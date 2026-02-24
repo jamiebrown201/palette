@@ -1,0 +1,34 @@
+{
+  "brands": {
+    "Farrow & Ball": {
+      "productUrlTemplate": "https://www.farrow-ball.com/paint-colours/{name}",
+      "searchUrlTemplate": "https://www.farrow-ball.com/paint-colours?q={name}",
+      "homepageUrl": "https://www.farrow-ball.com/paint-colours",
+      "affiliatePrefix": null
+    },
+    "Dulux": {
+      "productUrlTemplate": null,
+      "searchUrlTemplate": "https://www.dulux.co.uk/en/search?q={name}",
+      "homepageUrl": "https://www.dulux.co.uk/en/colour-palettes",
+      "affiliatePrefix": null
+    },
+    "Little Greene": {
+      "productUrlTemplate": "https://www.littlegreene.com/colours/{name}",
+      "searchUrlTemplate": "https://www.littlegreene.com/catalogsearch/result/?q={name}",
+      "homepageUrl": "https://www.littlegreene.com/colours",
+      "affiliatePrefix": null
+    },
+    "Benjamin Moore": {
+      "productUrlTemplate": null,
+      "searchUrlTemplate": "https://www.benjaminmoore.co.uk/colour-overview/find-your-colour?q={name}",
+      "homepageUrl": "https://www.benjaminmoore.co.uk/colour-overview",
+      "affiliatePrefix": null
+    },
+    "Crown": {
+      "productUrlTemplate": null,
+      "searchUrlTemplate": "https://www.crownpaints.co.uk/search?q={name}",
+      "homepageUrl": "https://www.crownpaints.co.uk/colours",
+      "affiliatePrefix": null
+    }
+  }
+}

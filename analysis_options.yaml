@@ -1,0 +1,17 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "lib/data/database/**/*.drift.dart"
+
+linter:
+  rules:
+    public_member_api_docs: false
+    lines_longer_than_80_chars: false
+    flutter_style_todos: false
+    prefer_int_literals: false
+    sort_pub_dependencies: false
+    avoid_redundant_argument_values: false
+    parameter_assignments: false

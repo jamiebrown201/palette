@@ -1,0 +1,123 @@
+{
+  "templates": [
+    {
+      "id": "victorian_terrace",
+      "name": "Victorian Terrace",
+      "propertyType": "terraced",
+      "propertyEra": "victorian",
+      "zones": [
+        {"id": "hallway", "name": "Hallway", "x": 0.4, "y": 0.0, "width": 0.2, "height": 0.5},
+        {"id": "front_room", "name": "Front Room", "x": 0.0, "y": 0.0, "width": 0.4, "height": 0.5},
+        {"id": "back_room", "name": "Back Room", "x": 0.0, "y": 0.5, "width": 0.5, "height": 0.5},
+        {"id": "kitchen", "name": "Kitchen", "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5},
+        {"id": "bedroom_1", "name": "Bedroom 1", "x": 0.6, "y": 0.0, "width": 0.4, "height": 0.3},
+        {"id": "bedroom_2", "name": "Bedroom 2", "x": 0.6, "y": 0.3, "width": 0.4, "height": 0.2},
+        {"id": "bathroom", "name": "Bathroom", "x": 0.5, "y": 0.3, "width": 0.1, "height": 0.2}
+      ],
+      "adjacencies": [
+        ["hallway", "front_room"],
+        ["hallway", "back_room"],
+        ["hallway", "kitchen"],
+        ["back_room", "kitchen"],
+        ["hallway", "bedroom_1"],
+        ["hallway", "bedroom_2"],
+        ["bedroom_2", "bathroom"]
+      ]
+    },
+    {
+      "id": "1930s_semi",
+      "name": "1930s Semi-Detached",
+      "propertyType": "semiDetached",
+      "propertyEra": "thirtiesToFifties",
+      "zones": [
+        {"id": "hallway", "name": "Hallway", "x": 0.35, "y": 0.0, "width": 0.15, "height": 0.6},
+        {"id": "living_room", "name": "Living Room", "x": 0.0, "y": 0.0, "width": 0.35, "height": 0.5},
+        {"id": "dining_room", "name": "Dining Room", "x": 0.0, "y": 0.5, "width": 0.35, "height": 0.5},
+        {"id": "kitchen", "name": "Kitchen", "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5},
+        {"id": "bedroom_1", "name": "Bedroom 1", "x": 0.5, "y": 0.0, "width": 0.5, "height": 0.3},
+        {"id": "bedroom_2", "name": "Bedroom 2", "x": 0.5, "y": 0.3, "width": 0.3, "height": 0.2},
+        {"id": "bathroom", "name": "Bathroom", "x": 0.8, "y": 0.3, "width": 0.2, "height": 0.2}
+      ],
+      "adjacencies": [
+        ["hallway", "living_room"],
+        ["hallway", "dining_room"],
+        ["hallway", "kitchen"],
+        ["living_room", "dining_room"],
+        ["dining_room", "kitchen"],
+        ["hallway", "bedroom_1"],
+        ["hallway", "bedroom_2"],
+        ["bedroom_2", "bathroom"]
+      ]
+    },
+    {
+      "id": "post_war_estate",
+      "name": "Post-War Estate",
+      "propertyType": "semiDetached",
+      "propertyEra": "postWar",
+      "zones": [
+        {"id": "hallway", "name": "Hallway", "x": 0.4, "y": 0.4, "width": 0.2, "height": 0.2},
+        {"id": "living_room", "name": "Living Room", "x": 0.0, "y": 0.0, "width": 0.5, "height": 0.4},
+        {"id": "kitchen", "name": "Kitchen", "x": 0.5, "y": 0.0, "width": 0.5, "height": 0.4},
+        {"id": "bedroom_1", "name": "Bedroom 1", "x": 0.0, "y": 0.6, "width": 0.4, "height": 0.4},
+        {"id": "bedroom_2", "name": "Bedroom 2", "x": 0.4, "y": 0.6, "width": 0.3, "height": 0.4},
+        {"id": "bathroom", "name": "Bathroom", "x": 0.7, "y": 0.6, "width": 0.3, "height": 0.4}
+      ],
+      "adjacencies": [
+        ["hallway", "living_room"],
+        ["hallway", "kitchen"],
+        ["hallway", "bedroom_1"],
+        ["hallway", "bedroom_2"],
+        ["hallway", "bathroom"],
+        ["living_room", "kitchen"],
+        ["bedroom_1", "bedroom_2"]
+      ]
+    },
+    {
+      "id": "modern_flat",
+      "name": "Modern Flat",
+      "propertyType": "flat",
+      "propertyEra": "modern",
+      "zones": [
+        {"id": "hallway", "name": "Hallway", "x": 0.0, "y": 0.4, "width": 0.2, "height": 0.2},
+        {"id": "living_kitchen", "name": "Living/Kitchen", "x": 0.2, "y": 0.0, "width": 0.8, "height": 0.5},
+        {"id": "bedroom_1", "name": "Bedroom 1", "x": 0.0, "y": 0.0, "width": 0.2, "height": 0.4},
+        {"id": "bedroom_2", "name": "Bedroom 2", "x": 0.0, "y": 0.6, "width": 0.4, "height": 0.4},
+        {"id": "bathroom", "name": "Bathroom", "x": 0.4, "y": 0.6, "width": 0.3, "height": 0.4},
+        {"id": "ensuite", "name": "Ensuite", "x": 0.7, "y": 0.5, "width": 0.3, "height": 0.25}
+      ],
+      "adjacencies": [
+        ["hallway", "living_kitchen"],
+        ["hallway", "bedroom_1"],
+        ["hallway", "bedroom_2"],
+        ["hallway", "bathroom"],
+        ["bedroom_1", "ensuite"]
+      ]
+    },
+    {
+      "id": "new_build",
+      "name": "New Build",
+      "propertyType": "detached",
+      "propertyEra": "newBuild",
+      "zones": [
+        {"id": "hallway", "name": "Hallway", "x": 0.3, "y": 0.3, "width": 0.2, "height": 0.4},
+        {"id": "living_room", "name": "Living Room", "x": 0.0, "y": 0.0, "width": 0.5, "height": 0.3},
+        {"id": "kitchen_diner", "name": "Kitchen/Diner", "x": 0.5, "y": 0.0, "width": 0.5, "height": 0.5},
+        {"id": "utility", "name": "Utility", "x": 0.5, "y": 0.5, "width": 0.2, "height": 0.2},
+        {"id": "bedroom_1", "name": "Bedroom 1", "x": 0.0, "y": 0.5, "width": 0.3, "height": 0.5},
+        {"id": "bedroom_2", "name": "Bedroom 2", "x": 0.5, "y": 0.7, "width": 0.25, "height": 0.3},
+        {"id": "bedroom_3", "name": "Bedroom 3", "x": 0.75, "y": 0.7, "width": 0.25, "height": 0.3},
+        {"id": "bathroom", "name": "Bathroom", "x": 0.7, "y": 0.5, "width": 0.3, "height": 0.2}
+      ],
+      "adjacencies": [
+        ["hallway", "living_room"],
+        ["hallway", "kitchen_diner"],
+        ["hallway", "bedroom_1"],
+        ["hallway", "bedroom_2"],
+        ["hallway", "bedroom_3"],
+        ["hallway", "bathroom"],
+        ["kitchen_diner", "utility"],
+        ["bedroom_2", "bedroom_3"]
+      ]
+    }
+  ]
+}

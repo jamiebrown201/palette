@@ -1,0 +1,73 @@
+name: palette
+description: "Palette - A colour-first interior design companion"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Local database
+  drift: ^2.25.0
+  sqlite3_flutter_libs: ^0.5.32
+
+  # Immutable models & serialisation
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # UI
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.17
+  share_plus: ^10.1.4
+  smooth_page_indicator: ^1.2.0+3
+  pdf: ^3.11.2
+  printing: ^5.13.5
+
+  # Utilities
+  url_launcher: ^6.3.1
+  sensors_plus: ^6.1.1
+  flutter_compass: ^0.8.0
+  intl: ^0.20.2
+  collection: ^1.19.1
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  uuid: ^4.5.1
+
+  # Backend (scaffold)
+  supabase_flutter: ^2.9.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code generation
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.6.3
+  freezed: ^2.5.7
+  json_serializable: ^6.9.5
+  drift_dev: ^2.25.0
+
+  # Linting
+  very_good_analysis: ^7.0.0
+
+  # Testing
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/data/
+    - assets/images/

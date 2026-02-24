@@ -1,0 +1,53 @@
+{
+  "families": [
+    {
+      "id": "pastels",
+      "name": "Pastels",
+      "description": "Soft, light colours that bring calm and airiness to a space. Think powder blues, blush pinks, and mint greens.",
+      "moodAffinity": ["calm", "fresh", "elegant"],
+      "quizKeywords": ["soft", "light", "airy", "gentle", "delicate"]
+    },
+    {
+      "id": "brights",
+      "name": "Brights",
+      "description": "Vivid, saturated colours that energise and uplift. Perfect for accent walls and statement rooms.",
+      "moodAffinity": ["energising", "playful", "dramatic"],
+      "quizKeywords": ["bold", "vibrant", "energetic", "fun", "statement"]
+    },
+    {
+      "id": "jewelTones",
+      "name": "Jewel Tones",
+      "description": "Rich, deep colours inspired by precious gemstones. Emeralds, sapphires, and amethysts for luxurious spaces.",
+      "moodAffinity": ["elegant", "dramatic", "cocooning"],
+      "quizKeywords": ["rich", "luxurious", "deep", "opulent", "gem"]
+    },
+    {
+      "id": "earthTones",
+      "name": "Earth Tones",
+      "description": "Warm, grounded colours drawn from nature. Terracotta, ochre, and olive for an organic feel.",
+      "moodAffinity": ["grounded", "cocooning", "calm"],
+      "quizKeywords": ["natural", "organic", "warm", "earthy", "rustic"]
+    },
+    {
+      "id": "darks",
+      "name": "Darks",
+      "description": "Bold, dramatic colours that create intimacy and depth. Charcoals, navy, and deep forest greens.",
+      "moodAffinity": ["dramatic", "cocooning", "elegant"],
+      "quizKeywords": ["moody", "intimate", "dark", "dramatic", "cosy"]
+    },
+    {
+      "id": "warmNeutrals",
+      "name": "Warm Neutrals",
+      "description": "Understated warm tones that create a cosy foundation. Creams, taupes, and warm greys.",
+      "moodAffinity": ["calm", "grounded", "cocooning"],
+      "quizKeywords": ["understated", "warm", "cosy", "timeless", "classic"]
+    },
+    {
+      "id": "coolNeutrals",
+      "name": "Cool Neutrals",
+      "description": "Understated cool tones that create a serene foundation. Cool greys, blue-whites, and soft silvers.",
+      "moodAffinity": ["calm", "fresh", "elegant"],
+      "quizKeywords": ["serene", "cool", "modern", "clean", "crisp"]
+    }
+  ]
+}

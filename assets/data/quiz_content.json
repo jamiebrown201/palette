@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "memoryPrompts": [
+    {
+      "id": "childhood",
+      "prompt": "Think back to a childhood memory that felt safe and warm. Which colour world does it live in?",
+      "cards": [
+        {
+          "id": "childhood-sun",
+          "label": "Sun-warmed yellow",
+          "hex": "#E8CE78",
+          "familyWeights": {"warmNeutrals": 2, "earthTones": 1, "pastels": 1}
+        },
+        {
+          "id": "childhood-garden",
+          "label": "Garden green",
+          "hex": "#7A8870",
+          "familyWeights": {"earthTones": 2, "warmNeutrals": 1}
+        },
+        {
+          "id": "childhood-sky",
+          "label": "Clear sky blue",
+          "hex": "#8ABED6",
+          "familyWeights": {"pastels": 2, "coolNeutrals": 1}
+        },
+        {
+          "id": "childhood-terracotta",
+          "label": "Terracotta warmth",
+          "hex": "#C87830",
+          "familyWeights": {"earthTones": 2, "warmNeutrals": 1, "brights": 1}
+        },
+        {
+          "id": "childhood-berry",
+          "label": "Berry picking",
+          "hex": "#533946",
+          "familyWeights": {"darks": 2, "jewelTones": 1}
+        },
+        {
+          "id": "childhood-cream",
+          "label": "Creamy blanket",
+          "hex": "#F4EDDD",
+          "familyWeights": {"warmNeutrals": 3, "pastels": 1}
+        }
+      ]
+    },
+    {
+      "id": "holiday",
+      "prompt": "Picture your ideal holiday escape. Which palette draws you in?",
+      "cards": [
+        {
+          "id": "holiday-mediterranean",
+          "label": "Mediterranean white & blue",
+          "hex": "#5B758A",
+          "familyWeights": {"coolNeutrals": 2, "pastels": 1}
+        },
+        {
+          "id": "holiday-tropical",
+          "label": "Tropical lush green",
+          "hex": "#5F8D5C",
+          "familyWeights": {"brights": 2, "earthTones": 1}
+        },
+        {
+          "id": "holiday-desert",
+          "label": "Desert sand & ochre",
+          "hex": "#D9A732",
+          "familyWeights": {"earthTones": 2, "warmNeutrals": 1, "brights": 1}
+        },
+        {
+          "id": "holiday-scandi",
+          "label": "Scandinavian cabin",
+          "hex": "#C8BBA3",
+          "familyWeights": {"warmNeutrals": 2, "coolNeutrals": 1}
+        },
+        {
+          "id": "holiday-jungle",
+          "label": "Deep jungle",
+          "hex": "#37503E",
+          "familyWeights": {"darks": 2, "jewelTones": 1, "earthTones": 1}
+        },
+        {
+          "id": "holiday-sunset",
+          "label": "Golden sunset",
+          "hex": "#E0955F",
+          "familyWeights": {"brights": 2, "earthTones": 1}
+        }
+      ]
+    },
+    {
+      "id": "evening",
+      "prompt": "Your perfect evening at home. What colours surround you?",
+      "cards": [
+        {
+          "id": "evening-candlelit",
+          "label": "Candlelit warm glow",
+          "hex": "#DDA92A",
+          "familyWeights": {"warmNeutrals": 2, "earthTones": 1}
+        },
+        {
+          "id": "evening-moody",
+          "label": "Moody & dramatic",
+          "hex": "#3B3B35",
+          "familyWeights": {"darks": 3, "jewelTones": 1}
+        },
+        {
+          "id": "evening-soft",
+          "label": "Soft blush & rose",
+          "hex": "#D5ABAB",
+          "familyWeights": {"pastels": 2, "warmNeutrals": 1}
+        },
+        {
+          "id": "evening-emerald",
+          "label": "Emerald & velvet",
+          "hex": "#486A4E",
+          "familyWeights": {"jewelTones": 3, "darks": 1}
+        },
+        {
+          "id": "evening-midnight",
+          "label": "Midnight blue",
+          "hex": "#1A3A4A",
+          "familyWeights": {"darks": 2, "coolNeutrals": 1, "jewelTones": 1}
+        },
+        {
+          "id": "evening-linen",
+          "label": "Fresh linen & white",
+          "hex": "#F5F0E3",
+          "familyWeights": {"coolNeutrals": 2, "pastels": 1}
+        },
+        {
+          "id": "evening-spice",
+          "label": "Spiced & aromatic",
+          "hex": "#917B5C",
+          "familyWeights": {"earthTones": 2, "warmNeutrals": 1}
+        },
+        {
+          "id": "evening-jewel",
+          "label": "Ruby & sapphire",
+          "hex": "#943732",
+          "familyWeights": {"jewelTones": 3, "brights": 1}
+        }
+      ]
+    },
+    {
+      "id": "emotion",
+      "prompt": "Which colour evokes the strongest positive emotion?",
+      "cards": [
+        {
+          "id": "emotion-joy",
+          "label": "Joyful sunshine",
+          "hex": "#EDD379",
+          "familyWeights": {"brights": 2, "pastels": 1}
+        },
+        {
+          "id": "emotion-serenity",
+          "label": "Serene calm",
+          "hex": "#B4BFC8",
+          "familyWeights": {"coolNeutrals": 3, "pastels": 1}
+        },
+        {
+          "id": "emotion-passion",
+          "label": "Passionate depth",
+          "hex": "#723A3A",
+          "familyWeights": {"jewelTones": 2, "darks": 1}
+        },
+        {
+          "id": "emotion-comfort",
+          "label": "Comforting warmth",
+          "hex": "#B8A99A",
+          "familyWeights": {"warmNeutrals": 3}
+        },
+        {
+          "id": "emotion-energy",
+          "label": "Energetic pop",
+          "hex": "#E64D42",
+          "familyWeights": {"brights": 3, "jewelTones": 1}
+        },
+        {
+          "id": "emotion-ground",
+          "label": "Grounded & earthy",
+          "hex": "#8B7C64",
+          "familyWeights": {"earthTones": 3, "warmNeutrals": 1}
+        }
+      ]
+    }
+  ],
+  "visualPreferences": [
+    {
+      "id": "room-1",
+      "description": "Bright, airy living room with white walls and natural light",
+      "imageAsset": "assets/images/quiz/room_bright_airy.jpg",
+      "familyWeights": {"pastels": 2, "coolNeutrals": 2, "warmNeutrals": 1}
+    },
+    {
+      "id": "room-2",
+      "description": "Cosy dark green library with brass accents",
+      "imageAsset": "assets/images/quiz/room_dark_library.jpg",
+      "familyWeights": {"darks": 2, "jewelTones": 2, "earthTones": 1}
+    },
+    {
+      "id": "room-3",
+      "description": "Warm terracotta kitchen with natural wood",
+      "imageAsset": "assets/images/quiz/room_terracotta_kitchen.jpg",
+      "familyWeights": {"earthTones": 3, "warmNeutrals": 1}
+    },
+    {
+      "id": "room-4",
+      "description": "Elegant blush bedroom with soft furnishings",
+      "imageAsset": "assets/images/quiz/room_blush_bedroom.jpg",
+      "familyWeights": {"pastels": 2, "warmNeutrals": 2}
+    },
+    {
+      "id": "room-5",
+      "description": "Bold navy dining room with statement artwork",
+      "imageAsset": "assets/images/quiz/room_navy_dining.jpg",
+      "familyWeights": {"darks": 2, "jewelTones": 1, "coolNeutrals": 1}
+    },
+    {
+      "id": "room-6",
+      "description": "Scandi-style room with pale grey and warm wood",
+      "imageAsset": "assets/images/quiz/room_scandi.jpg",
+      "familyWeights": {"coolNeutrals": 2, "warmNeutrals": 2}
+    },
+    {
+      "id": "room-7",
+      "description": "Vibrant yellow hallway with colourful art",
+      "imageAsset": "assets/images/quiz/room_vibrant_hallway.jpg",
+      "familyWeights": {"brights": 3, "earthTones": 1}
+    },
+    {
+      "id": "room-8",
+      "description": "Jewel-toned living room with deep teal and gold",
+      "imageAsset": "assets/images/quiz/room_jewel_living.jpg",
+      "familyWeights": {"jewelTones": 3, "earthTones": 1}
+    }
+  ]
+}
