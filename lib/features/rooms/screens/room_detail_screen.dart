@@ -98,30 +98,67 @@ class _RoomDetailContent extends ConsumerWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 24),
 
-            // Light direction (free: educational, premium: full recs)
+            // Hero colour swatch
+            if (room.heroColourHex != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _hexToColor(room.heroColourHex!),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: PaletteColours.divider),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.palette,
+                      size: 20,
+                      color: _isLightColour(room.heroColourHex!)
+                          ? Colors.black54
+                          : Colors.white70,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      room.heroColourHex!.toUpperCase(),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: _isLightColour(room.heroColourHex!)
+                                ? Colors.black87
+                                : Colors.white,
+                            letterSpacing: 1.2,
+                          ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      room.isRenterMode ? 'Wall colour' : 'Hero colour',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: _isLightColour(room.heroColourHex!)
+                                ? Colors.black54
+                                : Colors.white70,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
+
+            // Light direction (compact)
             if (room.direction != null) ...[
               const SectionHeader(title: 'Light & Direction'),
               const SizedBox(height: 8),
-              _LightDirectionFreeSection(direction: room.direction!),
-              const SizedBox(height: 8),
-              PremiumGate(
-                requiredTier: SubscriptionTier.plus,
-                upgradeMessage: 'Unlock personalised light recommendations',
-                child: _LightDirectionPremiumSection(
-                  direction: room.direction!,
-                  usageTime: room.usageTime,
-                ),
+              _LightDirectionCompact(
+                direction: room.direction!,
+                usageTime: room.usageTime,
               ),
-              const SizedBox(height: 12),
-              // White Finder link (context-aware)
+              const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: () => context.push(
                   '/explore/white-finder?roomId=${room.id}',
                 ),
                 icon: const Icon(Icons.format_paint_outlined, size: 16),
-                label: const Text('Find the right white for this room'),
+                label: const Text('Find the right white'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: PaletteColours.sageGreenDark,
                   side: const BorderSide(color: PaletteColours.sageGreen),
@@ -333,38 +370,8 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _LightDirectionFreeSection extends StatelessWidget {
-  const _LightDirectionFreeSection({required this.direction});
-
-  final CompassDirection direction;
-
-  @override
-  Widget build(BuildContext context) {
-    final summary = getLightDirectionSummary(direction);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: PaletteColours.softCream,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.wb_sunny_outlined, color: PaletteColours.softGold),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              summary,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _LightDirectionPremiumSection extends StatelessWidget {
-  const _LightDirectionPremiumSection({
+class _LightDirectionCompact extends StatelessWidget {
+  const _LightDirectionCompact({
     required this.direction,
     required this.usageTime,
   });
@@ -374,54 +381,53 @@ class _LightDirectionPremiumSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final summary = getLightDirectionSummary(direction);
     final rec = getLightRecommendation(
       direction: direction,
       usageTime: usageTime,
     );
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: PaletteColours.cardBackground,
+        color: PaletteColours.softCream,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PaletteColours.sageGreenLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome,
-                  size: 16, color: PaletteColours.sageGreen),
+              const Icon(Icons.wb_sunny_outlined,
+                  size: 18, color: PaletteColours.softGold),
               const SizedBox(width: 8),
-              Text(
-                rec.summary,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            rec.recommendation,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _UndertoneChip(
-                label: 'Prefer: ${rec.preferredUndertone.displayName}',
-                isPositive: true,
-              ),
-              if (rec.avoidUndertone != null) ...[
-                const SizedBox(width: 8),
-                _UndertoneChip(
-                  label: 'Avoid: ${rec.avoidUndertone!.displayName}',
-                  isPositive: false,
+              Expanded(
+                child: Text(
+                  summary,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-              ],
+              ),
             ],
+          ),
+          const SizedBox(height: 8),
+          PremiumGate(
+            requiredTier: SubscriptionTier.plus,
+            upgradeMessage: 'Unlock light recommendations',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                _UndertoneChip(
+                  label: 'Prefer: ${rec.preferredUndertone.displayName}',
+                  isPositive: true,
+                ),
+                if (rec.avoidUndertone != null)
+                  _UndertoneChip(
+                    label: 'Avoid: ${rec.avoidUndertone!.displayName}',
+                    isPositive: false,
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -503,7 +509,7 @@ class _ColourPlanSection extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           _ColourTierRow(
-            label: room.isRenterMode ? 'Furnishings' : 'Beta (20%)',
+            label: room.isRenterMode ? 'Furnishings' : 'Supporting (20%)',
             description: room.isRenterMode
                 ? 'Large items you can swap or add'
                 : 'Large furnishings & upholstery',
@@ -602,7 +608,7 @@ class _ColourPlanSection extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       builder: (ctx) => _PaintColourPicker(
-        title: 'Swap ${tier == 'beta' ? 'Beta (20%)' : 'Surprise (10%)'} colour',
+        title: 'Swap ${tier == 'beta' ? 'Supporting (20%)' : 'Surprise (10%)'} colour',
         paintColours: allPaints,
       ),
     );
@@ -918,15 +924,26 @@ class _LightSwatchColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = _isLightColour(hex);
     return Expanded(
       child: Column(
         children: [
           Container(
-            height: 56,
+            height: 64,
             decoration: BoxDecoration(
               color: _hexToColor(hex),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(color: PaletteColours.divider),
+            ),
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Text(
+              hex.toUpperCase(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 9,
+                    color: isLight ? Colors.black45 : Colors.white60,
+                    letterSpacing: 0.5,
+                  ),
             ),
           ),
           const SizedBox(height: 4),
@@ -1160,14 +1177,15 @@ class _FurnitureLockSection extends ConsumerWidget {
     );
   }
 
-  static bool _isLightColour(String hex) {
-    final cleaned = hex.replaceAll('#', '');
-    final value = int.parse(cleaned, radix: 16);
-    final r = (value >> 16) & 0xFF;
-    final g = (value >> 8) & 0xFF;
-    final b = value & 0xFF;
-    return (0.299 * r + 0.587 * g + 0.114 * b) > 160;
-  }
+}
+
+bool _isLightColour(String hex) {
+  final cleaned = hex.replaceAll('#', '');
+  final value = int.parse(cleaned, radix: 16);
+  final r = (value >> 16) & 0xFF;
+  final g = (value >> 8) & 0xFF;
+  final b = value & 0xFF;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 160;
 }
 
 Color _hexToColor(String hex) {
