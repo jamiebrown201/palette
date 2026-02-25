@@ -55,14 +55,14 @@ seed_db() {
   $ADB shell "run-as $PKG sqlite3 $DB \"
     INSERT OR REPLACE INTO user_profiles VALUES('default', 1, 'plus', 0, 'qa-demo-dna-001', $NOW, $NOW);
 
-    INSERT OR IGNORE INTO colour_dna_results VALUES(
+    INSERT OR REPLACE INTO colour_dna_results VALUES(
       'qa-demo-dna-001', 'warmNeutrals', 'earthTones',
-      '[\"#C4A882\",\"#8B7355\",\"#D4C5A9\",\"#A0522D\",\"#DEB887\",\"#F5DEB3\",\"#BC8F8F\",\"#CD853F\",\"#D2B48C\",\"#4A6741\"]',
+      '#C4A882,#8B7355,#D4C5A9,#A0522D,#DEB887,#F5DEB3,#BC8F8F,#CD853F,#D2B48C,#4A6741',
       'terraced', 'victorian', 'planning', 'owner', $NOW, 1);
 
-    INSERT OR IGNORE INTO rooms VALUES('qa-room-living', 'Living Room', 'south', 'evening', '[\"cocooning\",\"elegant\"]', 'midRange', '#C4A882', '#8B7355', '#4A6741', 0, 0, NULL, $NOW, $NOW);
-    INSERT OR IGNORE INTO rooms VALUES('qa-room-bedroom', 'Bedroom', 'east', 'morning', '[\"calm\"]', 'affordable', '#D4C5A9', '#BC8F8F', '#DEB887', 0, 1, NULL, $NOW, $NOW);
-    INSERT OR IGNORE INTO rooms VALUES('qa-room-kitchen', 'Kitchen', 'north', 'allDay', '[\"fresh\",\"energising\"]', 'investment', '#F5DEB3', '#CD853F', '#A0522D', 0, 2, NULL, $NOW, $NOW);
+    INSERT OR REPLACE INTO rooms VALUES('qa-room-living', 'Living Room', 'south', 'evening', 'cocooning,elegant', 'midRange', '#C4A882', '#8B7355', '#4A6741', 0, 0, NULL, $NOW, $NOW);
+    INSERT OR REPLACE INTO rooms VALUES('qa-room-bedroom', 'Bedroom', 'east', 'morning', 'calm', 'affordable', '#D4C5A9', '#BC8F8F', '#DEB887', 0, 1, NULL, $NOW, $NOW);
+    INSERT OR REPLACE INTO rooms VALUES('qa-room-kitchen', 'Kitchen', 'north', 'allDay', 'fresh,energising', 'investment', '#F5DEB3', '#CD853F', '#A0522D', 0, 2, NULL, $NOW, $NOW);
   \""
   echo "Done."
 }
