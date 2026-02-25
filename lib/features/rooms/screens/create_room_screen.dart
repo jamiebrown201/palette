@@ -19,6 +19,7 @@ class CreateRoomScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
+  static const _totalSteps = 5;
   int _currentStep = 0;
   final _nameController = TextEditingController();
   CompassDirection? _direction;
@@ -39,10 +40,38 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     'Guest Room',
   ];
 
+  static const _stepTitles = [
+    'What room is this?',
+    'Which way does the light come in?',
+    'When do you use this room?',
+    'How should it feel?',
+    'Budget & ownership',
+  ];
+
   @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  bool get _canContinue {
+    if (_currentStep == 0) return _nameController.text.trim().isNotEmpty;
+    return true;
+  }
+
+  void _next() {
+    if (!_canContinue) return;
+    if (_currentStep < _totalSteps - 1) {
+      setState(() => _currentStep++);
+    } else {
+      _saveRoom();
+    }
+  }
+
+  void _back() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
+    }
   }
 
   Future<void> _detectWithCompass() async {
@@ -71,7 +100,8 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   ),
                   const SizedBox(height: 16),
                   if (detected != null) ...[
-                    const Icon(Icons.explore, size: 48, color: PaletteColours.sageGreen),
+                    const Icon(Icons.explore,
+                        size: 48, color: PaletteColours.sageGreen),
                     const SizedBox(height: 8),
                     Text(
                       '${detected!.displayName}-facing',
@@ -105,7 +135,6 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   }
 
   CompassDirection _headingToDirection(double heading) {
-    // Normalise to 0-360
     final h = heading % 360;
     if (h >= 315 || h < 45) return CompassDirection.north;
     if (h >= 45 && h < 135) return CompassDirection.east;
@@ -140,6 +169,8 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLast = _currentStep == _totalSteps - 1;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Room'),
@@ -148,191 +179,561 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
           icon: const Icon(Icons.close),
         ),
       ),
-      body: Stepper(
-        currentStep: _currentStep,
-        onStepContinue: () {
-          if (_currentStep == 0 && _nameController.text.trim().isEmpty) return;
-          if (_currentStep < 4) {
-            setState(() => _currentStep++);
-          } else {
-            _saveRoom();
-          }
-        },
-        onStepCancel: () {
-          if (_currentStep > 0) setState(() => _currentStep--);
-        },
-        controlsBuilder: (context, details) {
-          final isLast = _currentStep == 4;
-          return Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Row(
+      body: Column(
+        children: [
+          // Progress indicator
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Column(
               children: [
-                FilledButton(
-                  onPressed: details.onStepContinue,
-                  child: Text(isLast ? 'Create Room' : 'Continue'),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (_currentStep + 1) / _totalSteps,
+                    minHeight: 6,
+                    backgroundColor: PaletteColours.warmGrey,
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      PaletteColours.sageGreen,
+                    ),
+                  ),
                 ),
-                if (_currentStep > 0) ...[
-                  const SizedBox(width: 12),
-                  TextButton(
-                    onPressed: details.onStepCancel,
-                    child: const Text('Back'),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${_currentStep + 1} of $_totalSteps',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: PaletteColours.textTertiary,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Step content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _stepTitles[_currentStep],
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child: _buildStepContent(),
                   ),
                 ],
-              ],
-            ),
-          );
-        },
-        steps: [
-          // Step 0: Name
-          Step(
-            title: const Text('Room name'),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter room name',
-                    border: OutlineInputBorder(),
-                  ),
-                  textCapitalization: TextCapitalization.words,
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _presetNames.map((name) {
-                    return ActionChip(
-                      label: Text(name),
-                      onPressed: () => _nameController.text = name,
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-            isActive: _currentStep >= 0,
-          ),
-
-          // Step 1: Compass direction
-          Step(
-            title: const Text('Light direction'),
-            subtitle: const Text('Which way does the main window face?'),
-            content: Column(
-              children: [
-                RadioGroup<CompassDirection>(
-                  groupValue: _direction,
-                  onChanged: (v) => setState(() => _direction = v),
-                  child: Column(
-                    children: CompassDirection.values.map((dir) {
-                      return RadioListTile<CompassDirection>(
-                        title: Text(dir.displayName),
-                        value: dir,
-                      );
-                    }).toList(),
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: _detectWithCompass,
-                  icon: const Icon(Icons.explore, size: 16),
-                  label: const Text('Detect with compass'),
-                ),
-                TextButton(
-                  onPressed: () => setState(() => _direction = null),
-                  child: const Text("I'm not sure"),
-                ),
-              ],
-            ),
-            isActive: _currentStep >= 1,
-          ),
-
-          // Step 2: Usage time
-          Step(
-            title: const Text('When do you use this room most?'),
-            content: RadioGroup<UsageTime>(
-              groupValue: _usageTime,
-              onChanged: (v) {
-                if (v != null) setState(() => _usageTime = v);
-              },
-              child: Column(
-                children: UsageTime.values.map((time) {
-                  return RadioListTile<UsageTime>(
-                    title: Text(time.displayName),
-                    value: time,
-                  );
-                }).toList(),
               ),
             ),
-            isActive: _currentStep >= 2,
           ),
 
-          // Step 3: Mood
-          Step(
-            title: const Text('How should this room feel?'),
-            subtitle: const Text('Choose up to 3'),
-            content: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: RoomMood.values.map((mood) {
-                final isSelected = _moods.contains(mood);
-                return FilterChip(
-                  label: Text(mood.displayName),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected && _moods.length < 3) {
-                        _moods.add(mood);
-                      } else {
-                        _moods.remove(mood);
-                      }
-                    });
-                  },
-                  selectedColor: PaletteColours.sageGreenLight,
-                );
-              }).toList(),
-            ),
-            isActive: _currentStep >= 3,
-          ),
-
-          // Step 4: Budget & renter mode
-          Step(
-            title: const Text('Budget & ownership'),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Budget',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                RadioGroup<BudgetBracket>(
-                  groupValue: _budget,
-                  onChanged: (v) {
-                    if (v != null) setState(() => _budget = v);
-                  },
-                  child: Column(
-                    children: BudgetBracket.values.map((bracket) {
-                      return RadioListTile<BudgetBracket>(
-                        title: Text(bracket.displayName),
-                        value: bracket,
-                      );
-                    }).toList(),
+          // Bottom buttons
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+              child: Row(
+                children: [
+                  if (_currentStep > 0) ...[
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _back,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side:
+                              const BorderSide(color: PaletteColours.divider),
+                        ),
+                        child: const Text('Back'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    flex: _currentStep > 0 ? 2 : 1,
+                    child: FilledButton(
+                      onPressed: _canContinue ? _next : null,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(isLast ? 'Create Room' : 'Continue'),
+                    ),
                   ),
-                ),
-                const Divider(),
-                SwitchListTile(
-                  title: const Text('Renter mode'),
-                  subtitle: const Text(
-                    'Lock wall colour to landlord paint, '
-                    'focus on furniture & accessories',
-                  ),
-                  value: _isRenterMode,
-                  onChanged: (v) => setState(() => _isRenterMode = v),
-                ),
-              ],
+                ],
+              ),
             ),
-            isActive: _currentStep >= 4,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStepContent() {
+    switch (_currentStep) {
+      case 0:
+        return _NameStep(
+          key: const ValueKey('name'),
+          controller: _nameController,
+          presetNames: _presetNames,
+          onChanged: () => setState(() {}),
+        );
+      case 1:
+        return _DirectionStep(
+          key: const ValueKey('direction'),
+          direction: _direction,
+          onDirectionChanged: (d) => setState(() => _direction = d),
+          onDetectWithCompass: _detectWithCompass,
+        );
+      case 2:
+        return _UsageTimeStep(
+          key: const ValueKey('usage'),
+          usageTime: _usageTime,
+          onChanged: (v) => setState(() => _usageTime = v),
+        );
+      case 3:
+        return _MoodStep(
+          key: const ValueKey('mood'),
+          moods: _moods,
+          onToggle: (mood, selected) {
+            setState(() {
+              if (selected && _moods.length < 3) {
+                _moods.add(mood);
+              } else {
+                _moods.remove(mood);
+              }
+            });
+          },
+        );
+      case 4:
+        return _BudgetStep(
+          key: const ValueKey('budget'),
+          budget: _budget,
+          isRenterMode: _isRenterMode,
+          onBudgetChanged: (v) => setState(() => _budget = v),
+          onRenterChanged: (v) => setState(() => _isRenterMode = v),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+}
+
+class _NameStep extends StatelessWidget {
+  const _NameStep({
+    super.key,
+    required this.controller,
+    required this.presetNames,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final List<String> presetNames;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: 'Enter room name',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          textCapitalization: TextCapitalization.words,
+          onChanged: (_) => onChanged(),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Or pick a preset:',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: PaletteColours.textSecondary,
+              ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: presetNames.map((name) {
+            final isSelected = controller.text == name;
+            return ChoiceChip(
+              label: Text(name),
+              selected: isSelected,
+              selectedColor: PaletteColours.sageGreenLight,
+              onSelected: (_) {
+                controller.text = name;
+                onChanged();
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class _DirectionStep extends StatelessWidget {
+  const _DirectionStep({
+    super.key,
+    required this.direction,
+    required this.onDirectionChanged,
+    required this.onDetectWithCompass,
+  });
+
+  final CompassDirection? direction;
+  final ValueChanged<CompassDirection?> onDirectionChanged;
+  final VoidCallback onDetectWithCompass;
+
+  static const _directionIcons = {
+    CompassDirection.north: Icons.north,
+    CompassDirection.east: Icons.east,
+    CompassDirection.south: Icons.south,
+    CompassDirection.west: Icons.west,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Which way does the main window face?',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: PaletteColours.textSecondary,
+              ),
+        ),
+        const SizedBox(height: 16),
+        // Direction grid
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 2.2,
+          children: CompassDirection.values.map((dir) {
+            final isSelected = direction == dir;
+            return Material(
+              color: isSelected
+                  ? PaletteColours.sageGreenLight
+                  : PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => onDirectionChanged(dir),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? PaletteColours.sageGreen
+                          : PaletteColours.divider,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _directionIcons[dir],
+                        size: 20,
+                        color: isSelected
+                            ? PaletteColours.sageGreenDark
+                            : PaletteColours.textSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        dir.displayName,
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: isSelected
+                              ? PaletteColours.sageGreenDark
+                              : PaletteColours.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton.icon(
+              onPressed: onDetectWithCompass,
+              icon: const Icon(Icons.explore, size: 16),
+              label: const Text('Detect with compass'),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () => onDirectionChanged(null),
+              child: const Text("I'm not sure"),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _UsageTimeStep extends StatelessWidget {
+  const _UsageTimeStep({
+    super.key,
+    required this.usageTime,
+    required this.onChanged,
+  });
+
+  final UsageTime usageTime;
+  final ValueChanged<UsageTime> onChanged;
+
+  static const _usageIcons = {
+    UsageTime.morning: Icons.wb_sunny_outlined,
+    UsageTime.afternoon: Icons.light_mode_outlined,
+    UsageTime.evening: Icons.nightlight_outlined,
+    UsageTime.allDay: Icons.schedule_outlined,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: UsageTime.values.map((time) {
+        final isSelected = usageTime == time;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Material(
+            color: isSelected
+                ? PaletteColours.sageGreenLight
+                : PaletteColours.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => onChanged(time),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? PaletteColours.sageGreen
+                        : PaletteColours.divider,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _usageIcons[time],
+                      color: isSelected
+                          ? PaletteColours.sageGreenDark
+                          : PaletteColours.textSecondary,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      time.displayName,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                    ),
+                    const Spacer(),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle,
+                        color: PaletteColours.sageGreen,
+                        size: 22,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _MoodStep extends StatelessWidget {
+  const _MoodStep({
+    super.key,
+    required this.moods,
+    required this.onToggle,
+  });
+
+  final Set<RoomMood> moods;
+  final void Function(RoomMood mood, bool selected) onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Choose up to 3',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: PaletteColours.textSecondary,
+              ),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 10,
+          children: RoomMood.values.map((mood) {
+            final isSelected = moods.contains(mood);
+            return FilterChip(
+              label: Text(mood.displayName),
+              selected: isSelected,
+              onSelected: (selected) => onToggle(mood, selected),
+              selectedColor: PaletteColours.sageGreenLight,
+              checkmarkColor: PaletteColours.sageGreenDark,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            );
+          }).toList(),
+        ),
+        if (moods.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: PaletteColours.softCream,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.auto_awesome,
+                    size: 16, color: PaletteColours.sageGreen),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Selected: ${moods.map((m) => m.displayName).join(', ')}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.sageGreenDark,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _BudgetStep extends StatelessWidget {
+  const _BudgetStep({
+    super.key,
+    required this.budget,
+    required this.isRenterMode,
+    required this.onBudgetChanged,
+    required this.onRenterChanged,
+  });
+
+  final BudgetBracket budget;
+  final bool isRenterMode;
+  final ValueChanged<BudgetBracket> onBudgetChanged;
+  final ValueChanged<bool> onRenterChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Budget',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: 10),
+        ...BudgetBracket.values.map((bracket) {
+          final isSelected = budget == bracket;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Material(
+              color: isSelected
+                  ? PaletteColours.sageGreenLight
+                  : PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => onBudgetChanged(bracket),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? PaletteColours.sageGreen
+                          : PaletteColours.divider,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        bracket.displayName,
+                        style:
+                            Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                ),
+                      ),
+                      const Spacer(),
+                      if (isSelected)
+                        const Icon(
+                          Icons.check_circle,
+                          color: PaletteColours.sageGreen,
+                          size: 22,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: PaletteColours.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isRenterMode
+                  ? PaletteColours.sageGreen
+                  : PaletteColours.divider,
+            ),
+          ),
+          child: SwitchListTile(
+            title: const Text('Renter mode'),
+            subtitle: const Text(
+              'Lock wall colour to landlord paint, '
+              'focus on furniture & accessories',
+            ),
+            value: isRenterMode,
+            onChanged: onRenterChanged,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

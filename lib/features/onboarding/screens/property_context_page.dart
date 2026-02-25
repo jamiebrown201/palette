@@ -21,14 +21,14 @@ class PropertyContextPage extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Tell us about your home',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.displaySmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'This helps us tailor recommendations to your space',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PaletteColours.textSecondary,
+                  color: PaletteColours.textTertiary,
                 ),
             textAlign: TextAlign.center,
           ),

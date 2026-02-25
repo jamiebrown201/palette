@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/progress_bar.dart';
 import 'package:palette/features/onboarding/logic/quiz_state.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
@@ -87,6 +88,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               ),
                             TextButton(
                               onPressed: _skipQuiz,
+                              style: TextButton.styleFrom(
+                                foregroundColor:
+                                    PaletteColours.textTertiary,
+                              ),
                               child: const Text('Skip'),
                             ),
                           ],

@@ -44,30 +44,40 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Colour wheel
+            const SizedBox(height: 8),
+
+            // Responsive colour wheel — fills available width
             Center(
-              child: InteractiveViewer(
-                minScale: 1.0,
-                maxScale: 3.0,
-                child: GestureDetector(
-                  onPanDown: (details) => _handleTap(details.localPosition),
-                  onPanUpdate: (details) => _handleTap(details.localPosition),
-                  child: SizedBox(
-                    width: 300,
-                    height: 300,
-                    child: CustomPaint(
-                      painter: ColourWheelPainter(
-                        selectedHue: _selectedHue,
-                        selectedRadial: _selectedRadial,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wheelSize =
+                      min(constraints.maxWidth - 16, 340.0);
+                  return InteractiveViewer(
+                    minScale: 1.0,
+                    maxScale: 3.0,
+                    child: GestureDetector(
+                      onPanDown: (details) =>
+                          _handleTap(details.localPosition, wheelSize),
+                      onPanUpdate: (details) =>
+                          _handleTap(details.localPosition, wheelSize),
+                      child: SizedBox(
+                        width: wheelSize,
+                        height: wheelSize,
+                        child: CustomPaint(
+                          painter: ColourWheelPainter(
+                            selectedHue: _selectedHue,
+                            selectedRadial: _selectedRadial,
+                          ),
+                          size: Size(wheelSize, wheelSize),
+                        ),
                       ),
-                      size: const Size(300, 300),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
 
@@ -102,35 +112,65 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
               const SizedBox(height: 24),
 
               // Paint matches
-              _PaintMatchSection(hue: _selectedHue!, lightness: _selectedLightness),
+              _PaintMatchSection(
+                  hue: _selectedHue!, lightness: _selectedLightness),
               const SizedBox(height: 24),
               const ColourDisclaimer(),
             ] else ...[
               const SizedBox(height: 32),
               Center(
-                child: Text(
-                  'Tap the wheel to explore colours',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: PaletteColours.textSecondary,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 24),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.softCream,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.touch_app_outlined,
+                        size: 32,
+                        color: PaletteColours.sageGreen,
                       ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Tap the wheel to explore',
+                        style:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Find paint matches and colour harmonies',
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  void _handleTap(Offset localPosition) {
-    const centre = Offset(150, 150);
+  void _handleTap(Offset localPosition, double wheelSize) {
+    final halfSize = wheelSize / 2;
+    final centre = Offset(halfSize, halfSize);
     final dx = localPosition.dx - centre.dx;
     final dy = localPosition.dy - centre.dy;
     final distance = sqrt(dx * dx + dy * dy);
 
     // Only respond to taps on the ring
-    const outerRadius = 150.0;
-    const innerRadius = outerRadius * 0.35;
+    final outerRadius = halfSize;
+    final innerRadius = outerRadius * 0.35;
     if (distance < innerRadius || distance > outerRadius) return;
 
     var angle = atan2(dy, dx) * 180 / pi + 90;
@@ -188,56 +228,74 @@ class _SelectedColourPreview extends StatelessWidget {
             : 'Neutral';
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: PaletteColours.cardBackground,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: PaletteColours.divider),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: PaletteColours.divider),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Colour band across the top
+          Container(height: 6, color: color),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
               children: [
-                Text(
-                  hex.toUpperCase(),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
+                    ],
+                  ),
                 ),
-                Text(
-                  'Hue: ${hue.round()}\u00B0',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PaletteColours.textSecondary,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hex.toUpperCase(),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
+                      Text(
+                        'Hue: ${hue.round()}\u00B0',
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
+                      ),
+                    ],
+                  ),
                 ),
                 if (showUndertone)
                   Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: undertone == 'Warm'
                           ? PaletteColours.softGoldLight
                           : undertone == 'Cool'
                               ? PaletteColours.accessibleBlueLight
                               : PaletteColours.warmGrey,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       undertone,
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
               ],
@@ -260,18 +318,23 @@ class _RelationshipSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: ColourRelationship.values.map((r) {
-        final isSelected = r == selected;
-        return ChoiceChip(
-          label: Text(r.displayName),
-          selected: isSelected,
-          onSelected: (_) => onChanged(r),
-          selectedColor: PaletteColours.sageGreenLight,
-        );
-      }).toList(),
+    // Horizontal scroll prevents awkward wrapping of "Split-complementary"
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: ColourRelationship.values.map((r) {
+          final isSelected = r == selected;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(r.displayName),
+              selected: isSelected,
+              onSelected: (_) => onChanged(r),
+              selectedColor: PaletteColours.sageGreenLight,
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
@@ -327,6 +390,25 @@ class _RelationshipResults extends StatelessWidget {
             ),
           ],
         ),
+        if (onColourTap != null) ...[
+          const SizedBox(height: 10),
+          Center(
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: PaletteColours.softCream,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Tap a swatch to find paint matches',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: PaletteColours.textSecondary,
+                    ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -395,28 +477,35 @@ class _ColourSwatchTile extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                height: 56,
+                height: 80,
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: PaletteColours.divider),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: showUndertone
                     ? Align(
                         alignment: Alignment.topRight,
                         child: Container(
-                          margin: const EdgeInsets.all(4),
+                          margin: const EdgeInsets.all(6),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 2),
+                              horizontal: 6, vertical: 3),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            borderRadius: BorderRadius.circular(4),
+                            color: Colors.white.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             undertone,
                             style:
                                 Theme.of(context).textTheme.labelSmall?.copyWith(
-                                      fontSize: 9,
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                     ),
                           ),
@@ -424,7 +513,7 @@ class _ColourSwatchTile extends StatelessWidget {
                       )
                     : null,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall,
@@ -452,6 +541,7 @@ class _PaintMatchSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionHeader(title: 'Nearest Paint Matches'),
+        const SizedBox(height: 8),
         paintColoursAsync.when(
           data: (allPaints) {
             final baseColor =
@@ -471,19 +561,24 @@ class _PaintMatchSection extends ConsumerWidget {
             return Column(
               children: top5.map((match) {
                 final percent = _deltaEToPercent(match.deltaE);
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-                  child: Column(
-                    children: [
-                      Row(
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.cardBackground,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: PaletteColours.divider),
+                  ),
+                  child: Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
                           color: _hexToColor(match.colour.hex),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: PaletteColours.divider),
+                          borderRadius: BorderRadius.circular(10),
+                          border:
+                              Border.all(color: PaletteColours.divider),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -493,47 +588,41 @@ class _PaintMatchSection extends ConsumerWidget {
                           children: [
                             Text(
                               match.colour.name,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w500,
                                   ),
                             ),
+                            const SizedBox(height: 2),
                             Text(
-                              '${match.colour.brand} \u2022 ${percent.round()}% match',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: PaletteColours.textSecondary,
+                              '${match.colour.brand}'
+                              '${match.colour.approximatePricePerLitre != null ? ' \u2022 \u00A3${match.colour.approximatePricePerLitre!.toStringAsFixed(0)}/L' : ''}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: PaletteColours.textTertiary,
                                   ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(
-                            match.colour.hex.toUpperCase(),
-                            style: Theme.of(context).textTheme.labelSmall,
+                          _MatchBadge(percent: percent),
+                          const SizedBox(height: 6),
+                          BuyThisPaintButton(
+                            brand: match.colour.brand,
+                            colourCode: match.colour.code,
+                            colourName: match.colour.name,
                           ),
-                          if (match.colour.approximatePricePerLitre != null)
-                            Text(
-                              '\u00A3${match.colour.approximatePricePerLitre!.toStringAsFixed(0)}/L',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: PaletteColours.textTertiary,
-                                  ),
-                            ),
                         ],
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: double.infinity,
-                    child: BuyThisPaintButton(
-                      brand: match.colour.brand,
-                      colourCode: match.colour.code,
-                      colourName: match.colour.name,
-                    ),
-                  ),
-                ],
                   ),
                 );
               }).toList(),
@@ -556,6 +645,36 @@ class _PaintMatchSection extends ConsumerWidget {
     if (dE <= 0) return 100;
     if (dE >= 25) return 0;
     return (1 - dE / 25) * 100;
+  }
+}
+
+class _MatchBadge extends StatelessWidget {
+  const _MatchBadge({required this.percent});
+
+  final double percent;
+
+  @override
+  Widget build(BuildContext context) {
+    final colour = percent >= 70
+        ? PaletteColours.sageGreen
+        : percent >= 40
+            ? PaletteColours.softGold
+            : PaletteColours.textTertiary;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colour.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '${percent.round()}%',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colour,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
   }
 }
 

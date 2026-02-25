@@ -415,7 +415,7 @@ class _BuyThisPaintButtonState extends State<BuyThisPaintButton> {
     return OutlinedButton.icon(
       onPressed: _configs != null ? _launchUrl : null,
       icon: const Icon(Icons.shopping_bag_outlined, size: 16),
-      label: const Text('Buy This Paint'),
+      label: const Text('Buy'),
       style: OutlinedButton.styleFrom(
         foregroundColor: PaletteColours.sageGreenDark,
         side: const BorderSide(color: PaletteColours.sageGreen),

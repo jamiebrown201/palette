@@ -67,12 +67,20 @@ class _EmptyRoomView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.meeting_room_outlined,
-              size: 64,
-              color: PaletteColours.textTertiary,
+            Container(
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                color: PaletteColours.softCream,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.meeting_room_outlined,
+                size: 40,
+                color: PaletteColours.sageGreen,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               'No rooms yet',
               style: Theme.of(context).textTheme.headlineSmall,
@@ -110,62 +118,69 @@ class _RoomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: PaletteColours.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Hero colour preview
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: room.heroColourHex != null
-                      ? _hexToColor(room.heroColourHex!)
-                      : PaletteColours.warmGrey,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: PaletteColours.divider),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.divider),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: room.heroColourHex != null
+                        ? _hexToColor(room.heroColourHex!)
+                        : PaletteColours.warmGrey,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: PaletteColours.divider),
+                  ),
+                  child: room.heroColourHex == null
+                      ? const Icon(
+                          Icons.palette_outlined,
+                          size: 20,
+                          color: PaletteColours.textTertiary,
+                        )
+                      : null,
                 ),
-                child: room.heroColourHex == null
-                    ? const Icon(
-                        Icons.palette_outlined,
-                        size: 20,
-                        color: PaletteColours.textTertiary,
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      room.name,
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _buildSubtitle(room),
-                      style:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: PaletteColours.textSecondary,
-                              ),
-                    ),
-                  ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        room.name,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _buildSubtitle(room),
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                color: PaletteColours.textTertiary,
-              ),
-            ],
+                const Icon(
+                  Icons.chevron_right,
+                  color: PaletteColours.textTertiary,
+                ),
+              ],
+            ),
           ),
         ),
       ),
