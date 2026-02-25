@@ -21,14 +21,14 @@ class VisualPreferencePage extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Which rooms speak to you?',
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.displaySmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Select as many as you like',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PaletteColours.textSecondary,
+                  color: PaletteColours.textTertiary,
                 ),
             textAlign: TextAlign.center,
           ),

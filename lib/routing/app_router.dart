@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/features/capture/screens/capture_screen.dart';
 import 'package:palette/features/colour_wheel/screens/colour_wheel_screen.dart';
 import 'package:palette/features/colour_wheel/screens/white_finder_screen.dart';
+import 'package:palette/features/dev/screens/qa_mode_screen.dart';
 import 'package:palette/features/explore/screens/explore_screen.dart';
 import 'package:palette/features/explore/screens/paint_library_screen.dart';
 import 'package:palette/features/home/screens/home_screen.dart';
@@ -30,9 +32,18 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
+    // Gracefully handle unknown routes (e.g. malformed deep links)
+    errorBuilder: (context, state) => const HomeScreen(),
     redirect: (context, state) {
-      final isOnboarding = state.matchedLocation == '/onboarding';
-      if (!hasCompletedOnboarding && !isOnboarding) {
+      // Normalise trailing slashes from deep links
+      final loc = state.matchedLocation;
+      if (loc.length > 1 && loc.endsWith('/')) {
+        return loc.substring(0, loc.length - 1);
+      }
+
+      final isOnboarding = loc == '/onboarding';
+      final isDev = loc == '/dev';
+      if (!hasCompletedOnboarding && !isOnboarding && !isDev) {
         return '/onboarding';
       }
       if (hasCompletedOnboarding && isOnboarding) {
@@ -62,6 +73,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/red-thread',
         builder: (context, state) => const RedThreadScreen(),
       ),
+      if (kDebugMode)
+        GoRoute(
+          parentNavigatorKey: _rootNavigatorKey,
+          path: '/dev',
+          builder: (context, state) => const QaModeScreen(),
+        ),
 
       // Tab-based navigation
       StatefulShellRoute.indexedStack(

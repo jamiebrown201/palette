@@ -33,7 +33,7 @@ class SteppedProgressBar extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                height: 4,
+                height: 5,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(2),
                   color: isCompleted || isCurrent

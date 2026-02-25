@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/theme/palette_colours.dart';
 
 /// The main app shell with bottom navigation and persistent palette FAB.
 class AppShell extends StatelessWidget {
@@ -11,45 +12,41 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) => navigationShell.goBranch(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (index) => navigationShell.goBranch(
           index,
           initialLocation: index == navigationShell.currentIndex,
         ),
-        items: const [
-          BottomNavigationBarItem(
+        backgroundColor: PaletteColours.cardBackground,
+        indicatorColor: PaletteColours.sageGreenLight.withValues(alpha: 0.4),
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.meeting_room_outlined),
-            activeIcon: Icon(Icons.meeting_room),
+            selectedIcon: Icon(Icons.meeting_room),
             label: 'Rooms',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.camera_alt_outlined),
-            activeIcon: Icon(Icons.camera_alt),
+            selectedIcon: Icon(Icons.camera_alt),
             label: 'Capture',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.explore_outlined),
-            activeIcon: Icon(Icons.explore),
+            selectedIcon: Icon(Icons.explore),
             label: 'Explore',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.person_outlined),
-            activeIcon: Icon(Icons.person),
+            selectedIcon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.small(
-        heroTag: 'palette_shortcut',
-        onPressed: () => context.push('/palette'),
-        tooltip: 'My Palette',
-        child: const Icon(Icons.palette_outlined),
       ),
     );
   }

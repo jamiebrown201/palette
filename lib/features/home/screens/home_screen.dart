@@ -47,18 +47,18 @@ class HomeScreen extends ConsumerWidget {
                 return _ColourDnaCard(
                   primaryFamily: dna.primaryFamily.displayName,
                   colourCount: dna.colourHexes.length,
-                  hexes: dna.colourHexes.take(5).toList(),
+                  hexes: dna.colourHexes.take(6).toList(),
                   onTap: () => context.push('/palette'),
                 );
               },
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             // My Rooms section
             const SectionHeader(title: 'My Rooms'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             roomsAsync.when(
               data: (rooms) {
                 if (rooms.isEmpty) {
@@ -75,35 +75,44 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             // Quick actions
             const SectionHeader(title: 'Explore'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             _QuickActionsGrid(
               actions: [
                 _QuickAction(
                   icon: Icons.palette_outlined,
                   label: 'Colour Wheel',
+                  description: 'Find harmonies & matches',
+                  accentColour: PaletteColours.sageGreenLight,
                   onTap: () => context.go('/explore/wheel'),
                 ),
                 _QuickAction(
                   icon: Icons.format_paint_outlined,
                   label: 'White Finder',
+                  description: 'Right white for your room',
+                  accentColour: PaletteColours.softCream,
                   onTap: () => context.go('/explore/white-finder'),
                 ),
                 _QuickAction(
                   icon: Icons.linear_scale,
                   label: 'Red Thread',
+                  description: 'Colour flow across rooms',
+                  accentColour: const Color(0xFFF0E0E0),
                   onTap: () => context.push('/red-thread'),
                 ),
                 _QuickAction(
                   icon: Icons.search,
                   label: 'Paint Library',
+                  description: 'Browse all paints',
+                  accentColour: PaletteColours.warmGrey,
                   onTap: () => context.go('/explore/paint-library'),
                 ),
               ],
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -126,61 +135,79 @@ class _ColourDnaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              PaletteColours.premiumGradientStart,
-              PaletteColours.premiumGradientEnd,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.auto_awesome,
-                    color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Your Colour DNA',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+    return Material(
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Ink(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                PaletteColours.premiumGradientStart,
+                PaletteColours.premiumGradientEnd,
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              '$primaryFamily \u2022 $colourCount colours',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: hexes
-                  .map((hex) => Container(
-                        width: 32,
-                        height: 32,
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: _hexToColor(hex),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.5),
-                          ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome,
+                      color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Your Colour DNA',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ))
-                  .toList(),
-            ),
-          ],
+                  ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right,
+                      color: Colors.white.withValues(alpha: 0.7), size: 20),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '$primaryFamily \u2022 $colourCount colours',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: hexes
+                    .map((hex) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: _hexToColor(hex),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.4),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -195,45 +222,84 @@ class _RoomsSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: rooms.take(3).map((room) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: PaletteColours.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: PaletteColours.divider),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: room.heroColourHex != null
-                      ? _hexToColor(room.heroColourHex!)
-                      : PaletteColours.warmGrey,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  room.name,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+      children: [
+        ...rooms.take(3).map((room) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Material(
+              color: PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => context.go('/rooms/${room.id}'),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: PaletteColours.divider),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: room.heroColourHex != null
+                              ? _hexToColor(room.heroColourHex!)
+                              : PaletteColours.warmGrey,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              room.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w500),
+                            ),
+                            Text(
+                              _buildRoomSubtitle(room),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                      color: PaletteColours.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right,
+                        size: 20,
+                        color: PaletteColours.textTertiary,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: PaletteColours.textTertiary,
+            ),
+          );
+        }),
+        if (rooms.length > 3)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: TextButton(
+              onPressed: () => context.go('/rooms'),
+              child: Text(
+                'See all ${rooms.length} rooms',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.sageGreenDark,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
-            ],
+            ),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }
@@ -256,14 +322,14 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         color: PaletteColours.softCream,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 40, color: PaletteColours.sageGreen),
+          Icon(icon, size: 36, color: PaletteColours.sageGreen),
           const SizedBox(height: 12),
           Text(
             title,
@@ -276,7 +342,7 @@ class _ActionCard extends StatelessWidget {
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PaletteColours.textSecondary,
+                  color: PaletteColours.textTertiary,
                 ),
             textAlign: TextAlign.center,
           ),
@@ -326,39 +392,73 @@ class _QuickAction extends StatelessWidget {
   const _QuickAction({
     required this.icon,
     required this.label,
+    required this.description,
     required this.onTap,
+    this.accentColour,
   });
 
   final IconData icon;
   final String label;
+  final String description;
   final VoidCallback onTap;
+  final Color? accentColour;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: (MediaQuery.sizeOf(context).width - 44) / 2,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: PaletteColours.cardBackground,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: PaletteColours.divider),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 28, color: PaletteColours.sageGreen),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium,
-              textAlign: TextAlign.center,
+    final width = (MediaQuery.sizeOf(context).width - 44) / 2;
+
+    return SizedBox(
+      width: width,
+      child: Material(
+        color: PaletteColours.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: PaletteColours.divider),
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: accentColour ?? PaletteColours.softCream,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, size: 22, color: PaletteColours.sageGreenDark),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: PaletteColours.textTertiary,
+                      ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
+}
+
+String _buildRoomSubtitle(Room room) {
+  final parts = <String>[];
+  if (room.direction != null) parts.add(room.direction!.displayName);
+  parts.add(room.usageTime.displayName);
+  return parts.join(' \u2022 ');
 }
 
 Color _hexToColor(String hex) {

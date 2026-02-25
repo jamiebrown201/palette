@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -64,58 +65,117 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
-          // Colour DNA summary
-          dnaAsync.when(
-            data: (dna) {
-              if (dna == null) return const SizedBox.shrink();
-              return ListTile(
-                leading: const Icon(Icons.auto_awesome),
-                title: const Text('Colour DNA'),
-                subtitle: Text(
-                  '${dna.primaryFamily.displayName} \u2022 ${dna.colourHexes.length} colours',
+          // Your Palette section
+          Text(
+            'Your Palette',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: PaletteColours.textSecondary,
                 ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/palette'),
-              );
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
           ),
-
-          const Divider(),
-
-          // Settings
-          SwitchListTile(
-            title: const Text('Colour Blind Mode'),
-            subtitle: const Text(
-              'Uses shape markers and text badges instead of colour-only indicators',
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.divider),
             ),
-            value: colourBlindMode,
-            onChanged: (v) =>
-                ref.read(colourBlindModeProvider.notifier).state = v,
+            child: Column(
+              children: [
+                dnaAsync.when(
+                  data: (dna) {
+                    if (dna == null) return const SizedBox.shrink();
+                    return _ProfileRow(
+                      icon: Icons.auto_awesome,
+                      iconColor: PaletteColours.softGold,
+                      title: 'Colour DNA',
+                      subtitle:
+                          '${dna.primaryFamily.displayName} \u2022 ${dna.colourHexes.length} colours',
+                      trailing: const Icon(Icons.chevron_right,
+                          color: PaletteColours.textTertiary),
+                      onTap: () => context.push('/palette'),
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+                const Divider(height: 1, indent: 56),
+                _ProfileRow(
+                  icon: Icons.refresh,
+                  iconColor: PaletteColours.sageGreen,
+                  title: 'Retake Colour DNA Quiz',
+                  onTap: () {
+                    ref.read(hasCompletedOnboardingProvider.notifier).state =
+                        false;
+                    context.go('/onboarding');
+                  },
+                ),
+              ],
+            ),
           ),
+          const SizedBox(height: 24),
 
-          const Divider(),
-
-          ListTile(
-            leading: const Icon(Icons.refresh),
-            title: const Text('Retake Colour DNA Quiz'),
-            onTap: () {
-              ref.read(hasCompletedOnboardingProvider.notifier).state = false;
-              context.go('/onboarding');
-            },
+          // Settings section
+          Text(
+            'Settings',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: PaletteColours.textSecondary,
+                ),
           ),
-
-          const Divider(),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.divider),
+            ),
+            child: Column(
+              children: [
+                SwitchListTile(
+                  secondary: const Icon(Icons.visibility_outlined,
+                      color: PaletteColours.accessibleBlue),
+                  title: const Text('Colour Blind Mode'),
+                  subtitle: const Text(
+                    'Uses shape markers and text badges instead of colour-only indicators',
+                  ),
+                  value: colourBlindMode,
+                  onChanged: (v) =>
+                      ref.read(colourBlindModeProvider.notifier).state = v,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
 
           // About section
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('About Palette'),
-            subtitle: Text('v1.0.0'),
+          Container(
+            decoration: BoxDecoration(
+              color: PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.divider),
+            ),
+            child: _ProfileRow(
+              icon: Icons.info_outline,
+              iconColor: PaletteColours.textTertiary,
+              title: 'About Palette',
+              subtitle: 'v1.0.0',
+            ),
           ),
 
-          const SizedBox(height: 16),
+          if (kDebugMode) ...[
+            const SizedBox(height: 24),
+            FilledButton.tonalIcon(
+              onPressed: () => context.push('/dev'),
+              icon: const Icon(Icons.bug_report),
+              label: const Text('QA Mode'),
+            ),
+          ],
+
+          const SizedBox(height: 20),
           Text(
             'Colours displayed on screens are approximations. '
             'Always test physical paint samples in your space.',
@@ -125,6 +185,38 @@ class ProfileScreen extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProfileRow extends StatelessWidget {
+  const _ProfileRow({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor),
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle!) : null,
+      trailing: trailing,
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

@@ -71,69 +71,78 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage> {
                 children: [
                   Text(
                     'My Colour DNA',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context).textTheme.displaySmall,
                     textAlign: TextAlign.center,
                   ),
-          const SizedBox(height: 8),
-          Text(
-            'Your personal palette, built from your instincts',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PaletteColours.textSecondary,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Your personal palette, built from your instincts',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
 
-          // Primary family badge
-          Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: PaletteColours.sageGreenLight,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                palette.primaryFamily.displayName,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: PaletteColours.sageGreenDark,
-                      fontWeight: FontWeight.w600,
+                  // Primary family badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: PaletteColours.sageGreenLight,
+                      borderRadius: BorderRadius.circular(24),
                     ),
-              ),
-            ),
-          ),
-
-          if (palette.secondaryFamily != null) ...[
-            const SizedBox(height: 8),
-            Center(
-              child: Text(
-                'with ${palette.secondaryFamily!.displayName} undertones',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: PaletteColours.textSecondary,
+                    child: Text(
+                      palette.primaryFamily.displayName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: PaletteColours.sageGreenDark,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 8),
-          Text(
-            palette.primaryFamily.description,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
+                  ),
 
-          // Colour grid
-          _PaletteGrid(
-            colours: palette.colours.map((c) => c.hex).toList(),
-            surpriseIndices: [
-              for (var i = 0; i < palette.colours.length; i++)
-                if (palette.colours[i].isSurprise) i,
-            ],
-          ),
+                  if (palette.secondaryFamily != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'with ${palette.secondaryFamily!.displayName} undertones',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: PaletteColours.textSecondary,
+                          ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  Text(
+                    palette.primaryFamily.description,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Colour grid
+                  _PaletteGrid(
+                    colours: palette.colours.map((c) => c.hex).toList(),
+                    surpriseIndices: [
+                      for (var i = 0; i < palette.colours.length; i++)
+                        if (palette.colours[i].isSurprise) i,
+                    ],
+                  ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 24),
+
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+
+          // Section header for colour list
+          Text(
+            'Your Colours',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
 
           // Colour list with names
           ...palette.colours.map((entry) {
@@ -161,13 +170,16 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage> {
                 : const Icon(Icons.share_outlined),
             label: Text(_isSharing ? 'Preparing...' : 'Share My Colour DNA'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           FilledButton(
             onPressed: widget.onComplete,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
             child: const Text('Explore My Palette'),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -186,8 +198,8 @@ class _PaletteGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 4,
-      runSpacing: 4,
+      spacing: 6,
+      runSpacing: 6,
       alignment: WrapAlignment.center,
       children: [
         for (var i = 0; i < colours.length; i++)
@@ -195,26 +207,28 @@ class _PaletteGrid extends StatelessWidget {
             label:
                 'Palette colour ${i + 1}${surpriseIndices.contains(i) ? ', surprise colour' : ''}',
             child: Container(
-              width: 56,
-              height: 56,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
                 color: _hexToColor(colours[i]),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
                 border: surpriseIndices.contains(i)
                     ? Border.all(
                         color: PaletteColours.softGold,
                         width: 2,
                       )
-                    : null,
+                    : Border.all(
+                        color: Colors.black.withValues(alpha: 0.05),
+                      ),
               ),
               child: surpriseIndices.contains(i)
                   ? const Align(
                       alignment: Alignment.topRight,
                       child: Padding(
-                        padding: EdgeInsets.all(2),
+                        padding: EdgeInsets.all(3),
                         child: Icon(
                           Icons.auto_awesome,
-                          size: 12,
+                          size: 14,
                           color: PaletteColours.softGold,
                         ),
                       ),
@@ -243,19 +257,19 @@ class _ColourListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: _hexToColor(hex),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(color: PaletteColours.divider),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +284,7 @@ class _ColourListItem extends StatelessWidget {
                   Text(
                     brand!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PaletteColours.textSecondary,
+                          color: PaletteColours.textTertiary,
                         ),
                   ),
               ],
@@ -278,15 +292,16 @@ class _ColourListItem extends StatelessWidget {
           ),
           if (isSurprise)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: PaletteColours.softGoldLight,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 'Surprise',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: PaletteColours.softGoldDark,
+                      fontWeight: FontWeight.w600,
                     ),
               ),
             ),

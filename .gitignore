@@ -49,6 +49,9 @@ app.*.map.json
 *.freezed.dart
 *.drift.dart
 
+# QA screenshots
+screenshots/
+
 # Environment
 .env
 .env.*

@@ -807,53 +807,65 @@ class _ColourTierRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: hex != null
-                  ? _hexToColor(hex!)
-                  : PaletteColours.warmGrey,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: PaletteColours.divider),
-            ),
-            child: hex == null
-                ? const Icon(Icons.add, color: PaletteColours.textTertiary)
-                : null,
+    return Material(
+      color: PaletteColours.cardBackground,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: PaletteColours.divider),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: hex != null
+                      ? _hexToColor(hex!)
+                      : PaletteColours.warmGrey,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: PaletteColours.divider),
                 ),
-                Text(
-                  hex != null
-                      ? '$description \u2022 ${hex!.toUpperCase()}'
-                      : description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PaletteColours.textSecondary,
-                      ),
+                child: hex == null
+                    ? const Icon(Icons.add, color: PaletteColours.textTertiary)
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    Text(
+                      hex != null
+                          ? '$description \u2022 ${hex!.toUpperCase()}'
+                          : description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: PaletteColours.textSecondary,
+                          ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              if (onTap != null)
+                const Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: PaletteColours.textTertiary,
+                ),
+            ],
           ),
-          if (onTap != null)
-            const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: PaletteColours.textTertiary,
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -1011,10 +1023,25 @@ class _FurnitureLockSection extends ConsumerWidget {
     );
   }
 
+  static const _commonColours = {
+    'White': '#FFFFFF',
+    'Cream': '#FFFDD0',
+    'Beige': '#F5F5DC',
+    'Light Grey': '#D3D3D3',
+    'Dark Grey': '#505050',
+    'Black': '#1A1A1A',
+    'Brown': '#8B4513',
+    'Tan': '#D2B48C',
+    'Navy': '#1B2A4A',
+    'Olive': '#556B2F',
+    'Burgundy': '#722F37',
+    'Terracotta': '#CC6644',
+  };
+
   void _showAddFurnitureDialog(
       BuildContext context, WidgetRef ref, int currentCount) {
     final nameController = TextEditingController();
-    final hexController = TextEditingController(text: '#');
+    var selectedHex = '#D3D3D3';
     var role = FurnitureRole.beta;
 
     showDialog<void>(
@@ -1027,28 +1054,69 @@ class _FurnitureLockSection extends ConsumerWidget {
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Item name',
                   hintText: 'e.g. Brown leather sofa',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: hexController,
-                decoration: const InputDecoration(
-                  labelText: 'Approximate colour',
-                  hintText: '#8B4513',
-                  border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Approximate colour',
+                  style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                        color: PaletteColours.textSecondary,
+                      ),
                 ),
-                textCapitalization: TextCapitalization.characters,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _commonColours.entries.map((e) {
+                  final isSelected = selectedHex == e.value;
+                  return GestureDetector(
+                    onTap: () => setDialogState(() => selectedHex = e.value),
+                    child: Tooltip(
+                      message: e.key,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: _hexToColor(e.value),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected
+                                ? PaletteColours.sageGreen
+                                : PaletteColours.divider,
+                            width: isSelected ? 2.5 : 1,
+                          ),
+                        ),
+                        child: isSelected
+                            ? Icon(
+                                Icons.check,
+                                size: 16,
+                                color: _isLightColour(e.value)
+                                    ? PaletteColours.textPrimary
+                                    : Colors.white,
+                              )
+                            : null,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<FurnitureRole>(
                 initialValue: role,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Role in room',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 items: FurnitureRole.values.map((r) {
                   return DropdownMenuItem(
@@ -1068,17 +1136,15 @@ class _FurnitureLockSection extends ConsumerWidget {
             FilledButton(
               onPressed: () async {
                 final name = nameController.text.trim();
-                final hex = hexController.text.trim();
-                if (name.isEmpty || hex.length < 4) return;
+                if (name.isEmpty) return;
 
-                final normalised = hex.startsWith('#') ? hex : '#$hex';
                 final repo = ref.read(roomRepositoryProvider);
                 await repo.insertFurniture(
                   LockedFurnitureItemsCompanion.insert(
                     id: const Uuid().v4(),
                     roomId: roomId,
                     name: name,
-                    colourHex: normalised,
+                    colourHex: selectedHex,
                     role: role,
                     sortOrder: currentCount,
                   ),
@@ -1092,6 +1158,15 @@ class _FurnitureLockSection extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  static bool _isLightColour(String hex) {
+    final cleaned = hex.replaceAll('#', '');
+    final value = int.parse(cleaned, radix: 16);
+    final r = (value >> 16) & 0xFF;
+    final g = (value >> 8) & 0xFF;
+    final b = value & 0xFF;
+    return (0.299 * r + 0.587 * g + 0.114 * b) > 160;
   }
 }
 
