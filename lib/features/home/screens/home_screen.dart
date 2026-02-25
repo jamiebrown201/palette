@@ -28,10 +28,17 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Your colour companion',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 12),
             // Colour DNA card
             dnaAsync.when(
               data: (dna) {
@@ -54,11 +61,11 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             // My Rooms section
             const SectionHeader(title: 'My Rooms'),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             roomsAsync.when(
               data: (rooms) {
                 if (rooms.isEmpty) {
@@ -75,44 +82,39 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             // Quick actions
             const SectionHeader(title: 'Explore'),
-            const SizedBox(height: 12),
-            _QuickActionsGrid(
+            const SizedBox(height: 8),
+            _QuickActionsRow(
               actions: [
                 _QuickAction(
                   icon: Icons.palette_outlined,
                   label: 'Colour Wheel',
-                  description: 'Find harmonies & matches',
                   accentColour: PaletteColours.sageGreenLight,
                   onTap: () => context.go('/explore/wheel'),
                 ),
                 _QuickAction(
                   icon: Icons.format_paint_outlined,
                   label: 'White Finder',
-                  description: 'Right white for your room',
                   accentColour: PaletteColours.softCream,
                   onTap: () => context.go('/explore/white-finder'),
                 ),
                 _QuickAction(
                   icon: Icons.linear_scale,
                   label: 'Red Thread',
-                  description: 'Colour flow across rooms',
                   accentColour: const Color(0xFFF0E0E0),
                   onTap: () => context.push('/red-thread'),
                 ),
                 _QuickAction(
                   icon: Icons.search,
                   label: 'Paint Library',
-                  description: 'Browse all paints',
                   accentColour: PaletteColours.warmGrey,
                   onTap: () => context.go('/explore/paint-library'),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -182,29 +184,52 @@ class _ColourDnaCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Row(
-                children: hexes
-                    .map((hex) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: _hexToColor(hex),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.4),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                children: [
+                  ...hexes
+                      .map((hex) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: _hexToColor(hex),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.4),
                                 ),
-                              ],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                             ),
+                          )),
+                  if (colourCount > hexes.length)
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '+${colourCount - hexes.length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ))
-                    .toList(),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
@@ -299,6 +324,41 @@ class _RoomsSummary extends StatelessWidget {
               ),
             ),
           ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => context.push('/rooms/create'),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: PaletteColours.sageGreen.withValues(alpha: 0.4),
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.add, size: 18, color: PaletteColours.sageGreenDark),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Add Room',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: PaletteColours.sageGreenDark,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -373,17 +433,21 @@ class _LoadingCard extends StatelessWidget {
   }
 }
 
-class _QuickActionsGrid extends StatelessWidget {
-  const _QuickActionsGrid({required this.actions});
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow({required this.actions});
 
   final List<_QuickAction> actions;
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: actions,
+    return SizedBox(
+      height: 100,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: actions.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) => actions[index],
+      ),
     );
   }
 }
@@ -392,23 +456,19 @@ class _QuickAction extends StatelessWidget {
   const _QuickAction({
     required this.icon,
     required this.label,
-    required this.description,
     required this.onTap,
     this.accentColour,
   });
 
   final IconData icon;
   final String label;
-  final String description;
   final VoidCallback onTap;
   final Color? accentColour;
 
   @override
   Widget build(BuildContext context) {
-    final width = (MediaQuery.sizeOf(context).width - 44) / 2;
-
     return SizedBox(
-      width: width,
+      width: 150,
       child: Material(
         color: PaletteColours.cardBackground,
         borderRadius: BorderRadius.circular(12),
@@ -416,7 +476,7 @@ class _QuickAction extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border.all(color: PaletteColours.divider),
               borderRadius: BorderRadius.circular(12),
@@ -425,25 +485,20 @@ class _QuickAction extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: accentColour ?? PaletteColours.softCream,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, size: 22, color: PaletteColours.sageGreenDark),
+                  child: Icon(icon, size: 20, color: PaletteColours.sageGreenDark),
                 ),
-                const SizedBox(height: 12),
+                const Spacer(),
                 Text(
                   label,
                   style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PaletteColours.textTertiary,
-                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
