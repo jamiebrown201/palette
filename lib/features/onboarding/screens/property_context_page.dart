@@ -5,11 +5,19 @@ import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 
 /// Property context stage: type, era, project stage, tenure.
-class PropertyContextPage extends ConsumerWidget {
+class PropertyContextPage extends ConsumerStatefulWidget {
   const PropertyContextPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PropertyContextPage> createState() =>
+      _PropertyContextPageState();
+}
+
+class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
+  bool _isGenerating = false;
+
+  @override
+  Widget build(BuildContext context) {
     final quizState = ref.watch(quizNotifierProvider);
     final notifier = ref.read(quizNotifierProvider.notifier);
 
@@ -99,10 +107,20 @@ class PropertyContextPage extends ConsumerWidget {
           const SizedBox(height: 32),
 
           FilledButton(
-            onPressed: () async {
-              await notifier.generateAndSaveResult();
-            },
-            child: const Text('See My Colour DNA'),
+            onPressed: _isGenerating
+                ? null
+                : () async {
+                    setState(() => _isGenerating = true);
+                    await notifier.generateAndSaveResult();
+                    if (mounted) setState(() => _isGenerating = false);
+                  },
+            child: _isGenerating
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('See My Colour DNA'),
           ),
           const SizedBox(height: 32),
         ],

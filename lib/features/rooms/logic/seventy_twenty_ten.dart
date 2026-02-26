@@ -83,9 +83,10 @@ ColourPlan? generateColourPlan({
   // Find or use locked beta
   PaintColour betaColour;
   if (lockedBeta != null && lockedBeta.isNotEmpty) {
-    // Find nearest paint to the locked furniture colour
+    // Average all locked furniture colours for this tier
+    final averageHex = _averageLockedHexes(lockedBeta.map((f) => f.colourHex));
     betaColour = _findNearestPaint(
-      hex: lockedBeta.first.colourHex,
+      hex: averageHex,
       allColours: candidatePaints,
       excludeIds: {heroColour.id},
     ) ?? candidatePaints.first;
@@ -103,8 +104,10 @@ ColourPlan? generateColourPlan({
   // Find or use locked surprise
   PaintColour surpriseColour;
   if (lockedSurprise != null && lockedSurprise.isNotEmpty) {
+    final averageHex =
+        _averageLockedHexes(lockedSurprise.map((f) => f.colourHex));
     surpriseColour = _findNearestPaint(
-      hex: lockedSurprise.first.colourHex,
+      hex: averageHex,
       allColours: candidatePaints,
       excludeIds: {heroColour.id, betaColour.id},
     ) ?? candidatePaints.first;
@@ -273,6 +276,21 @@ List<PaintColour> _filterByBudget(
       BudgetBracket.investment => price > 30,
     };
   }).toList();
+}
+
+/// Average multiple locked furniture hex colours in Lab space.
+///
+/// When multiple items are locked for the same tier, this blends them
+/// so the algorithm finds a paint that harmonises with all of them.
+String _averageLockedHexes(Iterable<String> hexes) {
+  final labs = hexes.map(hexToLab).toList();
+  if (labs.length == 1) return hexes.first;
+
+  final avgL = labs.map((l) => l.l).reduce((a, b) => a + b) / labs.length;
+  final avgA = labs.map((l) => l.a).reduce((a, b) => a + b) / labs.length;
+  final avgB = labs.map((l) => l.b).reduce((a, b) => a + b) / labs.length;
+
+  return labToHex(LabColour(avgL, avgA, avgB));
 }
 
 PaletteFamily _getComplementaryFamily(PaletteFamily primary) {
