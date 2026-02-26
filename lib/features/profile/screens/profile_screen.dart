@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/providers/app_providers.dart';
 
@@ -105,6 +106,7 @@ class ProfileScreen extends ConsumerWidget {
                   iconColor: PaletteColours.sageGreen,
                   title: 'Retake Colour DNA Quiz',
                   onTap: () {
+                    ref.read(quizNotifierProvider.notifier).reset();
                     ref.read(hasCompletedOnboardingProvider.notifier).state =
                         false;
                     context.go('/onboarding');

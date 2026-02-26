@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/colour/colour_suggestions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/palette_bottom_sheet.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
+import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/paint_colour.dart';
@@ -183,11 +185,21 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
     final allPaints = await ref.read(allPaintColoursProvider.future);
     if (!mounted) return;
 
+    final suggestions = generateSuggestions(
+      context: PickerContext(
+        pickerRole: PickerRole.paletteAdd,
+        existingPaletteHexes: widget.result.colourHexes,
+        dnaHexes: widget.result.colourHexes,
+      ),
+      allPaints: allPaints,
+    );
+
     final selected = await PaletteBottomSheet.show<PaintColour>(
       context: context,
-      builder: (_) => _PaintColourPicker(
+      builder: (_) => SmartPaintColourPicker(
         title: 'Add a colour',
         paintColours: allPaints,
+        suggestions: suggestions,
       ),
     );
     if (selected == null || !mounted) return;
@@ -240,11 +252,24 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
     final allPaints = await ref.read(allPaintColoursProvider.future);
     if (!mounted) return;
 
+    final otherHexes = widget.result.colourHexes
+        .where((h) => h.toLowerCase() != oldHex.toLowerCase())
+        .toList();
+    final suggestions = generateSuggestions(
+      context: PickerContext(
+        pickerRole: PickerRole.paletteAdd,
+        existingPaletteHexes: otherHexes,
+        dnaHexes: widget.result.colourHexes,
+      ),
+      allPaints: allPaints,
+    );
+
     final selected = await PaletteBottomSheet.show<PaintColour>(
       context: context,
-      builder: (_) => _PaintColourPicker(
+      builder: (_) => SmartPaintColourPicker(
         title: 'Replace ${oldHex.toUpperCase()}',
         paintColours: allPaints,
+        suggestions: suggestions,
       ),
     );
     if (selected == null || !mounted) return;
@@ -561,115 +586,6 @@ class _ActionButton extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _PaintColourPicker extends StatefulWidget {
-  const _PaintColourPicker({
-    required this.title,
-    required this.paintColours,
-  });
-
-  final String title;
-  final List<PaintColour> paintColours;
-
-  @override
-  State<_PaintColourPicker> createState() => _PaintColourPickerState();
-}
-
-class _PaintColourPickerState extends State<_PaintColourPicker> {
-  String _query = '';
-
-  List<PaintColour> get _filtered {
-    if (_query.isEmpty) return widget.paintColours;
-    final q = _query.toLowerCase();
-    return widget.paintColours
-        .where((p) =>
-            p.name.toLowerCase().contains(q) ||
-            p.brand.toLowerCase().contains(q) ||
-            p.hex.toLowerCase().contains(q))
-        .toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (ctx, scrollController) {
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: PaletteColours.divider,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    widget.title,
-                    style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search by name, brand, or hex',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onChanged: (v) => setState(() => _query = v),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                itemCount: _filtered.length,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemBuilder: (ctx, i) {
-                  final pc = _filtered[i];
-                  return ListTile(
-                    leading: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: _hexToColor(pc.hex),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: PaletteColours.divider),
-                      ),
-                    ),
-                    title: Text(pc.name),
-                    subtitle: Text(pc.brand),
-                    trailing: Text(
-                      pc.hex.toUpperCase(),
-                      style: Theme.of(ctx).textTheme.labelSmall,
-                    ),
-                    onTap: () => Navigator.pop(ctx, pc),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

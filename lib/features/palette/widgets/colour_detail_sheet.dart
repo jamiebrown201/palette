@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
+import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/colour/palette_family.dart';
 import 'package:palette/core/colour/undertone.dart';
@@ -277,7 +278,7 @@ class _PaintMatchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colour = match.colour;
-    final matchPercent = _deltaEToPercent(match.deltaE);
+    final matchPercent = deltaEToMatchPercentage(match.deltaE);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -451,7 +452,6 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
   Future<void> _loadCrossBrand() async {
     final matches = await widget.paintColourRepo.findCrossBrandMatches(
       widget.closestMatch.colour,
-      threshold: 8.0,
     );
     if (mounted) {
       setState(() => _crossBrandMatches = matches);
@@ -551,11 +551,6 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
       ],
     );
   }
-}
-
-double _deltaEToPercent(double deltaE) {
-  // Map delta-E to percentage: 0 -> 100%, 25+ -> 0%
-  return (100 * (1 - (deltaE / 25))).clamp(0, 100);
 }
 
 Color _hexToColor(String hex) {

@@ -2,17 +2,24 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
+import 'package:palette/core/colour/colour_suggestions.dart';
+import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/kelvin_simulation.dart';
+import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
 import 'package:palette/core/widgets/section_header.dart';
+import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
+import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
+import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
@@ -177,7 +184,10 @@ class _RoomDetailContent extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: 8),
-            _FurnitureLockSection(roomId: room.id),
+            _FurnitureLockSection(
+              roomId: room.id,
+              heroColourHex: room.heroColourHex,
+            ),
             const SizedBox(height: 24),
 
             // 70/20/10 Planner
@@ -188,6 +198,14 @@ class _RoomDetailContent extends ConsumerWidget {
               upgradeMessage: 'Unlock the 70/20/10 colour planner',
               child: _ColourPlanSection(room: room),
             ),
+
+            // Colour plan harmony insight
+            if (room.heroColourHex != null &&
+                (room.betaColourHex != null ||
+                    room.surpriseColourHex != null)) ...[
+              const SizedBox(height: 12),
+              _ColourHarmonyInsight(room: room),
+            ],
             const SizedBox(height: 24),
 
             // Light simulation
@@ -466,6 +484,72 @@ class _UndertoneChip extends StatelessWidget {
   }
 }
 
+class _ColourHarmonyInsight extends StatelessWidget {
+  const _ColourHarmonyInsight({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    final harmony = analyseColourPlanHarmony(
+      heroHex: room.heroColourHex!,
+      betaHex: room.betaColourHex,
+      surpriseHex: room.surpriseColourHex,
+    );
+
+    final hasWarning = harmony.hasWarning;
+    final bgColor =
+        hasWarning ? PaletteColours.softGoldLight : PaletteColours.sageGreenLight;
+    final fgColor =
+        hasWarning ? PaletteColours.softGoldDark : PaletteColours.sageGreenDark;
+    final icon = hasWarning ? Icons.lightbulb_outline : Icons.auto_awesome;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: fgColor),
+              const SizedBox(width: 8),
+              Text(
+                harmony.verdict,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: fgColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            harmony.explanation,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: fgColor),
+          ),
+          if (harmony.warning != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              harmony.warning!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.softGoldDark,
+                    fontStyle: FontStyle.italic,
+                  ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _ColourPlanSection extends ConsumerWidget {
   const _ColourPlanSection({required this.room});
 
@@ -488,6 +572,27 @@ class _ColourPlanSection extends ConsumerWidget {
                   color: PaletteColours.textSecondary,
                 ),
           ),
+          if (room.isRenterMode) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Common landlord colours',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _landlordPresets.map((preset) {
+                return _LandlordPresetChip(
+                  label: preset.name,
+                  hex: preset.hex,
+                  onTap: () => _applyLandlordPreset(context, ref, preset.hex),
+                );
+              }).toList(),
+            ),
+          ],
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () => _showHeroColourPicker(context, ref),
@@ -525,6 +630,7 @@ class _ColourPlanSection extends ConsumerWidget {
             hex: room.surpriseColourHex,
             onTap: () => _showSwapPicker(context, ref, 'surprise'),
           ),
+          _DashColourRow(room: room),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: () => _regeneratePlan(context, ref),
@@ -539,20 +645,99 @@ class _ColourPlanSection extends ConsumerWidget {
     );
   }
 
+  static const _landlordPresets = [
+    (name: 'Magnolia', hex: '#F5E6CC'),
+    (name: 'Brilliant White', hex: '#FAFAFA'),
+    (name: 'Jasmine White', hex: '#F8F0E3'),
+    (name: 'Cotton White', hex: '#F5F2EA'),
+    (name: 'Barley White', hex: '#F0E8D0'),
+  ];
+
+  Future<void> _applyLandlordPreset(
+      BuildContext context, WidgetRef ref, String hex) async {
+    final allPaints = await ref.read(allPaintColoursProvider.future);
+
+    // Find the closest real paint to the preset
+    final heroPaint = allPaints
+        .map((p) {
+          final lab = hexToLab(hex);
+          final pLab = LabColour(p.labL, p.labA, p.labB);
+          return (paint: p, dE: deltaE2000(lab, pLab));
+        })
+        .toList()
+      ..sort((a, b) => a.dE.compareTo(b.dE));
+
+    if (heroPaint.isEmpty) return;
+    final selected = heroPaint.first.paint;
+
+    final furniture =
+        await ref.read(furnitureForRoomProvider(room.id).future);
+    final redThreadHexes = await ref.read(threadHexesProvider.future);
+
+    final plan = generateColourPlan(
+      heroColour: selected,
+      allPaintColours: allPaints,
+      direction: room.direction,
+      usageTime: room.usageTime,
+      redThreadHexes: redThreadHexes,
+      lockedFurniture: furniture,
+      budget: room.budget,
+    );
+
+    final repo = ref.read(roomRepositoryProvider);
+    await repo.updateRoom(
+      RoomsCompanion(
+        id: Value(room.id),
+        name: Value(room.name),
+        direction: Value(room.direction),
+        usageTime: Value(room.usageTime),
+        moods: Value(room.moods),
+        budget: Value(room.budget),
+        isRenterMode: Value(room.isRenterMode),
+        heroColourHex: Value(selected.hex),
+        betaColourHex: Value(plan?.betaColour.hex),
+        surpriseColourHex: Value(plan?.surpriseColour.hex),
+        wallColourHex: Value(selected.hex),
+        sortOrder: Value(room.sortOrder),
+        createdAt: Value(room.createdAt),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    ref
+      ..invalidate(roomByIdProvider(room.id))
+      ..invalidate(allRoomsProvider);
+  }
+
   Future<void> _showHeroColourPicker(
       BuildContext context, WidgetRef ref) async {
     final allPaints = await ref.read(allPaintColoursProvider.future);
+    final dnaResult = await ref.read(latestColourDnaProvider.future);
+    final redThreadHexList = await ref.read(threadHexesProvider.future);
 
     if (!context.mounted) return;
+
+    final suggestions = generateSuggestions(
+      context: PickerContext(
+        pickerRole: PickerRole.hero,
+        direction: room.direction,
+        usageTime: room.usageTime,
+        budget: room.budget,
+        moods: room.moods,
+        dnaHexes: dnaResult?.colourHexes ?? [],
+        redThreadHexes: redThreadHexList,
+      ),
+      allPaints: allPaints,
+    );
 
     final selected = await showModalBottomSheet<PaintColour>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => _PaintColourPicker(
+      builder: (ctx) => SmartPaintColourPicker(
         title: room.isRenterMode
             ? 'Match your existing wall colour'
             : 'Choose your hero colour',
         paintColours: allPaints,
+        suggestions: suggestions,
       ),
     );
 
@@ -604,12 +789,52 @@ class _ColourPlanSection extends ConsumerWidget {
 
     if (!context.mounted) return;
 
+    final pickerRole =
+        tier == 'beta' ? PickerRole.beta : PickerRole.surprise;
+    final suggestions = generateSuggestions(
+      context: PickerContext(
+        pickerRole: pickerRole,
+        heroColourHex: room.heroColourHex,
+        betaColourHex: room.betaColourHex,
+        direction: room.direction,
+        usageTime: room.usageTime,
+        budget: room.budget,
+        moods: room.moods,
+      ),
+      allPaints: allPaints,
+    );
+
+    // Build context banner describing current colour's relationship to hero
+    String? banner;
+    final currentHex =
+        tier == 'beta' ? room.betaColourHex : room.surpriseColourHex;
+    if (currentHex != null && room.heroColourHex != null) {
+      final heroLab = hexToLab(room.heroColourHex!);
+      final currentLab = hexToLab(currentHex);
+      final rel = classifyHuePair(heroLab, currentLab);
+      final tierName = tier == 'beta' ? 'supporting' : 'accent';
+      banner = switch (rel) {
+        ColourRelationship.complementary =>
+          'Your current $tierName is complementary to the hero — they create vibrant contrast.',
+        ColourRelationship.analogous =>
+          'Your current $tierName is analogous to the hero — they harmonise naturally.',
+        ColourRelationship.triadic =>
+          'Your current $tierName forms a triadic relationship with the hero — balanced vibrancy.',
+        ColourRelationship.splitComplementary =>
+          'Your current $tierName is split-complementary to the hero — softer contrast.',
+        null =>
+          'Your current $tierName creates a bold, eclectic pairing with the hero.',
+      };
+    }
+
     final selected = await showModalBottomSheet<PaintColour>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => _PaintColourPicker(
+      builder: (ctx) => SmartPaintColourPicker(
         title: 'Swap ${tier == 'beta' ? 'Supporting (20%)' : 'Surprise (10%)'} colour',
         paintColours: allPaints,
+        suggestions: suggestions,
+        contextBanner: banner,
       ),
     );
 
@@ -688,115 +913,6 @@ class _ColourPlanSection extends ConsumerWidget {
   }
 }
 
-/// A paint colour picker shown as a bottom sheet with search.
-class _PaintColourPicker extends StatefulWidget {
-  const _PaintColourPicker({
-    required this.title,
-    required this.paintColours,
-  });
-
-  final String title;
-  final List<PaintColour> paintColours;
-
-  @override
-  State<_PaintColourPicker> createState() => _PaintColourPickerState();
-}
-
-class _PaintColourPickerState extends State<_PaintColourPicker> {
-  String _query = '';
-
-  List<PaintColour> get _filtered {
-    if (_query.isEmpty) return widget.paintColours;
-    final q = _query.toLowerCase();
-    return widget.paintColours
-        .where((p) =>
-            p.name.toLowerCase().contains(q) ||
-            p.brand.toLowerCase().contains(q) ||
-            p.hex.toLowerCase().contains(q))
-        .toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (ctx, scrollController) {
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: PaletteColours.divider,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    widget.title,
-                    style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search by name, brand, or hex',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onChanged: (v) => setState(() => _query = v),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                itemCount: _filtered.length,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemBuilder: (ctx, i) {
-                  final pc = _filtered[i];
-                  return ListTile(
-                    leading: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: _hexToColor(pc.hex),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: PaletteColours.divider),
-                      ),
-                    ),
-                    title: Text(pc.name),
-                    subtitle: Text(pc.brand),
-                    trailing: Text(
-                      pc.hex.toUpperCase(),
-                      style: Theme.of(ctx).textTheme.labelSmall,
-                    ),
-                    onTap: () => Navigator.pop(ctx, pc),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
 
 class _ColourTierRow extends StatelessWidget {
   const _ColourTierRow({
@@ -959,9 +1075,13 @@ class _LightSwatchColumn extends StatelessWidget {
 }
 
 class _FurnitureLockSection extends ConsumerWidget {
-  const _FurnitureLockSection({required this.roomId});
+  const _FurnitureLockSection({
+    required this.roomId,
+    this.heroColourHex,
+  });
 
   final String roomId;
+  final String? heroColourHex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1126,6 +1246,73 @@ class _FurnitureLockSection extends ConsumerWidget {
                   );
                 }).toList(),
               ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () async {
+                  final allPaints = await ref
+                      .read(allPaintColoursProvider.future);
+                  if (!ctx.mounted) return;
+                  final picked = await showModalBottomSheet<PaintColour>(
+                    context: ctx,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                    ),
+                    builder: (_) => SmartPaintColourPicker(
+                      title: 'Find exact colour',
+                      paintColours: allPaints,
+                    ),
+                  );
+                  if (picked != null) {
+                    setDialogState(() => selectedHex = picked.hex);
+                  }
+                },
+                icon: const Icon(Icons.palette_outlined, size: 16),
+                label: const Text('Find exact colour'),
+                style: TextButton.styleFrom(
+                  foregroundColor: PaletteColours.sageGreenDark,
+                ),
+              ),
+              // Colour relationship hint
+              if (heroColourHex != null) ...[
+                Builder(builder: (ctx) {
+                  final heroLab = hexToLab(heroColourHex!);
+                  final furnitureLab = hexToLab(selectedHex);
+                  final dE = deltaE2000(heroLab, furnitureLab);
+                  final hint = dE < 5
+                      ? 'Very close to your hero — will blend in'
+                      : dE < 20
+                          ? 'Tonal variation — cohesive and calm'
+                          : dE > 45
+                              ? 'High contrast — will stand out boldly'
+                              : 'Moderate contrast with your hero';
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          size: 12,
+                          color: PaletteColours.sageGreenDark,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            hint,
+                            style:
+                                Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                      color: PaletteColours.sageGreenDark,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
               const SizedBox(height: 16),
               DropdownButtonFormField<FurnitureRole>(
                 initialValue: role,
@@ -1177,6 +1364,94 @@ class _FurnitureLockSection extends ConsumerWidget {
     );
   }
 
+}
+
+class _DashColourRow extends ConsumerWidget {
+  const _DashColourRow({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final threadHexesAsync = ref.watch(threadHexesProvider);
+
+    return threadHexesAsync.when(
+      data: (threadHexes) {
+        if (threadHexes.isEmpty) return const SizedBox.shrink();
+
+        final allPaintsAsync = ref.watch(allPaintColoursProvider);
+        return allPaintsAsync.when(
+          data: (allPaints) {
+            final excludeHexes = {
+              room.heroColourHex,
+              room.betaColourHex,
+              room.surpriseColourHex,
+            }.whereType<String>().toSet();
+
+            // Find the closest paint to any thread hex, excluding plan colours
+            PaintColour? dashPaint;
+            var bestDeltaE = double.infinity;
+            for (final threadHex in threadHexes) {
+              final threadLab = hexToLab(threadHex);
+              for (final pc in allPaints) {
+                if (excludeHexes.contains(pc.hex)) continue;
+                final lab = LabColour(pc.labL, pc.labA, pc.labB);
+                final dE = deltaE2000(threadLab, lab);
+                if (dE < bestDeltaE) {
+                  bestDeltaE = dE;
+                  dashPaint = pc;
+                }
+              }
+            }
+
+            if (dashPaint == null) return const SizedBox.shrink();
+
+            return Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: _ColourTierRow(
+                label: 'Dash',
+                description: 'Red thread tie-in',
+                hex: dashPaint.hex,
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _LandlordPresetChip extends StatelessWidget {
+  const _LandlordPresetChip({
+    required this.label,
+    required this.hex,
+    required this.onTap,
+  });
+
+  final String label;
+  final String hex;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          color: _hexToColor(hex),
+          shape: BoxShape.circle,
+          border: Border.all(color: PaletteColours.divider),
+        ),
+      ),
+      label: Text(label),
+      onPressed: onTap,
+    );
+  }
 }
 
 bool _isLightColour(String hex) {

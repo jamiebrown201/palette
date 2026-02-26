@@ -3,12 +3,18 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/colour_suggestions.dart';
+import 'package:palette/core/constants/app_constants.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
 import 'package:palette/core/widgets/section_header.dart';
+import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
 import 'package:palette/data/database/palette_database.dart';
+import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/room.dart';
+import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
+import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/logic/floor_plan_template.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/red_thread/widgets/floor_plan_painter.dart';
@@ -739,6 +745,39 @@ class _ThreadColourRow extends ConsumerWidget {
               onDelete: () async {
                 final repo = ref.read(redThreadRepositoryProvider);
                 final threads = await repo.getThreadColours();
+                if (threads.length <= AppConstants.minRedThreadColours) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'You need at least ${AppConstants.minRedThreadColours} thread colours',
+                        ),
+                      ),
+                    );
+                  }
+                  return;
+                }
+                if (!context.mounted) return;
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Remove colour'),
+                    content: const Text(
+                      'Remove this colour from your thread?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Remove'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed != true) return;
                 final match = threads.where((t) => t.hex == hex).firstOrNull;
                 if (match != null) {
                   await repo.deleteThreadColour(match.id);
@@ -753,49 +792,76 @@ class _ThreadColourRow extends ConsumerWidget {
     );
   }
 
-  void _showColourPicker(BuildContext context, WidgetRef ref) {
-    // Simple hex input dialog
-    final controller = TextEditingController();
-    showDialog<void>(
+  Future<void> _showColourPicker(BuildContext context, WidgetRef ref) async {
+    final allPaints =
+        await ref.read(allPaintColoursProvider.future);
+    final rooms = ref.read(allRoomsProvider).valueOrNull ?? [];
+    final dna = ref.read(latestColourDnaProvider).valueOrNull;
+
+    // Gather all room hexes for context
+    final roomHexes = <String>[];
+    for (final room in rooms) {
+      if (room.heroColourHex != null) roomHexes.add(room.heroColourHex!);
+      if (room.betaColourHex != null) roomHexes.add(room.betaColourHex!);
+      if (room.surpriseColourHex != null) {
+        roomHexes.add(room.surpriseColourHex!);
+      }
+    }
+
+    final pickerContext = PickerContext(
+      pickerRole: PickerRole.redThread,
+      dnaHexes: dna?.colourHexes ?? [],
+      redThreadHexes: threadHexes,
+      roomHexes: roomHexes,
+    );
+
+    final suggestions = generateSuggestions(
+      context: pickerContext,
+      allPaints: allPaints,
+    );
+
+    if (!context.mounted) return;
+
+    final selected = await showModalBottomSheet<PaintColour>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add Thread Colour'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '#AABBCC',
-            border: OutlineInputBorder(),
-          ),
-          textCapitalization: TextCapitalization.characters,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final hex = controller.text.trim();
-              if (hex.length >= 6) {
-                final normalised =
-                    hex.startsWith('#') ? hex : '#$hex';
-                final repo = ref.read(redThreadRepositoryProvider);
-                final threads = await repo.getThreadColours();
-                await repo.insertThreadColour(
-                  RedThreadColoursCompanion.insert(
-                    id: const Uuid().v4(),
-                    hex: normalised,
-                    sortOrder: threads.length,
-                  ),
-                );
-                if (ctx.mounted) Navigator.pop(ctx);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SmartPaintColourPicker(
+        title: 'Add Thread Colour',
+        paintColours: allPaints,
+        suggestions: suggestions,
       ),
     );
+
+    if (selected != null) {
+      final repo = ref.read(redThreadRepositoryProvider);
+      final threads = await repo.getThreadColours();
+
+      // Enforce maximum
+      if (threads.length >= AppConstants.maxRedThreadColours) return;
+
+      // Prevent duplicates
+      if (threads.any((t) => t.hex == selected.hex)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('This colour is already in your thread'),
+            ),
+          );
+        }
+        return;
+      }
+
+      await repo.insertThreadColour(
+        RedThreadColoursCompanion.insert(
+          id: const Uuid().v4(),
+          hex: selected.hex,
+          sortOrder: threads.length,
+        ),
+      );
+    }
   }
 }
 
