@@ -151,24 +151,33 @@ class _RoomDetailContent extends ConsumerWidget {
             ],
             const SizedBox(height: 20),
 
-            // Light direction (compact)
+            // Light direction (compact) — fully premium-gated
             if (room.direction != null) ...[
-              const SectionHeader(title: 'Light & Direction'),
-              const SizedBox(height: 8),
-              _LightDirectionCompact(
-                direction: room.direction!,
-                usageTime: room.usageTime,
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () => context.push(
-                  '/explore/white-finder?roomId=${room.id}',
-                ),
-                icon: const Icon(Icons.format_paint_outlined, size: 16),
-                label: const Text('Find the right white'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: PaletteColours.sageGreenDark,
-                  side: const BorderSide(color: PaletteColours.sageGreen),
+              PremiumGate(
+                requiredTier: SubscriptionTier.plus,
+                upgradeMessage: 'Unlock light & direction insights',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionHeader(title: 'Light & Direction'),
+                    const SizedBox(height: 8),
+                    _LightDirectionCompact(
+                      direction: room.direction!,
+                      usageTime: room.usageTime,
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => context.push(
+                        '/explore/white-finder?roomId=${room.id}',
+                      ),
+                      icon: const Icon(Icons.format_paint_outlined, size: 16),
+                      label: const Text('Find the right white'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: PaletteColours.sageGreenDark,
+                        side: const BorderSide(color: PaletteColours.sageGreen),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),
@@ -428,24 +437,20 @@ class _LightDirectionCompact extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          PremiumGate(
-            requiredTier: SubscriptionTier.plus,
-            upgradeMessage: 'Unlock light recommendations',
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _UndertoneChip(
+                label: 'Prefer: ${rec.preferredUndertone.displayName}',
+                isPositive: true,
+              ),
+              if (rec.avoidUndertone != null)
                 _UndertoneChip(
-                  label: 'Prefer: ${rec.preferredUndertone.displayName}',
-                  isPositive: true,
+                  label: 'Avoid: ${rec.avoidUndertone!.displayName}',
+                  isPositive: false,
                 ),
-                if (rec.avoidUndertone != null)
-                  _UndertoneChip(
-                    label: 'Avoid: ${rec.avoidUndertone!.displayName}',
-                    isPositive: false,
-                  ),
-              ],
-            ),
+            ],
           ),
         ],
       ),
@@ -706,6 +711,11 @@ class _ColourPlanSection extends ConsumerWidget {
     ref
       ..invalidate(roomByIdProvider(room.id))
       ..invalidate(allRoomsProvider);
+    if (plan != null && plan.warnings.isNotEmpty && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(plan.warnings.first)),
+      );
+    }
   }
 
   Future<void> _showHeroColourPicker(
@@ -781,6 +791,11 @@ class _ColourPlanSection extends ConsumerWidget {
     ref
       ..invalidate(roomByIdProvider(room.id))
       ..invalidate(allRoomsProvider);
+    if (plan != null && plan.warnings.isNotEmpty && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(plan.warnings.first)),
+      );
+    }
   }
 
   Future<void> _showSwapPicker(
@@ -910,6 +925,11 @@ class _ColourPlanSection extends ConsumerWidget {
       ),
     );
     ref.invalidate(roomByIdProvider(room.id));
+    if (plan.warnings.isNotEmpty && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(plan.warnings.first)),
+      );
+    }
   }
 }
 

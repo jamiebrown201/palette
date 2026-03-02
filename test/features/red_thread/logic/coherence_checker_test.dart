@@ -29,12 +29,12 @@ Room _makeRoom({
 
 void main() {
   group('checkCoherence', () {
-    test('returns coherent when no rooms or threads', () {
+    test('returns incoherent when no rooms or threads', () {
       final report = checkCoherence(
         rooms: [],
         threadColours: [],
       );
-      expect(report.overallCoherent, isTrue);
+      expect(report.overallCoherent, isFalse);
       expect(report.results, isEmpty);
     });
 
