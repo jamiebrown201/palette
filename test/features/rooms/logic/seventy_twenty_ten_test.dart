@@ -191,8 +191,8 @@ void main() {
       expect(plan, isNull);
     });
 
-    test('returns null when no surprise candidates available', () {
-      // Only warm neutrals — no other family for surprise
+    test('handles same-family-only paints via progressive relaxation', () {
+      // Only warm neutrals — progressive relaxation finds cross-family surprise
       final sameFamily = [
         testColours[0], // wn1
         testColours[1], // wn2
@@ -205,7 +205,9 @@ void main() {
         random: Random(42),
       );
 
-      expect(plan, isNull);
+      // Progressive relaxation now finds candidates even within the same family
+      expect(plan, isNotNull);
+      expect(plan!.heroColour.id, 'wn1');
     });
 
     test('all plan colours are distinct', () {

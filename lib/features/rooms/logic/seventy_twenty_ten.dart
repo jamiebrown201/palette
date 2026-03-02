@@ -15,6 +15,7 @@ class ColourPlan {
     required this.betaColour,
     required this.surpriseColour,
     this.dashColour,
+    this.warnings = const [],
   });
 
   /// 70% - Dominant colour (walls)
@@ -28,6 +29,9 @@ class ColourPlan {
 
   /// Optional red thread dash colour
   final PaintColour? dashColour;
+
+  /// Warnings generated during plan creation (e.g. conflicting locked furniture).
+  final List<String> warnings;
 }
 
 /// Generate a 70/20/10 colour plan for a room.
@@ -62,6 +66,8 @@ ColourPlan? generateColourPlan({
   // Fall back to unfiltered if budget filtering leaves too few options
   final candidatePaints = paints.length >= 10 ? paints : allPaintColours;
 
+  final warnings = <String>[];
+
   // Check locked furniture for pre-filled tiers
   final lockedBeta = lockedFurniture
       ?.where((f) => f.role == FurnitureRole.beta)
@@ -69,6 +75,24 @@ ColourPlan? generateColourPlan({
   final lockedSurprise = lockedFurniture
       ?.where((f) => f.role == FurnitureRole.surprise)
       .toList();
+
+  // Warn if locked items in same tier have very different colours
+  if (lockedBeta != null && lockedBeta.length > 1) {
+    if (_hasConflictingColours(lockedBeta.map((f) => f.colourHex))) {
+      warnings.add(
+        'Your locked supporting furniture items have very different colours '
+        '— the suggested match is a compromise.',
+      );
+    }
+  }
+  if (lockedSurprise != null && lockedSurprise.length > 1) {
+    if (_hasConflictingColours(lockedSurprise.map((f) => f.colourHex))) {
+      warnings.add(
+        'Your locked accent furniture items have very different colours '
+        '— the suggested match is a compromise.',
+      );
+    }
+  }
 
   // Determine preferred undertone based on light
   Undertone? preferredUndertone;
@@ -89,6 +113,10 @@ ColourPlan? generateColourPlan({
       hex: averageHex,
       allColours: candidatePaints,
       excludeIds: {heroColour.id},
+    ) ?? _findNearestPaint(
+      hex: averageHex,
+      allColours: allPaintColours,
+      excludeIds: const <String>{},
     ) ?? candidatePaints.first;
   } else {
     final betaCandidates = _findBetaCandidates(
@@ -110,6 +138,10 @@ ColourPlan? generateColourPlan({
       hex: averageHex,
       allColours: candidatePaints,
       excludeIds: {heroColour.id, betaColour.id},
+    ) ?? _findNearestPaint(
+      hex: averageHex,
+      allColours: allPaintColours,
+      excludeIds: const <String>{},
     ) ?? candidatePaints.first;
   } else {
     final surpriseCandidates = _findSurpriseCandidates(
@@ -138,51 +170,72 @@ ColourPlan? generateColourPlan({
     betaColour: betaColour,
     surpriseColour: surpriseColour,
     dashColour: dashColour,
+    warnings: warnings,
   );
 }
 
-/// Find beta candidates: similar lightness direction, moderate contrast.
+/// Find beta candidates with progressive relaxation.
+///
+/// Tries increasingly wider delta-E ranges and drops the undertone
+/// filter if needed. Always returns at least one candidate.
 List<PaintColour> _findBetaCandidates({
   required LabColour heroLab,
   required List<PaintColour> allColours,
   required String heroId,
   Undertone? preferredUndertone,
 }) {
-  final candidates = <PaintColour>[];
+  // Progressive relaxation: strict → wide → no undertone filter → any
+  final passes = [
+    (minDE: 10.0, maxDE: 35.0, filterUndertone: true),
+    (minDE: 5.0, maxDE: 50.0, filterUndertone: true),
+    (minDE: 5.0, maxDE: 50.0, filterUndertone: false),
+    (minDE: 3.0, maxDE: 70.0, filterUndertone: false),
+  ];
 
-  for (final pc in allColours) {
-    if (pc.id == heroId) continue;
-
-    final lab = LabColour(pc.labL, pc.labA, pc.labB);
-    final dE = deltaE2000(heroLab, lab);
-
-    // Beta should be noticeably different but not clashing
-    // Delta-E between 10-35 is a good range
-    if (dE < 10 || dE > 35) continue;
-
-    // If we have a preferred undertone, filter for it
-    if (preferredUndertone != null &&
-        pc.undertone != preferredUndertone &&
-        pc.undertone != Undertone.neutral) {
-      continue;
+  for (final pass in passes) {
+    final candidates = <PaintColour>[];
+    for (final pc in allColours) {
+      if (pc.id == heroId) continue;
+      final lab = LabColour(pc.labL, pc.labA, pc.labB);
+      final dE = deltaE2000(heroLab, lab);
+      if (dE < pass.minDE || dE > pass.maxDE) continue;
+      if (pass.filterUndertone &&
+          preferredUndertone != null &&
+          pc.undertone != preferredUndertone &&
+          pc.undertone != Undertone.neutral) {
+        continue;
+      }
+      candidates.add(pc);
     }
-
-    candidates.add(pc);
+    if (candidates.isNotEmpty) {
+      // Sort by proximity to the dE 15–25 sweet spot
+      candidates.sort((a, b) {
+        final labA = LabColour(a.labL, a.labA, a.labB);
+        final labB = LabColour(b.labL, b.labA, b.labB);
+        final dA = (deltaE2000(heroLab, labA) - 20).abs();
+        final dB = (deltaE2000(heroLab, labB) - 20).abs();
+        return dA.compareTo(dB);
+      });
+      return candidates.take(10).toList();
+    }
   }
 
-  // Sort by delta-E proximity to the 15-25 sweet spot
-  candidates.sort((a, b) {
-    final labA = LabColour(a.labL, a.labA, a.labB);
-    final labB = LabColour(b.labL, b.labA, b.labB);
-    final dA = (deltaE2000(heroLab, labA) - 20).abs();
-    final dB = (deltaE2000(heroLab, labB) - 20).abs();
-    return dA.compareTo(dB);
-  });
-
-  return candidates.take(10).toList();
+  // Ultimate fallback: return the 5 closest paints by delta-E
+  final sorted = allColours
+      .where((pc) => pc.id != heroId)
+      .map((pc) {
+        final lab = LabColour(pc.labL, pc.labA, pc.labB);
+        return (paint: pc, dE: deltaE2000(heroLab, lab));
+      })
+      .toList()
+    ..sort((a, b) => a.dE.compareTo(b.dE));
+  return sorted.take(5).map((e) => e.paint).toList();
 }
 
-/// Find surprise candidates: different family, complementary.
+/// Find surprise candidates with progressive relaxation.
+///
+/// Prefers a different palette family and complementary colours.
+/// Falls back to wider criteria if strict search finds nothing.
 List<PaintColour> _findSurpriseCandidates({
   required LabColour heroLab,
   required List<PaintColour> allColours,
@@ -190,28 +243,45 @@ List<PaintColour> _findSurpriseCandidates({
   required Set<String> excludeIds,
 }) {
   final complementaryFamily = _getComplementaryFamily(heroFamily);
-  final candidates = <PaintColour>[];
 
-  for (final pc in allColours) {
-    if (excludeIds.contains(pc.id)) continue;
-    if (pc.paletteFamily == heroFamily) continue;
+  // Progressive relaxation: strict → relaxed → any family
+  final passes = [
+    (minDE: 15.0, requireDifferentFamily: true),
+    (minDE: 8.0, requireDifferentFamily: true),
+    (minDE: 5.0, requireDifferentFamily: false),
+  ];
 
-    // Prefer complementary family
-    final isComplementary = pc.paletteFamily == complementaryFamily;
-    final lab = LabColour(pc.labL, pc.labA, pc.labB);
-    final dE = deltaE2000(heroLab, lab);
+  for (final pass in passes) {
+    final candidates = <PaintColour>[];
+    for (final pc in allColours) {
+      if (excludeIds.contains(pc.id)) continue;
+      if (pass.requireDifferentFamily && pc.paletteFamily == heroFamily) {
+        continue;
+      }
+      final lab = LabColour(pc.labL, pc.labA, pc.labB);
+      final dE = deltaE2000(heroLab, lab);
+      if (dE < pass.minDE) continue;
 
-    // Surprise should be noticeable: dE > 15
-    if (dE < 15) continue;
-
-    if (isComplementary) {
-      candidates.insert(0, pc); // Prioritise complementary
-    } else {
-      candidates.add(pc);
+      final isComplementary = pc.paletteFamily == complementaryFamily;
+      if (isComplementary) {
+        candidates.insert(0, pc); // Prioritise complementary
+      } else {
+        candidates.add(pc);
+      }
     }
+    if (candidates.isNotEmpty) return candidates.take(8).toList();
   }
 
-  return candidates.take(8).toList();
+  // Ultimate fallback: closest paints excluding hero/beta
+  final sorted = allColours
+      .where((pc) => !excludeIds.contains(pc.id))
+      .map((pc) {
+        final lab = LabColour(pc.labL, pc.labA, pc.labB);
+        return (paint: pc, dE: deltaE2000(heroLab, lab));
+      })
+      .toList()
+    ..sort((a, b) => a.dE.compareTo(b.dE));
+  return sorted.take(5).map((e) => e.paint).toList();
 }
 
 /// Find the best red thread dash colour.
@@ -291,6 +361,19 @@ String _averageLockedHexes(Iterable<String> hexes) {
   final avgB = labs.map((l) => l.b).reduce((a, b) => a + b) / labs.length;
 
   return labToHex(LabColour(avgL, avgA, avgB));
+}
+
+/// Returns true if any pair of hex colours differ by more than dE 40.
+bool _hasConflictingColours(Iterable<String> hexes) {
+  final list = hexes.toList();
+  for (var i = 0; i < list.length; i++) {
+    for (var j = i + 1; j < list.length; j++) {
+      final labA = hexToLab(list[i]);
+      final labB = hexToLab(list[j]);
+      if (deltaE2000(labA, labB) > 40) return true;
+    }
+  }
+  return false;
 }
 
 PaletteFamily _getComplementaryFamily(PaletteFamily primary) {

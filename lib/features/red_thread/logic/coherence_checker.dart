@@ -44,7 +44,7 @@ CoherenceReport checkCoherence({
   double threshold = 15.0,
 }) {
   if (threadColours.isEmpty || rooms.isEmpty) {
-    return const CoherenceReport(results: [], overallCoherent: true);
+    return const CoherenceReport(results: [], overallCoherent: false);
   }
 
   final results = <RoomCoherenceResult>[];
