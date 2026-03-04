@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 
@@ -56,12 +57,24 @@ class MemoryPromptPage extends ConsumerWidget {
                 final familyWeights =
                     (card['familyWeights'] as Map<String, dynamic>)
                         .map((k, v) => MapEntry(k, (v as num).toInt()));
+                final undertoneStr = card['undertoneTemp'] as String?;
+                final undertoneTemp = undertoneStr != null
+                    ? Undertone.values.byName(undertoneStr)
+                    : null;
+                final chromaBandStr = card['chromaBand'] as String?;
+                final chromaBand = chromaBandStr != null
+                    ? ChromaBand.values.byName(chromaBandStr)
+                    : null;
 
                 return _ColourMoodCard(
                   label: card['label'] as String,
                   colour: colour,
                   delayMs: index * 80,
-                  onTap: () => notifier.selectMemoryCard(familyWeights),
+                  onTap: () => notifier.selectMemoryCard(
+                    familyWeights,
+                    undertoneTemp: undertoneTemp,
+                    chromaBand: chromaBand,
+                  ),
                 );
               },
             ),

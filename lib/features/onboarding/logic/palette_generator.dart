@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/paint_colour.dart';
 
@@ -32,25 +30,26 @@ class PaletteColourEntry {
 /// Generates a personalised colour palette from quiz family weights.
 ///
 /// Algorithm:
-/// 1. Tally family weights from all quiz selections
-/// 2. Determine primary (and optional secondary) family
-/// 3. Select 8-12 colours from paint DB with L* spread
-/// 4. Add 1-2 "surprise" colours from complementary families
+/// 1. Sort families by weight, determine primary and secondary
+/// 2. Select colours from paint DB with L* spread (deterministic)
+/// 3. Add 1-2 "surprise" colours from complementary families
 GeneratedPalette generatePalette({
   required Map<PaletteFamily, int> familyWeights,
   required List<PaintColour> allPaintColours,
   int targetSize = 10,
-  Random? random,
+  Undertone? undertoneTemperature,
+  ChromaBand? saturationPreference,
 }) {
-  final rng = random ?? Random();
-
   // 1. Sort families by weight, determine primary and secondary
   final sorted = familyWeights.entries.toList()
-    ..sort((a, b) => b.value.compareTo(a.value));
+    ..sort((a, b) {
+      final cmp = b.value.compareTo(a.value);
+      // Deterministic tiebreaker: enum index
+      return cmp != 0 ? cmp : a.key.index.compareTo(b.key.index);
+    });
 
   if (sorted.isEmpty) {
-    // Fallback: warm neutrals as primary
-    return _fallbackPalette(allPaintColours, rng, targetSize);
+    return _fallbackPalette(allPaintColours, targetSize);
   }
 
   final primaryFamily = sorted.first.key;
@@ -58,16 +57,25 @@ GeneratedPalette generatePalette({
       sorted.length > 1 && sorted[1].value > 0 ? sorted[1].key : null;
 
   // 2. Collect candidate colours from primary and secondary families
-  final primaryCandidates = allPaintColours
-      .where((c) => c.paletteFamily == primaryFamily)
-      .toList();
+  //    Sort by undertone preference then saturation preference (soft sorts)
+  final primaryCandidates = _sortByPreferences(
+    allPaintColours
+        .where((c) => c.paletteFamily == primaryFamily)
+        .toList(),
+    undertoneTemperature,
+    saturationPreference,
+  );
   final secondaryCandidates = secondaryFamily != null
-      ? allPaintColours
-          .where((c) => c.paletteFamily == secondaryFamily)
-          .toList()
+      ? _sortByPreferences(
+          allPaintColours
+              .where((c) => c.paletteFamily == secondaryFamily)
+              .toList(),
+          undertoneTemperature,
+          saturationPreference,
+        )
       : <PaintColour>[];
 
-  // 3. Select colours with L* spread
+  // 3. Select colours with L* spread (deterministic)
   final mainCount = targetSize - 2; // Reserve 1-2 for surprise
   final primaryCount = secondaryFamily != null
       ? (mainCount * 0.6).ceil()
@@ -77,12 +85,12 @@ GeneratedPalette generatePalette({
   final selectedPrimary = _selectWithLightnessSpread(
     primaryCandidates,
     primaryCount,
-    rng,
+    saturationPreference: saturationPreference,
   );
   final selectedSecondary = _selectWithLightnessSpread(
     secondaryCandidates,
     secondaryCount,
-    rng,
+    saturationPreference: saturationPreference,
   );
 
   // 4. Add surprise colours from complementary family
@@ -93,7 +101,6 @@ GeneratedPalette generatePalette({
   final surprises = _selectWithLightnessSpread(
     surpriseCandidates,
     targetSize - selectedPrimary.length - selectedSecondary.length,
-    rng,
   );
 
   // 5. Build the palette entries
@@ -114,18 +121,25 @@ GeneratedPalette generatePalette({
 }
 
 /// Select colours from candidates ensuring L* spread across the range.
-/// Divides the L* range into buckets and picks from each.
+///
+/// Deterministic: sorts by L* then hex, picks from each bucket.
+/// When [saturationPreference] is set, picks the best saturation match
+/// from each bucket instead of the median.
 List<PaintColour> _selectWithLightnessSpread(
   List<PaintColour> candidates,
-  int count,
-  Random rng,
-) {
+  int count, {
+  ChromaBand? saturationPreference,
+}) {
   if (candidates.isEmpty || count <= 0) return [];
-  if (candidates.length <= count) return List.of(candidates)..shuffle(rng);
 
-  // Sort by lightness
+  // Sort deterministically by L* then hex
   final sorted = List.of(candidates)
-    ..sort((a, b) => a.labL.compareTo(b.labL));
+    ..sort((a, b) {
+      final cmp = a.labL.compareTo(b.labL);
+      return cmp != 0 ? cmp : a.hex.compareTo(b.hex);
+    });
+
+  if (sorted.length <= count) return sorted;
 
   final selected = <PaintColour>[];
   final bucketSize = sorted.length / count;
@@ -135,17 +149,41 @@ List<PaintColour> _selectWithLightnessSpread(
     final end = ((i + 1) * bucketSize).floor().clamp(start + 1, sorted.length);
     final bucket = sorted.sublist(start, end);
 
-    // Pick randomly within bucket, ensuring we don't duplicate
+    // Pick from bucket, excluding already selected
     final available = bucket.where((c) => !selected.contains(c)).toList();
     if (available.isNotEmpty) {
-      selected.add(available[rng.nextInt(available.length)]);
+      if (saturationPreference != null && available.length > 1) {
+        // Pick best saturation match from bucket
+        available.sort((a, b) {
+          final aSat = _saturationSortKey(a.cabStar, saturationPreference);
+          final bSat = _saturationSortKey(b.cabStar, saturationPreference);
+          final cmp = aSat.compareTo(bSat);
+          return cmp != 0 ? cmp : a.hex.compareTo(b.hex);
+        });
+        selected.add(available.first);
+      } else {
+        // Deterministic: pick the median element
+        selected.add(available[available.length ~/ 2]);
+      }
     }
   }
 
   return selected;
 }
 
+/// Sort key for saturation preference within a bucket.
+/// Lower is better (ascending sort).
+double _saturationSortKey(double cabStar, ChromaBand preference) {
+  return switch (preference) {
+    ChromaBand.muted => cabStar, // lower chroma preferred
+    ChromaBand.bold => -cabStar, // higher chroma preferred
+    ChromaBand.mid => (cabStar - 37.5).abs(), // closer to mid preferred
+  };
+}
+
 /// Tally family weights from quiz card selections.
+///
+/// Kept for backward compatibility with existing tests.
 Map<PaletteFamily, int> tallyFamilyWeights(
   List<Map<String, int>> selectedCardWeights,
 ) {
@@ -164,6 +202,65 @@ Map<PaletteFamily, int> tallyFamilyWeights(
   return tally;
 }
 
+/// Sort candidates by undertone and saturation preferences (soft sorts).
+///
+/// Primary key: undertone (matching → 3, neutral → 2, opposite → 1).
+/// Secondary key: saturation Cab* alignment:
+///   - muted → ascending Cab* (prefer lower chroma)
+///   - bold → descending Cab* (prefer higher chroma)
+///   - mid → distance from Cab* 37.5 ascending (prefer middle range)
+/// Tertiary: L* then hex for determinism.
+List<PaintColour> _sortByPreferences(
+  List<PaintColour> candidates,
+  Undertone? undertonePreference,
+  ChromaBand? saturationPreference,
+) {
+  if ((undertonePreference == null || undertonePreference == Undertone.neutral) &&
+      saturationPreference == null) {
+    return candidates;
+  }
+
+  int undertoneScore(Undertone paintUndertone) {
+    if (undertonePreference == null ||
+        undertonePreference == Undertone.neutral) return 0;
+    if (paintUndertone == undertonePreference) return 3;
+    if (paintUndertone == Undertone.neutral) return 2;
+    return 1;
+  }
+
+  double saturationSortKey(double cabStar) {
+    return switch (saturationPreference) {
+      ChromaBand.muted => cabStar, // ascending: lower is better
+      ChromaBand.bold => -cabStar, // descending: higher is better
+      ChromaBand.mid => (cabStar - 37.5).abs(), // ascending: closer to mid
+      null => 0,
+    };
+  }
+
+  final sorted = List.of(candidates)
+    ..sort((a, b) {
+      // Primary: undertone preference
+      final uCmp = undertoneScore(b.undertone).compareTo(
+        undertoneScore(a.undertone),
+      );
+      if (uCmp != 0) return uCmp;
+
+      // Secondary: saturation preference
+      if (saturationPreference != null) {
+        final sCmp = saturationSortKey(a.cabStar).compareTo(
+          saturationSortKey(b.cabStar),
+        );
+        if (sCmp != 0) return sCmp;
+      }
+
+      // Deterministic tiebreaker: L* then hex
+      final lCmp = a.labL.compareTo(b.labL);
+      return lCmp != 0 ? lCmp : a.hex.compareTo(b.hex);
+    });
+
+  return sorted;
+}
+
 /// Get a complementary family for "surprise" colours.
 PaletteFamily _getComplementaryFamily(PaletteFamily primary) {
   return switch (primary) {
@@ -179,13 +276,12 @@ PaletteFamily _getComplementaryFamily(PaletteFamily primary) {
 
 GeneratedPalette _fallbackPalette(
   List<PaintColour> allColours,
-  Random rng,
   int targetSize,
 ) {
   final warmNeutrals = allColours
       .where((c) => c.paletteFamily == PaletteFamily.warmNeutrals)
       .toList();
-  final selected = _selectWithLightnessSpread(warmNeutrals, targetSize, rng);
+  final selected = _selectWithLightnessSpread(warmNeutrals, targetSize);
 
   return GeneratedPalette(
     primaryFamily: PaletteFamily.warmNeutrals,

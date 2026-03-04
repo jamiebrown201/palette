@@ -77,6 +77,52 @@ extension PaletteFamilyX on PaletteFamily {
       };
 }
 
+enum DnaConfidence { low, medium, high }
+
+extension DnaConfidenceX on DnaConfidence {
+  String get displayName => switch (this) {
+        DnaConfidence.low => 'Eclectic',
+        DnaConfidence.medium => 'Balanced',
+        DnaConfidence.high => 'Clear',
+      };
+}
+
+enum ColourArchetype {
+  theCocooner,
+  theGoldenHour,
+  theCurator,
+  theMonochromeModernist,
+  theRomantic,
+  theColourOptimist,
+  theNatureLover,
+  theStoryteller,
+  theVelvetWhisper,
+  theMaximalist,
+  theBrightener,
+  theDramatist,
+  theMidnightArchitect,
+  theMinimalist,
+}
+
+extension ColourArchetypeX on ColourArchetype {
+  String get displayName => switch (this) {
+        ColourArchetype.theCocooner => 'The Cocooner',
+        ColourArchetype.theGoldenHour => 'The Golden Hour',
+        ColourArchetype.theCurator => 'The Curator',
+        ColourArchetype.theMonochromeModernist => 'The Monochrome Modernist',
+        ColourArchetype.theRomantic => 'The Romantic',
+        ColourArchetype.theColourOptimist => 'The Colour Optimist',
+        ColourArchetype.theNatureLover => 'The Nature Lover',
+        ColourArchetype.theStoryteller => 'The Storyteller',
+        ColourArchetype.theVelvetWhisper => 'The Velvet Whisper',
+        ColourArchetype.theMaximalist => 'The Maximalist',
+        ColourArchetype.theBrightener => 'The Brightener',
+        ColourArchetype.theDramatist => 'The Dramatist',
+        ColourArchetype.theMidnightArchitect => 'The Midnight Architect',
+        ColourArchetype.theMinimalist => 'The Minimalist',
+      };
+}
+
 enum Undertone { warm, cool, neutral }
 
 extension UndertoneX on Undertone {
@@ -90,6 +136,16 @@ extension UndertoneX on Undertone {
         Undertone.warm => 'W',
         Undertone.cool => 'C',
         Undertone.neutral => 'N',
+      };
+}
+
+enum ChromaBand { muted, mid, bold }
+
+extension ChromaBandX on ChromaBand {
+  String get displayName => switch (this) {
+        ChromaBand.muted => 'Muted',
+        ChromaBand.mid => 'Mid',
+        ChromaBand.bold => 'Bold',
       };
 }
 

@@ -75,4 +75,15 @@ class UserProfileRepository {
       ),
     );
   }
+
+  Future<void> dismissDriftPrompt() async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        driftPromptDismissedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/repositories/colour_dna_repository.dart';
+import 'package:palette/data/repositories/colour_interaction_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/repositories/palette_repository.dart';
 import 'package:palette/data/repositories/red_thread_repository.dart';
@@ -41,3 +42,7 @@ RedThreadRepository redThreadRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 UserProfileRepository userProfileRepository(Ref ref) =>
     UserProfileRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+ColourInteractionRepository colourInteractionRepository(Ref ref) =>
+    ColourInteractionRepository(ref.watch(paletteDatabaseProvider));

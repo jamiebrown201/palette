@@ -8,8 +8,12 @@ import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/repositories/colour_dna_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/repositories/user_profile_repository.dart';
+import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/onboarding/logic/palette_generator.dart';
 import 'package:palette/features/onboarding/logic/quiz_state.dart';
+import 'package:palette/features/onboarding/logic/quiz_weight_calculator.dart';
+import 'package:palette/features/onboarding/logic/system_palette_generator.dart';
+import 'package:palette/features/onboarding/logic/undertone_temperature.dart';
 import 'package:uuid/uuid.dart';
 
 /// Notifier managing the full Colour DNA quiz flow.
@@ -53,30 +57,49 @@ class QuizNotifier extends StateNotifier<QuizState> {
     return _visualPreferences!.cast<Map<String, dynamic>>();
   }
 
-  /// Select a card in the memory prompts stage.
-  void selectMemoryCard(Map<String, int> familyWeights) {
-    final newWeights = [...state.selectedCardWeights, familyWeights];
+  /// Select a card in the memory prompts stage (Stage 1).
+  void selectMemoryCard(
+    Map<String, int> familyWeights, {
+    Undertone? undertoneTemp,
+    ChromaBand? chromaBand,
+  }) {
+    final newWeights = [...state.stage1CardWeights, familyWeights];
     final nextIndex = state.currentPromptIndex + 1;
+
+    // Accumulate undertone and saturation tallies
+    final newTally = _addUndertone(state.undertoneTally, undertoneTemp);
+    final newSatTally = _addChromaBand(state.saturationTally, chromaBand);
 
     if (nextIndex >= (_memoryPrompts?.length ?? 4)) {
       // Move to visual preference stage
       state = state.copyWith(
-        selectedCardWeights: newWeights,
+        stage1CardWeights: newWeights,
         currentPromptIndex: nextIndex,
+        undertoneTally: newTally,
+        saturationTally: newSatTally,
         stage: QuizStage.visualPreference,
       );
     } else {
       state = state.copyWith(
-        selectedCardWeights: newWeights,
+        stage1CardWeights: newWeights,
         currentPromptIndex: nextIndex,
+        undertoneTally: newTally,
+        saturationTally: newSatTally,
       );
     }
   }
 
-  /// Toggle a room selection in the visual preference stage.
-  void toggleRoomSelection(String roomId, Map<String, int> familyWeights) {
+  /// Toggle a room selection in the visual preference stage (Stage 2).
+  void toggleRoomSelection(
+    String roomId,
+    Map<String, int> familyWeights, {
+    Undertone? undertoneTemp,
+    ChromaBand? chromaBand,
+  }) {
     final newRoomIds = Set<String>.from(state.selectedRoomIds);
-    final newWeights = List<Map<String, int>>.from(state.selectedCardWeights);
+    final newWeights = List<Map<String, int>>.from(state.stage2CardWeights);
+    Map<Undertone, int> newTally;
+    Map<ChromaBand, int> newSatTally;
 
     if (newRoomIds.contains(roomId)) {
       newRoomIds.remove(roomId);
@@ -87,14 +110,22 @@ class QuizNotifier extends StateNotifier<QuizState> {
           break;
         }
       }
+      // Subtract on deselect
+      newTally = _subtractUndertone(state.undertoneTally, undertoneTemp);
+      newSatTally = _subtractChromaBand(state.saturationTally, chromaBand);
     } else {
       newRoomIds.add(roomId);
       newWeights.add(familyWeights);
+      // Add on select
+      newTally = _addUndertone(state.undertoneTally, undertoneTemp);
+      newSatTally = _addChromaBand(state.saturationTally, chromaBand);
     }
 
     state = state.copyWith(
       selectedRoomIds: newRoomIds,
-      selectedCardWeights: newWeights,
+      stage2CardWeights: newWeights,
+      undertoneTally: newTally,
+      saturationTally: newSatTally,
     );
   }
 
@@ -138,17 +169,63 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   /// Generate the palette and save the result.
   Future<void> generateAndSaveResult() async {
-    final familyWeights = tallyFamilyWeights(state.selectedCardWeights);
+    // Calculate normalised weights with stage balancing and confidence
+    final weightResult = calculateWeights(
+      stage1CardWeights: state.stage1CardWeights,
+      stage2CardWeights: state.stage2CardWeights,
+      stage2CardCount: state.selectedRoomIds.length,
+    );
+
+    // Convert double weights to int for palette generation.
+    // Scale by 100 before rounding to preserve relative ordering —
+    // plain round() on small doubles (e.g. 1.5 vs 2.0) creates false ties.
+    final familyWeights = <PaletteFamily, int>{};
+    for (final entry in weightResult.finalWeights.entries) {
+      final scaled = (entry.value * 100).round();
+      if (scaled > 0) {
+        familyWeights[entry.key] = scaled;
+      }
+    }
+
     final allPaintColours = await paintColourRepo.getAll();
+
+    // Derive undertone temperature and saturation preference from tallies
+    final undertoneTemp = deriveUndertoneTemperature(state.undertoneTally);
+    final saturationPref = deriveSaturationPreference(state.saturationTally);
 
     final palette = generatePalette(
       familyWeights: familyWeights,
       allPaintColours: allPaintColours,
+      undertoneTemperature: undertoneTemp,
+      saturationPreference: saturationPref,
+    );
+
+    // Generate the role-based system palette
+    final systemPalette = generateSystemPalette(
+      primaryFamily: palette.primaryFamily,
+      secondaryFamily: palette.secondaryFamily,
+      allPaintColours: allPaintColours,
+      undertoneTemperature: undertoneTemp,
+      saturationPreference: saturationPref,
+      propertyEra: state.propertyEra,
+    );
+
+    // Use system palette hex list if available (backward compat)
+    final colourHexes = systemPalette?.toColourHexes() ??
+        palette.colours.map((c) => c.hex).toList();
+
+    // Map to archetype using family + saturation
+    final archetype = mapToArchetype(
+      primaryFamily: palette.primaryFamily,
+      saturationPreference: saturationPref,
     );
 
     state = state.copyWith(
       stage: QuizStage.result,
       generatedPalette: palette,
+      dnaConfidence: weightResult.confidence,
+      archetype: archetype,
+      systemPaletteJson: systemPalette?.toJson(),
     );
 
     // Persist to database
@@ -158,11 +235,16 @@ class QuizNotifier extends StateNotifier<QuizState> {
         id: resultId,
         primaryFamily: palette.primaryFamily,
         secondaryFamily: Value(palette.secondaryFamily),
-        colourHexes: palette.colours.map((c) => c.hex).toList(),
+        colourHexes: colourHexes,
+        dnaConfidence: Value(weightResult.confidence),
+        archetype: Value(archetype),
         propertyType: Value(state.propertyType),
         propertyEra: Value(state.propertyEra),
         projectStage: Value(state.projectStage),
         tenure: Value(state.tenure),
+        undertoneTemperature: Value(undertoneTemp),
+        saturationPreference: Value(saturationPref),
+        systemPaletteJson: Value(systemPalette?.toJson()),
         completedAt: DateTime.now(),
         isComplete: state.stage == QuizStage.result,
       ),
@@ -177,5 +259,59 @@ class QuizNotifier extends StateNotifier<QuizState> {
   /// Reset quiz state for retaking.
   void reset() {
     state = const QuizState();
+  }
+
+  /// Add an undertone vote to the tally.
+  Map<Undertone, int> _addUndertone(
+    Map<Undertone, int> tally,
+    Undertone? undertone,
+  ) {
+    if (undertone == null) return tally;
+    final result = Map<Undertone, int>.from(tally);
+    result[undertone] = (result[undertone] ?? 0) + 1;
+    return result;
+  }
+
+  /// Subtract an undertone vote from the tally (on deselect).
+  Map<Undertone, int> _subtractUndertone(
+    Map<Undertone, int> tally,
+    Undertone? undertone,
+  ) {
+    if (undertone == null) return tally;
+    final result = Map<Undertone, int>.from(tally);
+    final current = result[undertone] ?? 0;
+    if (current <= 1) {
+      result.remove(undertone);
+    } else {
+      result[undertone] = current - 1;
+    }
+    return result;
+  }
+
+  /// Add a chroma band vote to the saturation tally.
+  Map<ChromaBand, int> _addChromaBand(
+    Map<ChromaBand, int> tally,
+    ChromaBand? band,
+  ) {
+    if (band == null) return tally;
+    final result = Map<ChromaBand, int>.from(tally);
+    result[band] = (result[band] ?? 0) + 1;
+    return result;
+  }
+
+  /// Subtract a chroma band vote from the saturation tally (on deselect).
+  Map<ChromaBand, int> _subtractChromaBand(
+    Map<ChromaBand, int> tally,
+    ChromaBand? band,
+  ) {
+    if (band == null) return tally;
+    final result = Map<ChromaBand, int>.from(tally);
+    final current = result[band] ?? 0;
+    if (current <= 1) {
+      result.remove(band);
+    } else {
+      result[band] = current - 1;
+    }
+    return result;
   }
 }

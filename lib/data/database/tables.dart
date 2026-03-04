@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/database/converters.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
+import 'package:palette/data/models/colour_interaction.dart';
 import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
@@ -29,6 +30,9 @@ class PaintColours extends Table {
       text().map(const EnumNameConverter<Undertone>(Undertone.values))();
   TextColumn get paletteFamily => text()
       .map(const EnumNameConverter<PaletteFamily>(PaletteFamily.values))();
+  RealColumn get cabStar => real()();
+  TextColumn get chromaBand => text()
+      .map(const EnumNameConverter<ChromaBand>(ChromaBand.values))();
   TextColumn get collection => text().nullable()();
   RealColumn get approximatePricePerLitre => real().nullable()();
   DateTimeColumn get priceLastChecked => dateTime().nullable()();
@@ -51,6 +55,16 @@ class ColourDnaResults extends Table {
       .map(const EnumNameConverter<PaletteFamily>(PaletteFamily.values))();
   TextColumn get colourHexes =>
       text().map(const StringListConverter())();
+  TextColumn get dnaConfidence => text()
+      .nullable()
+      .map(
+        const EnumNameConverter<DnaConfidence>(DnaConfidence.values),
+      )();
+  TextColumn get archetype => text()
+      .nullable()
+      .map(
+        const EnumNameConverter<ColourArchetype>(ColourArchetype.values),
+      )();
   TextColumn get propertyType => text()
       .nullable()
       .map(const EnumNameConverter<PropertyType>(PropertyType.values))();
@@ -63,6 +77,13 @@ class ColourDnaResults extends Table {
   TextColumn get tenure => text()
       .nullable()
       .map(const EnumNameConverter<Tenure>(Tenure.values))();
+  TextColumn get undertoneTemperature => text()
+      .nullable()
+      .map(const EnumNameConverter<Undertone>(Undertone.values))();
+  TextColumn get saturationPreference => text()
+      .nullable()
+      .map(const EnumNameConverter<ChromaBand>(ChromaBand.values))();
+  TextColumn get systemPaletteJson => text().nullable()();
   DateTimeColumn get completedAt => dateTime()();
   BoolColumn get isComplete => boolean()();
 
@@ -186,8 +207,28 @@ class UserProfiles extends Table {
   BoolColumn get colourBlindMode => boolean()();
   TextColumn get colourDnaResultId =>
       text().nullable().references(ColourDnaResults, #id)();
+  DateTimeColumn get driftPromptDismissedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Colour interactions (for DNA drift detection)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(ColourInteraction)
+class ColourInteractions extends Table {
+  TextColumn get id => text()();
+  TextColumn get interactionType => text()();
+  TextColumn get paintId => text().nullable()();
+  TextColumn get hex => text()();
+  TextColumn get contextRoomId => text().nullable()();
+  TextColumn get contextScreen => text()();
+  TextColumn get previousHex => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};

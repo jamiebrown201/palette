@@ -10,6 +10,7 @@ class UserProfile {
     required this.createdAt,
     required this.updatedAt,
     this.colourDnaResultId,
+    this.driftPromptDismissedAt,
   });
 
   final String id;
@@ -17,6 +18,7 @@ class UserProfile {
   final SubscriptionTier subscriptionTier;
   final bool colourBlindMode;
   final String? colourDnaResultId;
+  final DateTime? driftPromptDismissedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
 }

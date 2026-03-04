@@ -14,6 +14,8 @@ class PaintColour {
     required this.lrv,
     required this.undertone,
     required this.paletteFamily,
+    required this.cabStar,
+    required this.chromaBand,
     this.collection,
     this.approximatePricePerLitre,
     this.priceLastChecked,
@@ -30,6 +32,8 @@ class PaintColour {
   final double lrv;
   final Undertone undertone;
   final PaletteFamily paletteFamily;
+  final double cabStar;
+  final ChromaBand chromaBand;
   final String? collection;
   final double? approximatePricePerLitre;
   final DateTime? priceLastChecked;
@@ -46,6 +50,8 @@ class PaintColour {
     double? lrv,
     Undertone? undertone,
     PaletteFamily? paletteFamily,
+    double? cabStar,
+    ChromaBand? chromaBand,
     String? collection,
     double? approximatePricePerLitre,
     DateTime? priceLastChecked,
@@ -62,6 +68,8 @@ class PaintColour {
       lrv: lrv ?? this.lrv,
       undertone: undertone ?? this.undertone,
       paletteFamily: paletteFamily ?? this.paletteFamily,
+      cabStar: cabStar ?? this.cabStar,
+      chromaBand: chromaBand ?? this.chromaBand,
       collection: collection ?? this.collection,
       approximatePricePerLitre:
           approximatePricePerLitre ?? this.approximatePricePerLitre,

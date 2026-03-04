@@ -20,6 +20,15 @@ class QaSeedService {
     final now = DateTime.now();
 
     // 1. Insert a ColourDnaResult
+    const systemPaletteJson = '{'
+        '"trimWhite":{"paintId":"qa-trim","hex":"#F5F0E8","name":"White Cotton","brand":"Dulux","role":"trimWhite","roleLabel":"Trim White"},'
+        '"dominantWalls":[{"paintId":"qa-dom","hex":"#C4A882","name":"Camel","brand":"Farrow & Ball","role":"dominantWall","roleLabel":"Dominant Wall"}],'
+        '"supportingWalls":[{"paintId":"qa-sup1","hex":"#D4C5A9","name":"Stony Ground","brand":"Farrow & Ball","role":"supportingWall","roleLabel":"Supporting Wall"},{"paintId":"qa-sup2","hex":"#D2B48C","name":"Tan","brand":"Dulux","role":"supportingWall","roleLabel":"Supporting Wall"}],'
+        '"deepAnchor":{"paintId":"qa-deep","hex":"#8B7355","name":"Dark Buff","brand":"Little Greene","role":"deepAnchor","roleLabel":"Deep Anchor"},'
+        '"accentPops":[{"paintId":"qa-accent","hex":"#4A6741","name":"Calke Green","brand":"Farrow & Ball","role":"accentPop","roleLabel":"Accent Pop"}],'
+        '"spineColour":{"paintId":"qa-spine","hex":"#DEB887","name":"Burlywood","brand":"Dulux","role":"spineColour","roleLabel":"Spine Colour"}'
+        '}';
+
     await colourDnaRepo.insert(ColourDnaResultsCompanion.insert(
       id: 'qa-demo-dna-001',
       primaryFamily: PaletteFamily.warmNeutrals,
@@ -36,10 +45,15 @@ class QaSeedService {
         '#D2B48C',
         '#4A6741',
       ],
+      dnaConfidence: const Value(DnaConfidence.high),
+      archetype: const Value(ColourArchetype.theCocooner),
       propertyType: const Value(PropertyType.terraced),
       propertyEra: const Value(PropertyEra.victorian),
       projectStage: const Value(ProjectStage.planning),
       tenure: const Value(Tenure.owner),
+      undertoneTemperature: const Value(Undertone.warm),
+      saturationPreference: const Value(ChromaBand.mid),
+      systemPaletteJson: const Value(systemPaletteJson),
       completedAt: now,
       isComplete: true,
     ));
@@ -93,7 +107,31 @@ class QaSeedService {
       updatedAt: now,
     ));
 
-    // 3. Update app state (in-memory + database for persistence)
+    // 3. Insert sample colour interactions (for drift testing)
+    final interactionRepo = ref.read(colourInteractionRepositoryProvider);
+    await interactionRepo.logInteraction(
+      id: 'qa-int-001',
+      interactionType: 'heroSelected',
+      hex: '#C4A882',
+      contextScreen: 'planner',
+      contextRoomId: 'qa-room-living',
+    );
+    await interactionRepo.logInteraction(
+      id: 'qa-int-002',
+      interactionType: 'colourSwapped',
+      hex: '#8B7355',
+      contextScreen: 'planner',
+      contextRoomId: 'qa-room-living',
+      previousHex: '#6B5340',
+    );
+    await interactionRepo.logInteraction(
+      id: 'qa-int-003',
+      interactionType: 'colourFavourited',
+      hex: '#DEB887',
+      contextScreen: 'redThread',
+    );
+
+    // 4. Update app state (in-memory + database for persistence)
     ref.read(hasCompletedOnboardingProvider.notifier).state = true;
     ref.read(subscriptionTierProvider.notifier).state = SubscriptionTier.plus;
 
@@ -113,6 +151,7 @@ class QaSeedService {
     final db = ref.read(paletteDatabaseProvider);
 
     // Delete in dependency order (children first)
+    await db.delete(db.colourInteractions).go();
     await db.delete(db.lockedFurnitureItems).go();
     await db.delete(db.roomAdjacencies).go();
     await db.delete(db.redThreadColours).go();

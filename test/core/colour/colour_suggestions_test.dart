@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palette/core/colour/chroma_band.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/colour_suggestions.dart';
 import 'package:palette/core/colour/delta_e.dart';
@@ -18,6 +19,7 @@ PaintColour _paint(
   final rgb = hexToRgb(hex);
   // Approximate LRV from luminance
   final lrv = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255 * 100;
+  final cabStar = lab.chroma;
   return PaintColour(
     id: id,
     brand: 'Test Brand',
@@ -30,6 +32,8 @@ PaintColour _paint(
     lrv: lrv,
     undertone: undertone,
     paletteFamily: family,
+    cabStar: cabStar,
+    chromaBand: classifyChromaBand(cabStar),
     approximatePricePerLitre: price,
   );
 }

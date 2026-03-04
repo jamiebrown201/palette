@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 
@@ -49,12 +50,24 @@ class VisualPreferencePage extends ConsumerWidget {
                 final familyWeights =
                     (room['familyWeights'] as Map<String, dynamic>)
                         .map((k, v) => MapEntry(k, (v as num).toInt()));
+                final undertoneStr = room['undertoneTemp'] as String?;
+                final undertoneTemp = undertoneStr != null
+                    ? Undertone.values.byName(undertoneStr)
+                    : null;
+                final chromaBandStr = room['chromaBand'] as String?;
+                final chromaBand = chromaBandStr != null
+                    ? ChromaBand.values.byName(chromaBandStr)
+                    : null;
 
                 return _RoomCard(
                   description: room['description'] as String,
                   isSelected: isSelected,
-                  onTap: () =>
-                      notifier.toggleRoomSelection(roomId, familyWeights),
+                  onTap: () => notifier.toggleRoomSelection(
+                    roomId,
+                    familyWeights,
+                    undertoneTemp: undertoneTemp,
+                    chromaBand: chromaBand,
+                  ),
                 );
               },
             ),

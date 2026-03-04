@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palette/core/colour/chroma_band.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
@@ -28,6 +31,7 @@ void main() {
     Undertone undertone = Undertone.neutral,
     PaletteFamily paletteFamily = PaletteFamily.warmNeutrals,
   }) {
+    final cabStar = math.sqrt(labA * labA + labB * labB);
     return PaintColoursCompanion.insert(
       id: id,
       brand: brand,
@@ -40,6 +44,8 @@ void main() {
       lrv: lrv,
       undertone: undertone,
       paletteFamily: paletteFamily,
+      cabStar: cabStar,
+      chromaBand: classifyChromaBand(cabStar),
     );
   }
 

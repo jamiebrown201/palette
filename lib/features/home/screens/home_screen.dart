@@ -5,8 +5,12 @@ import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/data/models/room.dart';
+import 'package:palette/features/onboarding/data/archetype_definitions.dart';
+import 'package:palette/features/onboarding/logic/dna_drift.dart';
+import 'package:palette/features/onboarding/providers/dna_drift_provider.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/providers/database_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -51,8 +55,12 @@ class HomeScreen extends ConsumerWidget {
                     onAction: () => context.push('/onboarding'),
                   );
                 }
+                final archetypeName = dna.archetype != null
+                    ? archetypeDefinitions[dna.archetype]?.name
+                    : null;
                 return _ColourDnaCard(
-                  primaryFamily: dna.primaryFamily.displayName,
+                  primaryFamily: archetypeName ??
+                      dna.primaryFamily.displayName,
                   colourCount: dna.colourHexes.length,
                   hexes: dna.colourHexes.take(6).toList(),
                   onTap: () => context.push('/palette'),
@@ -61,6 +69,8 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
+            // Drift prompt (below DNA card)
+            _DriftPromptCard(),
             const SizedBox(height: 20),
 
             // My Rooms section
@@ -506,6 +516,131 @@ class _QuickAction extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _DriftPromptCard extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showAsync = ref.watch(shouldShowDriftPromptProvider);
+
+    return showAsync.when(
+      data: (show) {
+        if (!show) return const SizedBox.shrink();
+
+        final driftAsync = ref.watch(dnaDriftProvider);
+        return driftAsync.when(
+          data: (drift) {
+            if (drift == null) return const SizedBox.shrink();
+
+            final description = _buildDriftDescription(drift);
+            return Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: PaletteColours.softGoldLight,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: PaletteColours.softGold.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.auto_awesome,
+                          size: 18,
+                          color: PaletteColours.softGoldDark,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Your style is evolving',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: PaletteColours.softGoldDark,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: PaletteColours.softGoldDark,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        FilledButton(
+                          onPressed: () => context.push('/onboarding'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: PaletteColours.softGoldDark,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                          ),
+                          child: const Text('Retake Quiz'),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () async {
+                            final profileRepo =
+                                ref.read(userProfileRepositoryProvider);
+                            await profileRepo.dismissDriftPrompt();
+                            ref.invalidate(shouldShowDriftPromptProvider);
+                          },
+                          child: Text(
+                            'Dismiss',
+                            style: TextStyle(
+                              color: PaletteColours.softGoldDark
+                                  .withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  static String _buildDriftDescription(DnaDrift drift) {
+    final parts = <String>[];
+
+    if (drift.suggestedUndertone != null) {
+      parts.add(drift.suggestedUndertone!.displayName.toLowerCase());
+    }
+    if (drift.suggestedSaturation != null) {
+      parts.add(drift.suggestedSaturation!.displayName.toLowerCase());
+    }
+    if (drift.suggestedFamily != null) {
+      parts.add(drift.suggestedFamily!.displayName.toLowerCase());
+    }
+
+    if (parts.isEmpty) {
+      return 'Your recent colour choices suggest your taste may be shifting. '
+          'Consider retaking the quiz to update your palette.';
+    }
+
+    final leanDescription = parts.join(', ');
+    return 'Your recent colour choices lean more $leanDescription '
+        'than your original DNA. Retake the quiz to refresh your palette.';
   }
 }
 

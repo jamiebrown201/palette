@@ -17,14 +17,19 @@ import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
+import 'package:palette/features/onboarding/models/dna_anchors.dart';
+import 'package:palette/features/onboarding/models/system_palette.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
+import 'package:palette/features/rooms/data/room_colour_psychology.dart';
 import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:uuid/uuid.dart';
+
+const _uuid = Uuid();
 
 class RoomDetailScreen extends ConsumerWidget {
   const RoomDetailScreen({required this.roomId, super.key});
@@ -215,6 +220,12 @@ class _RoomDetailContent extends ConsumerWidget {
               const SizedBox(height: 12),
               _ColourHarmonyInsight(room: room),
             ],
+
+            // Room colour psychology tip
+            _RoomPsychologyTip(roomName: room.name),
+
+            // DNA trim white suggestion
+            _TrimWhiteSuggestion(room: room),
             const SizedBox(height: 24),
 
             // Light simulation
@@ -661,6 +672,7 @@ class _ColourPlanSection extends ConsumerWidget {
   Future<void> _applyLandlordPreset(
       BuildContext context, WidgetRef ref, String hex) async {
     final allPaints = await ref.read(allPaintColoursProvider.future);
+    final dnaResult = await ref.read(latestColourDnaProvider.future);
 
     // Find the closest real paint to the preset
     final heroPaint = allPaints
@@ -687,6 +699,7 @@ class _ColourPlanSection extends ConsumerWidget {
       redThreadHexes: redThreadHexes,
       lockedFurniture: furniture,
       budget: room.budget,
+      dnaUndertone: dnaResult?.undertoneTemperature,
     );
 
     final repo = ref.read(roomRepositoryProvider);
@@ -711,6 +724,17 @@ class _ColourPlanSection extends ConsumerWidget {
     ref
       ..invalidate(roomByIdProvider(room.id))
       ..invalidate(allRoomsProvider);
+
+    // Log interaction: hero selected (landlord preset)
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
+          id: _uuid.v4(),
+          interactionType: 'heroSelected',
+          hex: selected.hex,
+          contextScreen: 'planner',
+          paintId: selected.id,
+          contextRoomId: room.id,
+        );
+
     if (plan != null && plan.warnings.isNotEmpty && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(plan.warnings.first)),
@@ -726,6 +750,13 @@ class _ColourPlanSection extends ConsumerWidget {
 
     if (!context.mounted) return;
 
+    // Build DNA anchors from system palette if available
+    DnaAnchors? dnaAnchors;
+    if (dnaResult?.systemPaletteJson != null) {
+      final palette = SystemPalette.fromJson(dnaResult!.systemPaletteJson!);
+      dnaAnchors = DnaAnchors.fromSystemPalette(palette);
+    }
+
     final suggestions = generateSuggestions(
       context: PickerContext(
         pickerRole: PickerRole.hero,
@@ -735,6 +766,8 @@ class _ColourPlanSection extends ConsumerWidget {
         moods: room.moods,
         dnaHexes: dnaResult?.colourHexes ?? [],
         redThreadHexes: redThreadHexList,
+        undertoneTemperature: dnaResult?.undertoneTemperature,
+        dnaAnchors: dnaAnchors,
       ),
       allPaints: allPaints,
     );
@@ -767,6 +800,7 @@ class _ColourPlanSection extends ConsumerWidget {
       redThreadHexes: redThreadHexes,
       lockedFurniture: furniture,
       budget: room.budget,
+      dnaUndertone: dnaResult?.undertoneTemperature,
     );
 
     final repo = ref.read(roomRepositoryProvider);
@@ -791,6 +825,17 @@ class _ColourPlanSection extends ConsumerWidget {
     ref
       ..invalidate(roomByIdProvider(room.id))
       ..invalidate(allRoomsProvider);
+
+    // Log interaction: hero selected
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
+          id: _uuid.v4(),
+          interactionType: 'heroSelected',
+          hex: selected.hex,
+          contextScreen: 'planner',
+          paintId: selected.id,
+          contextRoomId: room.id,
+        );
+
     if (plan != null && plan.warnings.isNotEmpty && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(plan.warnings.first)),
@@ -877,12 +922,26 @@ class _ColourPlanSection extends ConsumerWidget {
       ),
     );
     ref.invalidate(roomByIdProvider(room.id));
+
+    // Log interaction: colour swapped
+    final previousHex =
+        tier == 'beta' ? room.betaColourHex : room.surpriseColourHex;
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
+          id: _uuid.v4(),
+          interactionType: 'colourSwapped',
+          hex: selected.hex,
+          contextScreen: 'planner',
+          paintId: selected.id,
+          contextRoomId: room.id,
+          previousHex: previousHex,
+        );
   }
 
   Future<void> _regeneratePlan(BuildContext context, WidgetRef ref) async {
     if (room.heroColourHex == null) return;
 
     final allPaints = await ref.read(allPaintColoursProvider.future);
+    final dnaResult = await ref.read(latestColourDnaProvider.future);
     final heroPaint = allPaints.firstWhere(
       (p) => p.hex.toLowerCase() == room.heroColourHex!.toLowerCase(),
       orElse: () => allPaints.first,
@@ -901,6 +960,7 @@ class _ColourPlanSection extends ConsumerWidget {
       redThreadHexes: redThreadHexes,
       lockedFurniture: furniture,
       budget: room.budget,
+      dnaUndertone: dnaResult?.undertoneTemperature,
     );
 
     if (plan == null) return;
@@ -1009,6 +1069,133 @@ class _ColourTierRow extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RoomPsychologyTip extends StatelessWidget {
+  const _RoomPsychologyTip({required this.roomName});
+
+  final String roomName;
+
+  @override
+  Widget build(BuildContext context) {
+    final guidance = getGuidanceForRoom(roomName);
+    if (guidance == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: PaletteColours.softCream,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.psychology_outlined,
+                    size: 16, color: PaletteColours.sageGreenDark),
+                const SizedBox(width: 8),
+                Text(
+                  'Colour psychology',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: PaletteColours.sageGreenDark,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              guidance.insight,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textPrimary,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              guidance.avoid,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrimWhiteSuggestion extends ConsumerWidget {
+  const _TrimWhiteSuggestion({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (room.heroColourHex == null) return const SizedBox.shrink();
+
+    final dnaAsync = ref.watch(latestColourDnaProvider);
+
+    return dnaAsync.when(
+      data: (dnaResult) {
+        if (dnaResult?.systemPaletteJson == null) return const SizedBox.shrink();
+
+        final palette = SystemPalette.fromJson(dnaResult!.systemPaletteJson!);
+        final trim = palette.trimWhite;
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.divider),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _hexToColor(trim.hex),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: PaletteColours.divider),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Suggested trim white',
+                        style:
+                            Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                      ),
+                      Text(
+                        '${trim.name} by ${trim.brand}',
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

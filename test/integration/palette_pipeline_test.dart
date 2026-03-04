@@ -22,52 +22,61 @@ final _testPaints = <PaintColour>[
     id: 'fb-joa', brand: 'Farrow & Ball', name: "Joa's White", code: '226',
     hex: '#E8DED0', labL: 89.6, labA: 1.8, labB: 8.4, lrv: 76.0,
     undertone: Undertone.warm, paletteFamily: PaletteFamily.warmNeutrals,
+    cabStar: 8.59, chromaBand: ChromaBand.muted,
   ),
   const PaintColour(
     id: 'fb-eb', brand: 'Farrow & Ball', name: "Elephant's Breath", code: '229',
     hex: '#C5B9A9', labL: 75.8, labA: 2.0, labB: 10.2, lrv: 54.0,
     undertone: Undertone.warm, paletteFamily: PaletteFamily.warmNeutrals,
+    cabStar: 10.39, chromaBand: ChromaBand.muted,
   ),
   // Cool neutrals
   const PaintColour(
     id: 'fb-pav', brand: 'Farrow & Ball', name: 'Pavilion Gray', code: '242',
     hex: '#BBBCB4', labL: 76.1, labA: -1.5, labB: 3.5, lrv: 53.0,
     undertone: Undertone.neutral, paletteFamily: PaletteFamily.coolNeutrals,
+    cabStar: 3.81, chromaBand: ChromaBand.muted,
   ),
   // Pastels
   const PaintColour(
     id: 'fb-ppc', brand: 'Farrow & Ball', name: 'Pink Cabbage', code: '2804',
     hex: '#E5C6C3', labL: 82.7, labA: 8.5, labB: 5.2, lrv: 61.0,
     undertone: Undertone.warm, paletteFamily: PaletteFamily.pastels,
+    cabStar: 9.96, chromaBand: ChromaBand.muted,
   ),
   // Jewel tones
   const PaintColour(
     id: 'fb-hy', brand: 'Farrow & Ball', name: 'Hague Blue', code: '30',
     hex: '#2C3E50', labL: 26.1, labA: -3.8, labB: -14.2, lrv: 5.0,
     undertone: Undertone.cool, paletteFamily: PaletteFamily.jewelTones,
+    cabStar: 14.7, chromaBand: ChromaBand.muted,
   ),
   const PaintColour(
     id: 'fb-sff', brand: 'Farrow & Ball', name: 'Stiffkey Blue', code: '281',
     hex: '#546A7B', labL: 43.5, labA: -4.2, labB: -12.8, lrv: 15.0,
     undertone: Undertone.cool, paletteFamily: PaletteFamily.jewelTones,
+    cabStar: 13.47, chromaBand: ChromaBand.muted,
   ),
   // Earth tones
   const PaintColour(
     id: 'lg-bc', brand: 'Little Greene', name: 'Book Room Red', code: '50',
     hex: '#8B4B4B', labL: 38.5, labA: 21.0, labB: 12.5, lrv: 12.0,
     undertone: Undertone.warm, paletteFamily: PaletteFamily.earthTones,
+    cabStar: 24.44, chromaBand: ChromaBand.muted,
   ),
   // Darks
   const PaintColour(
     id: 'fb-rs', brand: 'Farrow & Ball', name: 'Railings', code: '31',
     hex: '#2A2A2A', labL: 17.8, labA: 0.0, labB: 0.0, lrv: 2.5,
     undertone: Undertone.neutral, paletteFamily: PaletteFamily.darks,
+    cabStar: 0.0, chromaBand: ChromaBand.muted,
   ),
   // Brights
   const PaintColour(
     id: 'dx-mg', brand: 'Dulux', name: 'Mango Glory', code: 'DX01',
     hex: '#FF8C00', labL: 67.0, labA: 32.5, labB: 71.8, lrv: 40.0,
     undertone: Undertone.warm, paletteFamily: PaletteFamily.brights,
+    cabStar: 78.82, chromaBand: ChromaBand.bold,
   ),
 ];
 
@@ -89,7 +98,6 @@ void main() {
         allPaintColours: _testPaints,
         familyWeights: tallied,
         targetSize: 6,
-        random: Random(42),
       );
 
       expect(palette.colours, isNotEmpty);

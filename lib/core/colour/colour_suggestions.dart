@@ -6,6 +6,7 @@ import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/paint_colour.dart';
+import 'package:palette/features/onboarding/models/dna_anchors.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
 
 /// The role of the colour being picked.
@@ -53,6 +54,8 @@ class PickerContext {
     this.redThreadHexes = const [],
     this.existingPaletteHexes = const [],
     this.roomHexes = const [],
+    this.undertoneTemperature,
+    this.dnaAnchors,
   });
 
   final PickerRole pickerRole;
@@ -68,6 +71,12 @@ class PickerContext {
 
   /// All hero/beta/surprise hexes across all rooms (for red thread suggestions).
   final List<String> roomHexes;
+
+  /// User's derived undertone temperature from quiz.
+  final Undertone? undertoneTemperature;
+
+  /// Key anchor colours from the DNA system palette.
+  final DnaAnchors? dnaAnchors;
 }
 
 /// Generate contextual colour suggestions for a picker.

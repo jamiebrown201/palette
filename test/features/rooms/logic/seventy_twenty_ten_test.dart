@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palette/core/colour/chroma_band.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
@@ -15,6 +16,7 @@ PaintColour _makePaint({
   Undertone undertone = Undertone.warm,
   PaletteFamily family = PaletteFamily.warmNeutrals,
 }) {
+  final cabStar = sqrt(labA * labA + labB * labB);
   return PaintColour(
     id: id,
     brand: 'Test',
@@ -27,6 +29,8 @@ PaintColour _makePaint({
     lrv: 50.0,
     undertone: undertone,
     paletteFamily: family,
+    cabStar: cabStar,
+    chromaBand: classifyChromaBand(cabStar),
   );
 }
 
@@ -231,6 +235,22 @@ void main() {
         expect(ids.length, 4,
             reason: 'Dash should be distinct from other tiers');
       }
+    });
+
+    test('dnaUndertone overrides light direction for beta undertone', () {
+      // South-facing normally prefers neutral undertone, but DNA warm
+      // should override so beta is warm or neutral (not cool)
+      final plan = generateColourPlan(
+        heroColour: testColours[0], // warm neutral
+        allPaintColours: testColours,
+        direction: CompassDirection.south,
+        usageTime: UsageTime.allDay,
+        dnaUndertone: Undertone.warm,
+        random: Random(42),
+      );
+
+      expect(plan, isNotNull);
+      expect(plan!.betaColour.undertone, isNot(Undertone.cool));
     });
 
     test('deterministic with fixed seed', () {
