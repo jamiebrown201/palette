@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/delta_e.dart';
+import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
+import 'package:palette/features/onboarding/models/system_palette.dart';
+import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 
@@ -17,6 +21,7 @@ class WhiteFinderScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final whitesAsync = ref.watch(whitesByUndertoneProvider);
+    final dna = ref.watch(latestColourDnaProvider).valueOrNull;
 
     // If accessed from a room, load the room to get direction info
     CompassDirection? roomDirection;
@@ -25,12 +30,24 @@ class WhiteFinderScreen extends ConsumerWidget {
       roomDirection = roomAsync.valueOrNull?.direction;
     }
 
+    // Parse system palette for trim white reference
+    SystemPalette? systemPalette;
+    if (dna?.systemPaletteJson != null) {
+      try {
+        systemPalette = SystemPalette.fromJson(dna!.systemPaletteJson!);
+      } catch (_) {
+        // Ignore malformed JSON
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('White Finder')),
       body: whitesAsync.when(
         data: (grouped) => _WhiteFinderContent(
           grouped: grouped,
           roomDirection: roomDirection,
+          dnaUndertone: dna?.undertoneTemperature,
+          trimWhiteHex: systemPalette?.trimWhite.hex,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -43,15 +60,32 @@ class _WhiteFinderContent extends StatelessWidget {
   const _WhiteFinderContent({
     required this.grouped,
     this.roomDirection,
+    this.dnaUndertone,
+    this.trimWhiteHex,
   });
 
   final Map<WhiteUndertone, List<PaintColour>> grouped;
   final CompassDirection? roomDirection;
+  final Undertone? dnaUndertone;
+  final String? trimWhiteHex;
 
   @override
   Widget build(BuildContext context) {
     // Determine recommended undertone families based on room direction
-    final recommended = _getRecommendedWhiteUndertones(roomDirection);
+    final directionRecommended =
+        _getRecommendedWhiteUndertones(roomDirection);
+    final dnaRecommended = _getDnaRecommendedWhiteUndertones(dnaUndertone);
+    final recommended = {...directionRecommended, ...dnaRecommended};
+
+    // Sort undertone groups: recommended first, then the rest
+    final orderedUndertones = [...WhiteUndertone.values];
+    if (recommended.isNotEmpty) {
+      orderedUndertones.sort((a, b) {
+        final aRec = recommended.contains(a) ? 0 : 1;
+        final bRec = recommended.contains(b) ? 0 : 1;
+        return aRec.compareTo(bRec);
+      });
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -62,20 +96,31 @@ class _WhiteFinderContent extends StatelessWidget {
           const _PaperTestCard(),
           const SizedBox(height: 24),
 
+          if (dnaUndertone != null && dnaUndertone != Undertone.neutral) ...[
+            _DnaHint(undertone: dnaUndertone!),
+            const SizedBox(height: 16),
+          ],
+
           if (roomDirection != null) ...[
             _DirectionHint(
               direction: roomDirection!,
-              recommended: recommended,
+              recommended: directionRecommended,
             ),
             const SizedBox(height: 24),
           ],
 
-          // White groups by undertone
-          ...WhiteUndertone.values.map((undertone) {
-            final whites = grouped[undertone] ?? [];
+          // White groups by undertone (recommended first)
+          ...orderedUndertones.map((undertone) {
+            var whites = grouped[undertone] ?? [];
             if (whites.isEmpty) return const SizedBox.shrink();
 
-            final isRecommended = recommended.contains(undertone);
+            // Sort by delta-E to DNA trim white when available
+            if (trimWhiteHex != null) {
+              whites = _sortByTrimWhiteProximity(whites, trimWhiteHex!);
+            }
+
+            final isDnaMatch = dnaRecommended.contains(undertone);
+            final isDirectionMatch = directionRecommended.contains(undertone);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +130,25 @@ class _WhiteFinderContent extends StatelessWidget {
                     Expanded(
                       child: SectionHeader(title: undertone.displayName),
                     ),
-                    if (isRecommended)
+                    if (isDnaMatch)
+                      Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: PaletteColours.softGoldLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'DNA Match',
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: PaletteColours.softGold,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    if (isDirectionMatch)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
@@ -116,7 +179,7 @@ class _WhiteFinderContent extends StatelessWidget {
     );
   }
 
-  Set<WhiteUndertone> _getRecommendedWhiteUndertones(
+  static Set<WhiteUndertone> _getRecommendedWhiteUndertones(
       CompassDirection? direction) {
     if (direction == null) return {};
 
@@ -130,6 +193,43 @@ class _WhiteFinderContent extends StatelessWidget {
       // West: variable → neutral/warm
       CompassDirection.west => {WhiteUndertone.yellow, WhiteUndertone.grey},
     };
+  }
+
+  static Set<WhiteUndertone> _getDnaRecommendedWhiteUndertones(
+      Undertone? undertone) {
+    if (undertone == null || undertone == Undertone.neutral) return {};
+
+    return switch (undertone) {
+      Undertone.warm => {WhiteUndertone.yellow, WhiteUndertone.pink},
+      Undertone.cool => {WhiteUndertone.blue, WhiteUndertone.grey},
+      Undertone.neutral => {},
+    };
+  }
+
+  static List<PaintColour> _sortByTrimWhiteProximity(
+      List<PaintColour> whites, String trimHex) {
+    final cleanHex = trimHex.replaceAll('#', '');
+    final r = int.parse(cleanHex.substring(0, 2), radix: 16);
+    final g = int.parse(cleanHex.substring(2, 4), radix: 16);
+    final b = int.parse(cleanHex.substring(4, 6), radix: 16);
+    // Approximate Lab from RGB for trim white
+    final trimLab = LabColour(
+      // Simple approximation — L* from luminance
+      (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 * 100,
+      0, // We don't need precise a*/b* — just use the paint's own Lab
+      0,
+    );
+    // Use the actual Lab of each white paint vs a rough target
+    final sorted = [...whites];
+    sorted.sort((a, b2) {
+      final labA = LabColour(a.labL, a.labA, a.labB);
+      final labB = LabColour(b2.labL, b2.labA, b2.labB);
+      // Sort by delta-E to something close to the trim white
+      final dA = deltaE2000(labA, trimLab);
+      final dB = deltaE2000(labB, trimLab);
+      return dA.compareTo(dB);
+    });
+    return sorted;
   }
 }
 
@@ -284,6 +384,46 @@ class _DirectionHintState extends State<_DirectionHint> {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DnaHint extends StatelessWidget {
+  const _DnaHint({required this.undertone});
+
+  final Undertone undertone;
+
+  @override
+  Widget build(BuildContext context) {
+    final (toneLabel, whiteTypes) = switch (undertone) {
+      Undertone.warm => ('warm', 'yellow and pink'),
+      Undertone.cool => ('cool', 'blue and grey'),
+      Undertone.neutral => ('neutral', 'any'),
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PaletteColours.softGoldLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: PaletteColours.softGold.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.auto_awesome_outlined,
+              color: PaletteColours.softGold, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Your Colour DNA leans $toneLabel — $whiteTypes undertone '
+              'whites will harmonise with your palette.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
       ),
     );
   }

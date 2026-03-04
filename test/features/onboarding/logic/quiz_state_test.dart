@@ -9,13 +9,16 @@ void main() {
 
       expect(state.stage, QuizStage.memoryPrompts);
       expect(state.currentPromptIndex, 0);
-      expect(state.selectedCardWeights, isEmpty);
+      expect(state.stage1CardWeights, isEmpty);
+      expect(state.stage2CardWeights, isEmpty);
       expect(state.selectedRoomIds, isEmpty);
       expect(state.propertyType, isNull);
       expect(state.propertyEra, isNull);
       expect(state.projectStage, isNull);
       expect(state.tenure, isNull);
       expect(state.generatedPalette, isNull);
+      expect(state.dnaConfidence, isNull);
+      expect(state.archetype, isNull);
     });
 
     test('hasMinimumInput is false with no selections', () {
@@ -23,18 +26,18 @@ void main() {
       expect(state.hasMinimumInput, isFalse);
     });
 
-    test('hasMinimumInput is true after one card selection', () {
+    test('hasMinimumInput is true after one Stage 1 card selection', () {
       const state = QuizState(
-        selectedCardWeights: [
+        stage1CardWeights: [
           {'warmNeutrals': 2},
         ],
       );
       expect(state.hasMinimumInput, isTrue);
     });
 
-    test('totalAnswered counts all answers', () {
+    test('totalAnswered counts Stage 1 cards and room selections', () {
       const state = QuizState(
-        selectedCardWeights: [
+        stage1CardWeights: [
           {'warmNeutrals': 2},
           {'pastels': 1},
         ],
@@ -47,7 +50,7 @@ void main() {
       const state = QuizState(
         stage: QuizStage.memoryPrompts,
         currentPromptIndex: 2,
-        selectedCardWeights: [
+        stage1CardWeights: [
           {'warmNeutrals': 2},
         ],
       );
@@ -56,7 +59,7 @@ void main() {
 
       expect(updated.stage, QuizStage.visualPreference);
       expect(updated.currentPromptIndex, 2);
-      expect(updated.selectedCardWeights, hasLength(1));
+      expect(updated.stage1CardWeights, hasLength(1));
     });
 
     test('copyWith updates property context', () {
@@ -73,6 +76,34 @@ void main() {
       expect(updated.propertyEra, PropertyEra.victorian);
       expect(updated.projectStage, ProjectStage.planning);
       expect(updated.tenure, Tenure.owner);
+    });
+
+    test('copyWith updates new DNA fields', () {
+      const state = QuizState();
+
+      final updated = state.copyWith(
+        dnaConfidence: DnaConfidence.high,
+        archetype: ColourArchetype.theCocooner,
+      );
+
+      expect(updated.dnaConfidence, DnaConfidence.high);
+      expect(updated.archetype, ColourArchetype.theCocooner);
+    });
+
+    test('stage1 and stage2 weights are independent', () {
+      const state = QuizState(
+        stage1CardWeights: [
+          {'warmNeutrals': 2},
+        ],
+        stage2CardWeights: [
+          {'darks': 3},
+        ],
+      );
+
+      expect(state.stage1CardWeights, hasLength(1));
+      expect(state.stage2CardWeights, hasLength(1));
+      expect(state.stage1CardWeights.first, {'warmNeutrals': 2});
+      expect(state.stage2CardWeights.first, {'darks': 3});
     });
   });
 }

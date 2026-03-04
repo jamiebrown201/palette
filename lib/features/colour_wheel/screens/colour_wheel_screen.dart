@@ -12,6 +12,8 @@ import 'package:palette/core/widgets/palette_bottom_sheet.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
 import 'package:palette/features/colour_wheel/widgets/colour_wheel_painter.dart';
+import 'package:palette/features/onboarding/models/system_palette.dart';
+import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
 import 'package:palette/providers/database_providers.dart';
 
@@ -27,13 +29,41 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
   double _selectedRadial = 0.5;
   ColourRelationship _selectedRelationship = ColourRelationship.complementary;
   bool _showUndertones = false;
+  bool _showDnaPalette = false;
+  bool _hasDefaultedToDna = false;
 
   @override
   Widget build(BuildContext context) {
+    final dna = ref.watch(latestColourDnaProvider).valueOrNull;
+    final dnaHexes = dna?.colourHexes;
+    final hasDna = dnaHexes != null && dnaHexes.isNotEmpty;
+
+    // Default to DNA dominant wall colour on first build
+    if (!_hasDefaultedToDna && hasDna && _selectedHue == null) {
+      _hasDefaultedToDna = true;
+      // Use first colour (dominant wall is typically first after trim white)
+      final defaultHex = dnaHexes.length > 1 ? dnaHexes[1] : dnaHexes.first;
+      final color = _hexToColor(defaultHex);
+      final hsl = HSLColor.fromColor(color);
+      if (hsl.saturation > 0.05) {
+        _selectedHue = hsl.hue;
+        _selectedRadial = ((0.75 - hsl.lightness) / 0.45).clamp(0.0, 1.0);
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Colour Wheel'),
         actions: [
+          if (hasDna)
+            IconButton(
+              icon: Icon(
+                _showDnaPalette ? Icons.palette : Icons.palette_outlined,
+              ),
+              tooltip: 'Show your DNA colours',
+              onPressed: () =>
+                  setState(() => _showDnaPalette = !_showDnaPalette),
+            ),
           IconButton(
             icon: Icon(
               _showUndertones ? Icons.thermostat : Icons.thermostat_outlined,
@@ -71,6 +101,8 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
                           painter: ColourWheelPainter(
                             selectedHue: _selectedHue,
                             selectedRadial: _selectedRadial,
+                            dnaHexes: hasDna ? dnaHexes : null,
+                            showDnaPalette: _showDnaPalette,
                           ),
                           size: Size(wheelSize, wheelSize),
                         ),
@@ -80,6 +112,26 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
                 },
               ),
             ),
+
+            // DNA palette swatch row when toggled on
+            if (_showDnaPalette && hasDna) ...[
+              const SizedBox(height: 12),
+              _DnaPaletteRow(
+                dnaHexes: dnaHexes,
+                systemPaletteJson: dna?.systemPaletteJson,
+                onColourTap: (hex) {
+                  final color = _hexToColor(hex);
+                  final hsl = HSLColor.fromColor(color);
+                  if (hsl.saturation > 0.05) {
+                    setState(() {
+                      _selectedHue = hsl.hue;
+                      _selectedRadial =
+                          ((0.75 - hsl.lightness) / 0.45).clamp(0.0, 1.0);
+                    });
+                  }
+                },
+              ),
+            ],
 
             if (_selectedHue != null) ...[
               const SizedBox(height: 16),
@@ -527,6 +579,108 @@ class _ColourSwatchTile extends StatelessWidget {
   }
 }
 
+class _DnaPaletteRow extends StatelessWidget {
+  const _DnaPaletteRow({
+    required this.dnaHexes,
+    this.systemPaletteJson,
+    this.onColourTap,
+  });
+
+  final List<String> dnaHexes;
+  final String? systemPaletteJson;
+  final ValueChanged<String>? onColourTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // Try to get role labels from system palette
+    SystemPalette? systemPalette;
+    if (systemPaletteJson != null) {
+      try {
+        systemPalette = SystemPalette.fromJson(systemPaletteJson!);
+      } catch (_) {
+        // Ignore
+      }
+    }
+
+    final roleMap = <String, String>{};
+    if (systemPalette != null) {
+      roleMap[systemPalette.trimWhite.hex.toUpperCase()] = 'Trim';
+      for (final d in systemPalette.dominantWalls) {
+        roleMap[d.hex.toUpperCase()] = 'Wall';
+      }
+      for (final s in systemPalette.supportingWalls) {
+        roleMap[s.hex.toUpperCase()] = 'Support';
+      }
+      roleMap[systemPalette.deepAnchor.hex.toUpperCase()] = 'Anchor';
+      for (final a in systemPalette.accentPops) {
+        roleMap[a.hex.toUpperCase()] = 'Accent';
+      }
+      roleMap[systemPalette.spineColour.hex.toUpperCase()] = 'Spine';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 6),
+            child: Text(
+              'Your DNA Palette',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: PaletteColours.textSecondary,
+                  ),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: dnaHexes.map((hex) {
+                final role = roleMap[hex.toUpperCase()];
+                return GestureDetector(
+                  onTap: onColourTap != null ? () => onColourTap!(hex) : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _hexToColor(hex),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: PaletteColours.divider),
+                          ),
+                        ),
+                        if (role != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            role,
+                            style:
+                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      fontSize: 9,
+                                      color: PaletteColours.textTertiary,
+                                    ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PaintMatchSection extends ConsumerWidget {
   const _PaintMatchSection({required this.hue, this.lightness = 0.5});
 
@@ -536,6 +690,9 @@ class _PaintMatchSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final paintColoursAsync = ref.watch(allPaintColoursProvider);
+    final dna = ref.watch(latestColourDnaProvider).valueOrNull;
+    final dnaHexSet =
+        dna?.colourHexes.map((h) => h.toUpperCase()).toSet() ?? <String>{};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,6 +718,8 @@ class _PaintMatchSection extends ConsumerWidget {
             return Column(
               children: top5.map((match) {
                 final percent = _deltaEToPercent(match.deltaE);
+                final isDnaMatch =
+                    dnaHexSet.contains(match.colour.hex.toUpperCase());
                 return Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(14),
@@ -586,14 +745,42 @@ class _PaintMatchSection extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              match.colour.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    match.colour.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                   ),
+                                ),
+                                if (isDnaMatch) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: PaletteColours.softGoldLight,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'DNA',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w700,
+                                            color: PaletteColours.softGold,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 2),
                             Text(

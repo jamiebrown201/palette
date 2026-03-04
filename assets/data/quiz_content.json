@@ -9,37 +9,65 @@
           "id": "childhood-sun",
           "label": "Sun-warmed yellow",
           "hex": "#E8CE78",
-          "familyWeights": {"warmNeutrals": 2, "earthTones": 1, "pastels": 1}
+          "undertoneTemp": "warm",
+          "chromaBand": "mid",
+          "familyWeights": {"warmNeutrals": 1, "earthTones": 1, "pastels": 1, "brights": 1}
         },
         {
           "id": "childhood-garden",
           "label": "Garden green",
           "hex": "#7A8870",
+          "undertoneTemp": "neutral",
+          "chromaBand": "muted",
           "familyWeights": {"earthTones": 2, "warmNeutrals": 1}
         },
         {
           "id": "childhood-sky",
           "label": "Clear sky blue",
           "hex": "#8ABED6",
+          "undertoneTemp": "cool",
+          "chromaBand": "muted",
           "familyWeights": {"pastels": 2, "coolNeutrals": 1}
         },
         {
           "id": "childhood-terracotta",
           "label": "Terracotta warmth",
           "hex": "#C87830",
+          "undertoneTemp": "warm",
+          "chromaBand": "bold",
           "familyWeights": {"earthTones": 2, "warmNeutrals": 1, "brights": 1}
         },
         {
           "id": "childhood-berry",
           "label": "Berry picking",
           "hex": "#533946",
+          "undertoneTemp": "cool",
+          "chromaBand": "muted",
           "familyWeights": {"darks": 2, "jewelTones": 1}
         },
         {
           "id": "childhood-cream",
           "label": "Creamy blanket",
           "hex": "#F4EDDD",
+          "undertoneTemp": "warm",
+          "chromaBand": "muted",
           "familyWeights": {"warmNeutrals": 3, "pastels": 1}
+        },
+        {
+          "id": "childhood-honeyglow",
+          "label": "Honey-gold warmth",
+          "hex": "#D4981E",
+          "undertoneTemp": "warm",
+          "chromaBand": "bold",
+          "familyWeights": {"warmNeutrals": 2, "earthTones": 1}
+        },
+        {
+          "id": "childhood-storybook",
+          "label": "Storybook emerald",
+          "hex": "#006B3F",
+          "undertoneTemp": "cool",
+          "chromaBand": "bold",
+          "familyWeights": {"jewelTones": 3}
         }
       ]
     },
@@ -51,37 +79,65 @@
           "id": "holiday-mediterranean",
           "label": "Mediterranean white & blue",
           "hex": "#5B758A",
+          "undertoneTemp": "cool",
+          "chromaBand": "muted",
           "familyWeights": {"coolNeutrals": 2, "pastels": 1}
         },
         {
           "id": "holiday-tropical",
           "label": "Tropical lush green",
           "hex": "#5F8D5C",
+          "undertoneTemp": "neutral",
+          "chromaBand": "mid",
           "familyWeights": {"brights": 2, "earthTones": 1}
         },
         {
           "id": "holiday-desert",
           "label": "Desert sand & ochre",
           "hex": "#D9A732",
+          "undertoneTemp": "warm",
+          "chromaBand": "bold",
           "familyWeights": {"earthTones": 2, "warmNeutrals": 1, "brights": 1}
         },
         {
           "id": "holiday-scandi",
           "label": "Scandinavian cabin",
           "hex": "#C8BBA3",
-          "familyWeights": {"warmNeutrals": 2, "coolNeutrals": 1}
+          "undertoneTemp": "warm",
+          "chromaBand": "muted",
+          "familyWeights": {"warmNeutrals": 2, "coolNeutrals": 1, "brights": 1}
         },
         {
           "id": "holiday-jungle",
           "label": "Deep jungle",
           "hex": "#37503E",
+          "undertoneTemp": "cool",
+          "chromaBand": "muted",
           "familyWeights": {"darks": 2, "jewelTones": 1, "earthTones": 1}
         },
         {
           "id": "holiday-sunset",
           "label": "Golden sunset",
           "hex": "#E0955F",
+          "undertoneTemp": "warm",
+          "chromaBand": "mid",
           "familyWeights": {"brights": 2, "earthTones": 1}
+        },
+        {
+          "id": "holiday-glacier",
+          "label": "Glacier ice blue",
+          "hex": "#3A7CA5",
+          "undertoneTemp": "cool",
+          "chromaBand": "bold",
+          "familyWeights": {"coolNeutrals": 2, "warmNeutrals": 1}
+        },
+        {
+          "id": "holiday-bougainvillea",
+          "label": "Bougainvillea pink",
+          "hex": "#E05297",
+          "undertoneTemp": "warm",
+          "chromaBand": "bold",
+          "familyWeights": {"pastels": 2, "brights": 1}
         }
       ]
     },
@@ -93,49 +149,89 @@
           "id": "evening-candlelit",
           "label": "Candlelit warm glow",
           "hex": "#DDA92A",
-          "familyWeights": {"warmNeutrals": 2, "earthTones": 1}
+          "undertoneTemp": "warm",
+          "chromaBand": "bold",
+          "familyWeights": {"warmNeutrals": 1, "earthTones": 2}
         },
         {
           "id": "evening-moody",
           "label": "Moody & dramatic",
           "hex": "#3B3B35",
+          "undertoneTemp": "neutral",
+          "chromaBand": "muted",
           "familyWeights": {"darks": 3, "jewelTones": 1}
         },
         {
           "id": "evening-soft",
           "label": "Soft blush & rose",
           "hex": "#D5ABAB",
+          "undertoneTemp": "warm",
+          "chromaBand": "muted",
           "familyWeights": {"pastels": 2, "warmNeutrals": 1}
         },
         {
           "id": "evening-emerald",
           "label": "Emerald & velvet",
           "hex": "#486A4E",
+          "undertoneTemp": "cool",
+          "chromaBand": "muted",
           "familyWeights": {"jewelTones": 3, "darks": 1}
         },
         {
           "id": "evening-midnight",
           "label": "Midnight blue",
           "hex": "#1A3A4A",
+          "undertoneTemp": "cool",
+          "chromaBand": "muted",
           "familyWeights": {"darks": 2, "coolNeutrals": 1, "jewelTones": 1}
         },
         {
           "id": "evening-linen",
           "label": "Fresh linen & white",
           "hex": "#F5F0E3",
+          "undertoneTemp": "warm",
+          "chromaBand": "muted",
           "familyWeights": {"coolNeutrals": 2, "pastels": 1}
         },
         {
           "id": "evening-spice",
           "label": "Spiced & aromatic",
           "hex": "#917B5C",
+          "undertoneTemp": "warm",
+          "chromaBand": "muted",
           "familyWeights": {"earthTones": 2, "warmNeutrals": 1}
         },
         {
           "id": "evening-jewel",
           "label": "Ruby & sapphire",
           "hex": "#943732",
+          "undertoneTemp": "warm",
+          "chromaBand": "mid",
           "familyWeights": {"jewelTones": 3, "brights": 1}
+        },
+        {
+          "id": "evening-concrete",
+          "label": "Polished concrete",
+          "hex": "#5A6E7F",
+          "undertoneTemp": "cool",
+          "chromaBand": "bold",
+          "familyWeights": {"coolNeutrals": 3}
+        },
+        {
+          "id": "evening-amethyst",
+          "label": "Deep amethyst",
+          "hex": "#7B2D8E",
+          "undertoneTemp": "cool",
+          "chromaBand": "bold",
+          "familyWeights": {"jewelTones": 2, "darks": 1}
+        },
+        {
+          "id": "evening-obsidian",
+          "label": "Obsidian depth",
+          "hex": "#1A1A2E",
+          "undertoneTemp": "cool",
+          "chromaBand": "bold",
+          "familyWeights": {"darks": 3}
         }
       ]
     },
@@ -147,37 +243,73 @@
           "id": "emotion-joy",
           "label": "Joyful sunshine",
           "hex": "#EDD379",
+          "undertoneTemp": "warm",
+          "chromaBand": "mid",
           "familyWeights": {"brights": 2, "pastels": 1}
         },
         {
           "id": "emotion-serenity",
           "label": "Serene calm",
           "hex": "#B4BFC8",
+          "undertoneTemp": "cool",
+          "chromaBand": "muted",
           "familyWeights": {"coolNeutrals": 3, "pastels": 1}
         },
         {
           "id": "emotion-passion",
           "label": "Passionate depth",
           "hex": "#723A3A",
+          "undertoneTemp": "warm",
+          "chromaBand": "mid",
           "familyWeights": {"jewelTones": 2, "darks": 1}
         },
         {
           "id": "emotion-comfort",
           "label": "Comforting warmth",
           "hex": "#B8A99A",
+          "undertoneTemp": "warm",
+          "chromaBand": "muted",
           "familyWeights": {"warmNeutrals": 3}
         },
         {
           "id": "emotion-energy",
           "label": "Energetic pop",
           "hex": "#E64D42",
+          "undertoneTemp": "warm",
+          "chromaBand": "bold",
           "familyWeights": {"brights": 3, "jewelTones": 1}
         },
         {
           "id": "emotion-ground",
           "label": "Grounded & earthy",
           "hex": "#8B7C64",
+          "undertoneTemp": "warm",
+          "chromaBand": "muted",
           "familyWeights": {"earthTones": 3, "warmNeutrals": 1}
+        },
+        {
+          "id": "emotion-amber",
+          "label": "Amber confidence",
+          "hex": "#CC7722",
+          "undertoneTemp": "warm",
+          "chromaBand": "bold",
+          "familyWeights": {"warmNeutrals": 3}
+        },
+        {
+          "id": "emotion-delight",
+          "label": "Delighted lilac",
+          "hex": "#B565D9",
+          "undertoneTemp": "cool",
+          "chromaBand": "bold",
+          "familyWeights": {"pastels": 3}
+        },
+        {
+          "id": "emotion-intensity",
+          "label": "Intense conviction",
+          "hex": "#1C1C3A",
+          "undertoneTemp": "cool",
+          "chromaBand": "bold",
+          "familyWeights": {"darks": 2, "coolNeutrals": 1}
         }
       ]
     }
@@ -187,49 +319,137 @@
       "id": "room-1",
       "description": "Bright, airy living room with white walls and natural light",
       "imageAsset": "assets/images/quiz/room_bright_airy.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "muted",
       "familyWeights": {"pastels": 2, "coolNeutrals": 2, "warmNeutrals": 1}
     },
     {
       "id": "room-2",
       "description": "Cosy dark green library with brass accents",
       "imageAsset": "assets/images/quiz/room_dark_library.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "muted",
       "familyWeights": {"darks": 2, "jewelTones": 2, "earthTones": 1}
     },
     {
       "id": "room-3",
       "description": "Warm terracotta kitchen with natural wood",
       "imageAsset": "assets/images/quiz/room_terracotta_kitchen.jpg",
+      "undertoneTemp": "warm",
+      "chromaBand": "mid",
       "familyWeights": {"earthTones": 3, "warmNeutrals": 1}
     },
     {
       "id": "room-4",
       "description": "Elegant blush bedroom with soft furnishings",
       "imageAsset": "assets/images/quiz/room_blush_bedroom.jpg",
+      "undertoneTemp": "warm",
+      "chromaBand": "muted",
       "familyWeights": {"pastels": 2, "warmNeutrals": 2}
     },
     {
       "id": "room-5",
       "description": "Bold navy dining room with statement artwork",
       "imageAsset": "assets/images/quiz/room_navy_dining.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "mid",
       "familyWeights": {"darks": 2, "jewelTones": 1, "coolNeutrals": 1}
     },
     {
       "id": "room-6",
       "description": "Scandi-style room with pale grey and warm wood",
       "imageAsset": "assets/images/quiz/room_scandi.jpg",
+      "undertoneTemp": "neutral",
+      "chromaBand": "muted",
       "familyWeights": {"coolNeutrals": 2, "warmNeutrals": 2}
     },
     {
       "id": "room-7",
       "description": "Vibrant yellow hallway with colourful art",
       "imageAsset": "assets/images/quiz/room_vibrant_hallway.jpg",
+      "undertoneTemp": "warm",
+      "chromaBand": "bold",
       "familyWeights": {"brights": 3, "earthTones": 1}
     },
     {
       "id": "room-8",
       "description": "Jewel-toned living room with deep teal and gold",
       "imageAsset": "assets/images/quiz/room_jewel_living.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "mid",
       "familyWeights": {"jewelTones": 3, "earthTones": 1}
+    },
+    {
+      "id": "room-9",
+      "description": "Modern white kitchen with sage green accents",
+      "imageAsset": "assets/images/quiz/room_sage_kitchen.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "muted",
+      "familyWeights": {"coolNeutrals": 2, "earthTones": 1, "pastels": 1}
+    },
+    {
+      "id": "room-10",
+      "description": "Moody dark hallway with gallery wall",
+      "imageAsset": "assets/images/quiz/room_dark_hallway.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "muted",
+      "familyWeights": {"darks": 3, "coolNeutrals": 1}
+    },
+    {
+      "id": "room-11",
+      "description": "Spa-like bathroom with blue-green tiles",
+      "imageAsset": "assets/images/quiz/room_spa_bathroom.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "mid",
+      "familyWeights": {"coolNeutrals": 2, "pastels": 1, "jewelTones": 1}
+    },
+    {
+      "id": "room-12",
+      "description": "Warm home office with wooden desk and green plants",
+      "imageAsset": "assets/images/quiz/room_warm_office.jpg",
+      "undertoneTemp": "warm",
+      "chromaBand": "mid",
+      "familyWeights": {"earthTones": 2, "warmNeutrals": 1, "brights": 1}
+    },
+    {
+      "id": "room-13",
+      "description": "Rich honey-toned living room with amber glass and brass",
+      "imageAsset": "assets/images/quiz/room_honey_living.jpg",
+      "undertoneTemp": "warm",
+      "chromaBand": "bold",
+      "familyWeights": {"warmNeutrals": 2, "earthTones": 1}
+    },
+    {
+      "id": "room-14",
+      "description": "High-contrast monochrome kitchen with black marble",
+      "imageAsset": "assets/images/quiz/room_monochrome_kitchen.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "bold",
+      "familyWeights": {"coolNeutrals": 2, "darks": 1}
+    },
+    {
+      "id": "room-15",
+      "description": "Playful coral and mint children's room with bold prints",
+      "imageAsset": "assets/images/quiz/room_coral_playroom.jpg",
+      "undertoneTemp": "warm",
+      "chromaBand": "bold",
+      "familyWeights": {"pastels": 2, "brights": 1}
+    },
+    {
+      "id": "room-16",
+      "description": "Saturated emerald dining room with gold accents",
+      "imageAsset": "assets/images/quiz/room_emerald_dining.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "bold",
+      "familyWeights": {"jewelTones": 3}
+    },
+    {
+      "id": "room-17",
+      "description": "Dramatic entrance hall with inky walls and statement lighting",
+      "imageAsset": "assets/images/quiz/room_inky_entrance.jpg",
+      "undertoneTemp": "cool",
+      "chromaBand": "bold",
+      "familyWeights": {"darks": 2, "jewelTones": 1}
     }
   ]
 }

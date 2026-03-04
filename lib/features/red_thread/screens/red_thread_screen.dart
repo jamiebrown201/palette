@@ -13,6 +13,7 @@ import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/room.dart';
+import 'package:palette/features/onboarding/models/system_palette.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/logic/floor_plan_template.dart';
@@ -736,13 +737,20 @@ class _ThreadColourRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...threadHexes.map((hex) => _ThreadSwatch(
-              hex: hex,
-              onDelete: () async {
+        // DNA suggestions when no thread colours yet
+        if (threadHexes.isEmpty) _DnaSuggestions(
+          onUseSuggestion: (hex) => _addThreadColour(ref, hex),
+        ),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            ...threadHexes.map((hex) => _ThreadSwatch(
+                  hex: hex,
+                  onDelete: () async {
                 final repo = ref.read(redThreadRepositoryProvider);
                 final threads = await repo.getThreadColours();
                 if (threads.length <= AppConstants.minRedThreadColours) {
@@ -788,8 +796,32 @@ class _ThreadColourRow extends ConsumerWidget {
           _AddThreadButton(
             onAdd: () => _showColourPicker(context, ref),
           ),
+        ],
+        ),
       ],
     );
+  }
+
+  Future<void> _addThreadColour(WidgetRef ref, String hex) async {
+    final repo = ref.read(redThreadRepositoryProvider);
+    final threads = await repo.getThreadColours();
+    if (threads.length >= AppConstants.maxRedThreadColours) return;
+    if (threads.any((t) => t.hex == hex)) return;
+    await repo.insertThreadColour(
+      RedThreadColoursCompanion.insert(
+        id: const Uuid().v4(),
+        hex: hex,
+        sortOrder: threads.length,
+      ),
+    );
+
+    // Log interaction: DNA-suggested thread colour used
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
+          id: const Uuid().v4(),
+          interactionType: 'colourFavourited',
+          hex: hex,
+          contextScreen: 'redThread',
+        );
   }
 
   Future<void> _showColourPicker(BuildContext context, WidgetRef ref) async {
@@ -836,6 +868,25 @@ class _ThreadColourRow extends ConsumerWidget {
     );
 
     if (selected != null) {
+      // Undertone coherence check (informational only)
+      if (dna?.undertoneTemperature != null &&
+          dna!.undertoneTemperature != Undertone.neutral &&
+          selected.undertone != dna.undertoneTemperature &&
+          selected.undertone != Undertone.neutral &&
+          context.mounted) {
+        final dnaUndertone = dna.undertoneTemperature!.name;
+        final paintUndertone = selected.undertone.name;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'This colour has $paintUndertone undertones, but your DNA '
+              'palette leans $dnaUndertone. They might feel disconnected.',
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+
       final repo = ref.read(redThreadRepositoryProvider);
       final threads = await repo.getThreadColours();
 
@@ -861,7 +912,131 @@ class _ThreadColourRow extends ConsumerWidget {
           sortOrder: threads.length,
         ),
       );
+
+      // Log interaction: thread colour selected
+      ref.read(colourInteractionRepositoryProvider).logInteraction(
+            id: const Uuid().v4(),
+            interactionType: 'colourFavourited',
+            hex: selected.hex,
+            contextScreen: 'redThread',
+            paintId: selected.id,
+          );
     }
+  }
+}
+
+class _DnaSuggestions extends ConsumerWidget {
+  const _DnaSuggestions({required this.onUseSuggestion});
+
+  final ValueChanged<String> onUseSuggestion;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dna = ref.watch(latestColourDnaProvider).valueOrNull;
+    if (dna?.systemPaletteJson == null) return const SizedBox.shrink();
+
+    final SystemPalette systemPalette;
+    try {
+      systemPalette = SystemPalette.fromJson(dna!.systemPaletteJson!);
+    } catch (_) {
+      return const SizedBox.shrink();
+    }
+
+    // Build up to 3 suggestion cards from system palette roles
+    final suggestions = <({String hex, String name, String brand, String reason})>[];
+
+    suggestions.add((
+      hex: systemPalette.spineColour.hex,
+      name: systemPalette.spineColour.name,
+      brand: systemPalette.spineColour.brand,
+      reason: 'Connects naturally to your whole palette',
+    ));
+    suggestions.add((
+      hex: systemPalette.deepAnchor.hex,
+      name: systemPalette.deepAnchor.name,
+      brand: systemPalette.deepAnchor.brand,
+      reason: 'Adds depth across rooms',
+    ));
+    if (systemPalette.dominantWalls.isNotEmpty) {
+      suggestions.add((
+        hex: systemPalette.dominantWalls.first.hex,
+        name: systemPalette.dominantWalls.first.name,
+        brand: systemPalette.dominantWalls.first.brand,
+        reason: 'Your signature wall colour as a thread',
+      ));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Suggested from your Colour DNA',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: PaletteColours.sageGreenDark,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 8),
+          ...suggestions.map((s) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.sageGreenLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: _hexToColor(s.hex),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: PaletteColours.divider),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '${s.brand} — ${s.reason}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: PaletteColours.textTertiary,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => onUseSuggestion(s.hex),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          minimumSize: const Size(0, 32),
+                        ),
+                        child: const Text('Use'),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+        ],
+      ),
+    );
   }
 }
 

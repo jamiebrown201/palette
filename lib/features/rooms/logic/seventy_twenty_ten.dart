@@ -54,6 +54,7 @@ ColourPlan? generateColourPlan({
   List<String>? redThreadHexes,
   List<LockedFurniture>? lockedFurniture,
   BudgetBracket? budget,
+  Undertone? dnaUndertone,
   Random? random,
 }) {
   final rng = random ?? Random();
@@ -94,9 +95,11 @@ ColourPlan? generateColourPlan({
     }
   }
 
-  // Determine preferred undertone based on light
-  Undertone? preferredUndertone;
-  if (direction != null) {
+  // Determine preferred undertone: DNA preference overrides light direction
+  // because DNA represents the user's aesthetic choice, while light direction
+  // is environmental context.
+  Undertone? preferredUndertone = dnaUndertone;
+  if (preferredUndertone == null && direction != null) {
     final lightRec = getLightRecommendation(
       direction: direction,
       usageTime: usageTime,

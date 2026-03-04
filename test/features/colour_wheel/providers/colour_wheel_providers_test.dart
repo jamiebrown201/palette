@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palette/core/colour/chroma_band.dart' show classifyChromaBand;
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/paint_colour.dart';
 
@@ -22,6 +25,7 @@ PaintColour _makeWhite({
   required double labA,
   required double labB,
 }) {
+  final cabStar = math.sqrt(labA * labA + labB * labB);
   return PaintColour(
     id: id,
     brand: 'Test',
@@ -34,6 +38,8 @@ PaintColour _makeWhite({
     lrv: 85.0,
     undertone: Undertone.neutral,
     paletteFamily: PaletteFamily.warmNeutrals,
+    cabStar: cabStar,
+    chromaBand: classifyChromaBand(cabStar),
   );
 }
 
@@ -91,6 +97,8 @@ void main() {
           lrv: 95.0,
           undertone: Undertone.neutral,
           paletteFamily: PaletteFamily.warmNeutrals,
+          cabStar: 0.0,
+          chromaBand: ChromaBand.muted,
         ),
         PaintColour(
           id: '2',
@@ -104,6 +112,8 @@ void main() {
           lrv: 3.0,
           undertone: Undertone.cool,
           paletteFamily: PaletteFamily.darks,
+          cabStar: 20.62,
+          chromaBand: ChromaBand.muted,
         ),
         PaintColour(
           id: '3',
@@ -117,6 +127,8 @@ void main() {
           lrv: 82.0,
           undertone: Undertone.warm,
           paletteFamily: PaletteFamily.warmNeutrals,
+          cabStar: 5.1,
+          chromaBand: ChromaBand.muted,
         ),
       ];
 

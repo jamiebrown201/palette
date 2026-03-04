@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
+import 'package:palette/core/colour/chroma_band.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/palette_family.dart';
 import 'package:palette/core/colour/undertone.dart';
@@ -51,6 +52,8 @@ class SeedDataService {
       final lab = hexToLab(hex);
       final undertoneResult = classifyUndertone(lab);
       final family = classifyPaletteFamily(lab);
+      final cabStar = lab.chroma;
+      final chromaBand = classifyChromaBand(cabStar);
 
       companions.add(
         PaintColoursCompanion.insert(
@@ -65,6 +68,8 @@ class SeedDataService {
           lrv: (map['lrv'] as num).toDouble(),
           undertone: undertoneResult.classification,
           paletteFamily: family,
+          cabStar: cabStar,
+          chromaBand: chromaBand,
           collection: Value(map['collection'] as String?),
           approximatePricePerLitre: Value(
             map['approximatePricePerLitre'] != null

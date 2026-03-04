@@ -11,6 +11,7 @@ import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/palette_bottom_sheet.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
+import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
@@ -246,6 +247,15 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
       colourHexes: Value(hexes),
     ));
     ref.invalidate(latestColourDnaProvider);
+
+    // Log interaction: palette colour added
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
+          id: const Uuid().v4(),
+          interactionType: 'colourFavourited',
+          hex: selected.hex,
+          contextScreen: 'palette',
+          paintId: selected.id,
+        );
   }
 
   Future<void> _swapColour(String oldHex) async {
@@ -304,6 +314,16 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
     ));
     ref.invalidate(latestColourDnaProvider);
     setState(() => _editMode = _EditMode.none);
+
+    // Log interaction: palette colour swapped
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
+          id: const Uuid().v4(),
+          interactionType: 'colourSwapped',
+          hex: selected.hex,
+          contextScreen: 'palette',
+          paintId: selected.id,
+          previousHex: oldHex,
+        );
   }
 
   Future<void> _removeColour(String hex) async {
@@ -357,6 +377,14 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
     ));
     ref.invalidate(latestColourDnaProvider);
     setState(() => _editMode = _EditMode.none);
+
+    // Log interaction: palette colour removed
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
+          id: const Uuid().v4(),
+          interactionType: 'colourRemoved',
+          hex: hex,
+          contextScreen: 'palette',
+        );
   }
 
   Future<void> _showColourDetail(String hex) async {
@@ -379,6 +407,9 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
   Widget build(BuildContext context) {
     final result = widget.result;
     final colourHexes = result.colourHexes;
+    final archetypeDef = result.archetype != null
+        ? archetypeDefinitions[result.archetype]
+        : null;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -393,25 +424,54 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Family badge
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: PaletteColours.sageGreenLight,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                  // Archetype name or family badge
+                  if (archetypeDef != null) ...[
+                    Center(
                       child: Text(
-                        result.primaryFamily.displayName,
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: PaletteColours.sageGreenDark,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        archetypeDef.name,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Center(
+                      child: Text(
+                        archetypeDef.headline,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              color: PaletteColours.sageGreenDark,
+                              fontStyle: FontStyle.italic,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ] else ...[
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: PaletteColours.sageGreenLight,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          result.primaryFamily.displayName,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                color: PaletteColours.sageGreenDark,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ],
                   if (result.secondaryFamily != null) ...[
                     const SizedBox(height: 4),
                     Center(
@@ -435,6 +495,43 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
               ),
             ),
           ),
+
+          // Archetype description
+          if (archetypeDef != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              archetypeDef.description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: PaletteColours.softCream,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Why these colours work',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    archetypeDef.whyItWorks,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Edit mode instruction
           if (_editMode != _EditMode.none) ...[

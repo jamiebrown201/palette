@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/providers/app_providers.dart';
@@ -86,12 +87,16 @@ class ProfileScreen extends ConsumerWidget {
                 dnaAsync.when(
                   data: (dna) {
                     if (dna == null) return const SizedBox.shrink();
+                    final label = dna.archetype != null
+                        ? archetypeDefinitions[dna.archetype]?.name ??
+                            dna.primaryFamily.displayName
+                        : dna.primaryFamily.displayName;
                     return _ProfileRow(
                       icon: Icons.auto_awesome,
                       iconColor: PaletteColours.softGold,
                       title: 'Colour DNA',
                       subtitle:
-                          '${dna.primaryFamily.displayName} \u2022 ${dna.colourHexes.length} colours',
+                          '$label \u2022 ${dna.colourHexes.length} colours',
                       trailing: const Icon(Icons.chevron_right,
                           color: PaletteColours.textTertiary),
                       onTap: () => context.push('/palette'),

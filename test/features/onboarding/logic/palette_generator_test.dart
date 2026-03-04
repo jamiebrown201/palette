@@ -1,6 +1,7 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palette/core/colour/chroma_band.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/features/onboarding/logic/palette_generator.dart';
@@ -12,7 +13,11 @@ PaintColour _makePaintColour({
   required double labL,
   required PaletteFamily family,
   String hex = '#888888',
+  double labA = 0,
+  double labB = 0,
+  Undertone undertone = Undertone.neutral,
 }) {
+  final cabStar = math.sqrt(labA * labA + labB * labB);
   return PaintColour(
     id: id,
     brand: brand,
@@ -20,11 +25,13 @@ PaintColour _makePaintColour({
     code: 'TEST',
     hex: hex,
     labL: labL,
-    labA: 0,
-    labB: 0,
+    labA: labA,
+    labB: labB,
     lrv: 50,
-    undertone: Undertone.neutral,
+    undertone: undertone,
     paletteFamily: family,
+    cabStar: cabStar,
+    chromaBand: classifyChromaBand(cabStar),
   );
 }
 
@@ -150,7 +157,6 @@ void main() {
           PaletteFamily.pastels: 1,
         },
         allPaintColours: testColours,
-        random: Random(42),
       );
 
       expect(palette.primaryFamily, PaletteFamily.warmNeutrals);
@@ -163,7 +169,6 @@ void main() {
           PaletteFamily.jewelTones: 5,
         },
         allPaintColours: testColours,
-        random: Random(42),
       );
 
       expect(palette.secondaryFamily, PaletteFamily.jewelTones);
@@ -174,7 +179,6 @@ void main() {
         familyWeights: {PaletteFamily.warmNeutrals: 10},
         allPaintColours: testColours,
         targetSize: 8,
-        random: Random(42),
       );
 
       expect(palette.colours.length, greaterThanOrEqualTo(1));
@@ -185,7 +189,6 @@ void main() {
       final palette = generatePalette(
         familyWeights: {PaletteFamily.warmNeutrals: 10},
         allPaintColours: testColours,
-        random: Random(42),
       );
 
       final surprises = palette.colours.where((c) => c.isSurprise).toList();
@@ -196,7 +199,6 @@ void main() {
       final palette = generatePalette(
         familyWeights: {},
         allPaintColours: testColours,
-        random: Random(42),
       );
 
       expect(palette.primaryFamily, PaletteFamily.warmNeutrals);
@@ -207,7 +209,6 @@ void main() {
       final palette = generatePalette(
         familyWeights: {PaletteFamily.jewelTones: 8},
         allPaintColours: testColours,
-        random: Random(42),
       );
 
       for (final entry in palette.colours) {
@@ -219,12 +220,129 @@ void main() {
       final palette = generatePalette(
         familyWeights: {PaletteFamily.warmNeutrals: 10},
         allPaintColours: testColours,
-        random: Random(42),
       );
 
       for (final entry in palette.colours) {
         expect(entry.paintColour, isNotNull);
       }
+    });
+
+    test('deterministic: same inputs produce same outputs', () {
+      final palette1 = generatePalette(
+        familyWeights: {PaletteFamily.warmNeutrals: 10},
+        allPaintColours: testColours,
+      );
+      final palette2 = generatePalette(
+        familyWeights: {PaletteFamily.warmNeutrals: 10},
+        allPaintColours: testColours,
+      );
+
+      expect(palette1.primaryFamily, palette2.primaryFamily);
+      expect(palette1.secondaryFamily, palette2.secondaryFamily);
+      expect(
+        palette1.colours.map((c) => c.hex).toList(),
+        palette2.colours.map((c) => c.hex).toList(),
+      );
+    });
+
+    test('tiebreaker uses enum index for equal weights', () {
+      final palette = generatePalette(
+        familyWeights: {
+          PaletteFamily.warmNeutrals: 5,
+          PaletteFamily.coolNeutrals: 5,
+        },
+        allPaintColours: testColours,
+      );
+
+      // warmNeutrals has a lower enum index, so it wins the tie
+      expect(palette.primaryFamily, PaletteFamily.warmNeutrals);
+      expect(palette.secondaryFamily, PaletteFamily.coolNeutrals);
+    });
+  });
+
+  group('generatePalette with saturationPreference', () {
+    // Create colours with varying chroma to test saturation sorting
+    final chromaTestColours = [
+      _makePaintColour(
+        id: 'low1', brand: 'A', name: 'Muted 1', labL: 60,
+        family: PaletteFamily.warmNeutrals, hex: '#A09888',
+        labA: 3, labB: 5, // Cab* ~5.8 → muted
+      ),
+      _makePaintColour(
+        id: 'low2', brand: 'A', name: 'Muted 2', labL: 70,
+        family: PaletteFamily.warmNeutrals, hex: '#B0A898',
+        labA: 4, labB: 8, // Cab* ~8.9 → muted
+      ),
+      _makePaintColour(
+        id: 'mid1', brand: 'A', name: 'Mid 1', labL: 65,
+        family: PaletteFamily.warmNeutrals, hex: '#C0A070',
+        labA: 10, labB: 30, // Cab* ~31.6 → mid
+      ),
+      _makePaintColour(
+        id: 'mid2', brand: 'A', name: 'Mid 2', labL: 55,
+        family: PaletteFamily.warmNeutrals, hex: '#B09060',
+        labA: 15, labB: 35, // Cab* ~38.1 → mid
+      ),
+      _makePaintColour(
+        id: 'high1', brand: 'A', name: 'Bold 1', labL: 50,
+        family: PaletteFamily.warmNeutrals, hex: '#D08040',
+        labA: 25, labB: 50, // Cab* ~55.9 → bold
+      ),
+      _makePaintColour(
+        id: 'high2', brand: 'B', name: 'Bold 2', labL: 75,
+        family: PaletteFamily.warmNeutrals, hex: '#E09030',
+        labA: 30, labB: 55, // Cab* ~62.6 → bold
+      ),
+      // Surprise family
+      _makePaintColour(
+        id: 'jt1', brand: 'A', name: 'Jewel', labL: 35,
+        family: PaletteFamily.jewelTones, hex: '#486A4E',
+      ),
+    ];
+
+    test('muted preference produces lower average Cab* than bold', () {
+      final mutedPalette = generatePalette(
+        familyWeights: {PaletteFamily.warmNeutrals: 10},
+        allPaintColours: chromaTestColours,
+        saturationPreference: ChromaBand.muted,
+        targetSize: 4,
+      );
+      final boldPalette = generatePalette(
+        familyWeights: {PaletteFamily.warmNeutrals: 10},
+        allPaintColours: chromaTestColours,
+        saturationPreference: ChromaBand.bold,
+        targetSize: 4,
+      );
+
+      double avgCab(GeneratedPalette p) {
+        final nonSurprise = p.colours
+            .where((c) => !c.isSurprise && c.paintColour != null)
+            .toList();
+        if (nonSurprise.isEmpty) return 0;
+        return nonSurprise.fold<double>(
+              0, (sum, c) => sum + c.paintColour!.cabStar) /
+            nonSurprise.length;
+      }
+
+      expect(avgCab(mutedPalette), lessThan(avgCab(boldPalette)));
+    });
+
+    test('saturation preference is deterministic', () {
+      final p1 = generatePalette(
+        familyWeights: {PaletteFamily.warmNeutrals: 10},
+        allPaintColours: chromaTestColours,
+        saturationPreference: ChromaBand.muted,
+      );
+      final p2 = generatePalette(
+        familyWeights: {PaletteFamily.warmNeutrals: 10},
+        allPaintColours: chromaTestColours,
+        saturationPreference: ChromaBand.muted,
+      );
+
+      expect(
+        p1.colours.map((c) => c.hex).toList(),
+        p2.colours.map((c) => c.hex).toList(),
+      );
     });
   });
 
