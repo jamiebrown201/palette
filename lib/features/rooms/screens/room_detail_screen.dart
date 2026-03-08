@@ -114,44 +114,9 @@ class _RoomDetailContent extends ConsumerWidget {
             // Hero colour swatch
             if (room.heroColourHex != null) ...[
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _hexToColor(room.heroColourHex!),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: PaletteColours.divider),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.palette,
-                      size: 20,
-                      color: _isLightColour(room.heroColourHex!)
-                          ? Colors.black54
-                          : Colors.white70,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      room.heroColourHex!.toUpperCase(),
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: _isLightColour(room.heroColourHex!)
-                                ? Colors.black87
-                                : Colors.white,
-                            letterSpacing: 1.2,
-                          ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      room.isRenterMode ? 'Wall colour' : 'Hero colour',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: _isLightColour(room.heroColourHex!)
-                                ? Colors.black54
-                                : Colors.white70,
-                          ),
-                    ),
-                  ],
-                ),
+              _HeroColourSwatch(
+                hex: room.heroColourHex!,
+                label: room.isRenterMode ? 'Wall colour' : 'Hero colour',
               ),
             ],
             const SizedBox(height: 20),
@@ -374,6 +339,68 @@ class _RoomDetailContent extends ConsumerWidget {
   }
 }
 
+class _HeroColourSwatch extends ConsumerWidget {
+  const _HeroColourSwatch({
+    required this.hex,
+    required this.label,
+  });
+
+  final String hex;
+  final String label;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allPaintsAsync = ref.watch(allPaintColoursProvider);
+    final paintName = allPaintsAsync.whenOrNull(data: (paints) {
+      final lab = hexToLab(hex);
+      PaintColour? closest;
+      var bestDe = 10.0;
+      for (final paint in paints) {
+        final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
+        final dE = deltaE2000(lab, paintLab);
+        if (dE < bestDe) {
+          bestDe = dE;
+          closest = paint;
+        }
+      }
+      return closest?.name;
+    });
+
+    final isLight = _isLightColour(hex);
+    final fgPrimary = isLight ? Colors.black87 : Colors.white;
+    final fgSecondary = isLight ? Colors.black54 : Colors.white70;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _hexToColor(hex),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.palette, size: 20, color: fgSecondary),
+          const SizedBox(width: 8),
+          Text(
+            paintName ?? hex.toUpperCase(),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: fgPrimary,
+                ),
+          ),
+          const Spacer(),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: fgSecondary,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _InfoChip extends StatelessWidget {
   const _InfoChip({
     required this.icon,
@@ -571,9 +598,27 @@ class _ColourPlanSection extends ConsumerWidget {
 
   final Room room;
 
+  String? _lookupPaintName(List<PaintColour>? allPaints, String? hex) {
+    if (allPaints == null || hex == null) return null;
+    final lab = hexToLab(hex);
+    PaintColour? closest;
+    var bestDe = 10.0;
+    for (final paint in allPaints) {
+      final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
+      final dE = deltaE2000(lab, paintLab);
+      if (dE < bestDe) {
+        bestDe = dE;
+        closest = paint;
+      }
+    }
+    return closest?.name;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasHero = room.heroColourHex != null;
+    final allPaints =
+        ref.watch(allPaintColoursProvider).whenOrNull(data: (p) => p);
 
     return Column(
       children: [
@@ -626,6 +671,7 @@ class _ColourPlanSection extends ConsumerWidget {
                 ? 'Your existing wall colour'
                 : 'Walls & dominant surfaces',
             hex: room.heroColourHex,
+            paintName: _lookupPaintName(allPaints, room.heroColourHex),
             onTap: () => _showHeroColourPicker(context, ref),
           ),
           const SizedBox(height: 8),
@@ -635,6 +681,7 @@ class _ColourPlanSection extends ConsumerWidget {
                 ? 'Large items you can swap or add'
                 : 'Large furnishings & upholstery',
             hex: room.betaColourHex,
+            paintName: _lookupPaintName(allPaints, room.betaColourHex),
             onTap: () => _showSwapPicker(context, ref, 'beta'),
           ),
           const SizedBox(height: 8),
@@ -644,6 +691,7 @@ class _ColourPlanSection extends ConsumerWidget {
                 ? 'Cushions, throws & accessories'
                 : 'Accessories, artwork & accents',
             hex: room.surpriseColourHex,
+            paintName: _lookupPaintName(allPaints, room.surpriseColourHex),
             onTap: () => _showSwapPicker(context, ref, 'surprise'),
           ),
           _DashColourRow(room: room),
@@ -999,12 +1047,14 @@ class _ColourTierRow extends StatelessWidget {
     required this.label,
     required this.description,
     this.hex,
+    this.paintName,
     this.onTap,
   });
 
   final String label;
   final String description;
   final String? hex;
+  final String? paintName;
   final VoidCallback? onTap;
 
   @override
@@ -1049,8 +1099,8 @@ class _ColourTierRow extends StatelessWidget {
                           ),
                     ),
                     Text(
-                      hex != null
-                          ? '$description \u2022 ${hex!.toUpperCase()}'
+                      hex != null && (paintName != null)
+                          ? '$description \u2022 $paintName'
                           : description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: PaletteColours.textSecondary,
@@ -1249,33 +1299,21 @@ class _LightSwatchColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLight = _isLightColour(hex);
     return Expanded(
-      child: Column(
-        children: [
-          Container(
-            height: 64,
-            decoration: BoxDecoration(
-              color: _hexToColor(hex),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: PaletteColours.divider),
-            ),
-            alignment: Alignment.bottomCenter,
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Text(
-              hex.toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 9,
-                    color: isLight ? Colors.black45 : Colors.white60,
-                    letterSpacing: 0.5,
-                  ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall,
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          color: _hexToColor(hex),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: PaletteColours.divider),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: isLight ? Colors.black54 : Colors.white70,
+                fontWeight: FontWeight.w500,
+              ),
+        ),
       ),
     );
   }

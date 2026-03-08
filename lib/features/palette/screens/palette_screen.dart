@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/colour_suggestions.dart';
+import 'package:palette/core/colour/delta_e.dart';
+import 'package:palette/core/colour/lab_colour.dart';
+import 'package:palette/core/colour/palette_feedback.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
@@ -19,6 +23,7 @@ import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
+import 'package:palette/features/palette/widgets/colour_review_sheet.dart';
 import 'package:palette/features/palette/widgets/palette_grid.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:share_plus/share_plus.dart';
@@ -248,6 +253,22 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
     ));
     ref.invalidate(latestColourDnaProvider);
 
+    // Show feedback about how the new colour relates to the palette.
+    if (mounted) {
+      final nameMap = _buildNameMap(allPaints, result.colourHexes);
+      final feedback = describePaletteImpact(
+        newHex: selected.hex,
+        existingHexes: result.colourHexes,
+        nameMap: nameMap,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(feedback),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+
     // Log interaction: palette colour added
     ref.read(colourInteractionRepositoryProvider).logInteraction(
           id: const Uuid().v4(),
@@ -277,7 +298,7 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
     final selected = await PaletteBottomSheet.show<PaintColour>(
       context: context,
       builder: (_) => SmartPaintColourPicker(
-        title: 'Replace ${oldHex.toUpperCase()}',
+        title: 'Replace ${_buildNameMap(allPaints, [oldHex])[oldHex.toLowerCase()] ?? oldHex.toUpperCase()}',
         paintColours: allPaints,
         suggestions: suggestions,
       ),
@@ -315,6 +336,25 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
     ref.invalidate(latestColourDnaProvider);
     setState(() => _editMode = _EditMode.none);
 
+    // Show feedback about how the new colour relates to the palette.
+    if (mounted) {
+      final otherHexesAfterSwap = result.colourHexes
+          .where((h) => h.toLowerCase() != oldHex.toLowerCase())
+          .toList();
+      final nameMap = _buildNameMap(allPaints, otherHexesAfterSwap);
+      final feedback = describePaletteImpact(
+        newHex: selected.hex,
+        existingHexes: otherHexesAfterSwap,
+        nameMap: nameMap,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(feedback),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+
     // Log interaction: palette colour swapped
     ref.read(colourInteractionRepositoryProvider).logInteraction(
           id: const Uuid().v4(),
@@ -327,23 +367,71 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
   }
 
   Future<void> _removeColour(String hex) async {
+    final roleInfo = describeColourRole(
+      hex: hex,
+      paletteHexes: widget.result.colourHexes,
+    );
+
+    // Look up paint name for display.
+    final allPaints = await ref.read(allPaintColoursProvider.future);
+    final displayName =
+        _buildNameMap(allPaints, [hex])[hex.toLowerCase()] ??
+            hex.toUpperCase();
+    if (!mounted) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove colour?'),
-        content: Row(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: _hexToColor(hex),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: PaletteColours.divider),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(displayName),
+              ],
+            ),
+            const SizedBox(height: 12),
             Container(
-              width: 32,
-              height: 32,
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: _hexToColor(hex),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: PaletteColours.divider),
+                color: PaletteColours.softCream,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, size: 14,
+                      color: PaletteColours.sageGreenDark),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      roleInfo.role,
+                      style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            Text(hex.toUpperCase()),
+            if (roleInfo.warning != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                roleInfo.warning!,
+                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.softGoldDark,
+                      fontStyle: FontStyle.italic,
+                    ),
+              ),
+            ],
           ],
         ),
         actions: [
@@ -387,6 +475,51 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
         );
   }
 
+  /// Build a lowercase-hex → paint-name map for user-friendly feedback.
+  /// Uses exact match first, then closest delta-E match within threshold.
+  static Map<String, String> _buildNameMap(
+    List<PaintColour> allPaints,
+    List<String> hexes,
+  ) {
+    final map = <String, String>{};
+    final usedNames = <String>{};
+    for (final hex in hexes) {
+      // Try exact match first.
+      final exact = allPaints
+          .where((p) => p.hex.toLowerCase() == hex.toLowerCase())
+          .firstOrNull;
+      if (exact != null) {
+        var name = exact.name;
+        if (usedNames.contains(name)) {
+          name = '${exact.name} (${exact.brand})';
+        }
+        map[hex.toLowerCase()] = name;
+        usedNames.add(name);
+        continue;
+      }
+      // Closest match within dE < 10 (using pre-computed Lab values).
+      // Skip paints whose name is already taken by another hex.
+      final lab = hexToLab(hex);
+      final candidates = <(PaintColour, double)>[];
+      for (final paint in allPaints) {
+        final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
+        final dE = deltaE2000(lab, paintLab);
+        if (dE < 10) {
+          candidates.add((paint, dE));
+        }
+      }
+      candidates.sort((a, b) => a.$2.compareTo(b.$2));
+      for (final (paint, _) in candidates) {
+        if (!usedNames.contains(paint.name)) {
+          map[hex.toLowerCase()] = paint.name;
+          usedNames.add(paint.name);
+          break;
+        }
+      }
+    }
+    return map;
+  }
+
   Future<void> _showColourDetail(String hex) async {
     final paintRepo = ref.read(paintColourRepositoryProvider);
     final matches = await paintRepo.findClosestMatches(hex, limit: 5);
@@ -399,6 +532,31 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
         matches: matches,
         paintColourRepo: paintRepo,
         paletteHexes: widget.result.colourHexes,
+      ),
+    );
+  }
+
+  Future<void> _openColourReview() async {
+    final allPaints = await ref.read(allPaintColoursProvider.future);
+    if (!mounted) return;
+
+    final hexes = widget.result.colourHexes;
+    final nameMap = _buildNameMap(allPaints, hexes);
+    final health = analysePaletteHealth(hexes, nameMap: nameMap);
+    final findings = deriveStructuredFindings(hexes, nameMap: nameMap);
+
+    if (!mounted) return;
+
+    await PaletteBottomSheet.show<void>(
+      context: context,
+      builder: (_) => ColourReviewSheet(
+        hexes: hexes,
+        nameMap: nameMap,
+        health: health,
+        findings: findings,
+        onSwapColour: (hex) => _swapColour(hex),
+        onAddColour: _addColour,
+        onColourTap: (hex) => _showColourDetail(hex),
       ),
     );
   }
@@ -530,6 +688,15 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
                   ),
                 ],
               ),
+            ),
+          ],
+
+          // Palette story entry point
+          if (colourHexes.length >= 2) ...[
+            const SizedBox(height: 12),
+            _PaletteStoryCard(
+              hexes: colourHexes,
+              onTap: () => _openColourReview(),
             ),
           ],
 
@@ -681,6 +848,89 @@ class _ActionButton extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PaletteStoryCard extends ConsumerWidget {
+  const _PaletteStoryCard({required this.hexes, required this.onTap});
+
+  final List<String> hexes;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allPaintsAsync = ref.watch(allPaintColoursProvider);
+    final nameMap = allPaintsAsync.when(
+      data: (paints) => _PaletteContentState._buildNameMap(paints, hexes),
+      loading: () => <String, String>{},
+      error: (_, __) => <String, String>{},
+    );
+
+    final health = analysePaletteHealth(hexes, nameMap: nameMap);
+    final hasIssues = health.hasIssues;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: hasIssues
+              ? PaletteColours.softGoldLight.withValues(alpha: 0.3)
+              : PaletteColours.sageGreenLight.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Mini swatches
+                Expanded(
+                  child: Wrap(
+                    spacing: 6,
+                    children: [
+                      for (final hex in hexes.take(6))
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: _hexToColor(hex),
+                            borderRadius: BorderRadius.circular(6),
+                            border:
+                                Border.all(color: PaletteColours.divider),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: PaletteColours.textTertiary,
+                  size: 20,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              health.verdict,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              health.explanation,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

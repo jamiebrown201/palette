@@ -75,13 +75,28 @@ class ColourDetailSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Hex value
+              // Colour name (closest paint match) or hex fallback
               Center(
-                child: Text(
-                  hex.toUpperCase(),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontFamily: 'monospace',
+                child: Column(
+                  children: [
+                    Text(
+                      matches.isNotEmpty
+                          ? matches.first.colour.name
+                          : hex.toUpperCase(),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    if (matches.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        matches.first.colour.brand,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: PaletteColours.textSecondary,
+                            ),
                       ),
+                    ],
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
