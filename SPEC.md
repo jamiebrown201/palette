@@ -99,6 +99,18 @@ Four quick selections:
 
 **Output:** A "Colour DNA" result screen showing the user's primary palette family (and any secondary leanings), their personal palette of 8-12 colours, and a short explanation of why these colours resonate with them. This result is shareable as a beautiful card (designed for Instagram Stories and WhatsApp). Every shared card links back to the web-based quiz, not just a static image.
 
+**Colour Archetypes (implemented):**
+The quiz result goes beyond simple palette family classification. The engine maps quiz responses to one of 14 colour archetypes, each a personality-driven identity with a name, description, and curated colour set:
+
+- The Cocooner, The Earthkeeper, The Golden Hour, The Northern Light, The Curator, The Romantic, The Rewild, The Signal Fire, The Patina, The Mineral, The Bloomsbury, The Archive, The Prism, The Bohemian
+
+Each archetype defines a structured "system palette" with functional roles: trimWhite, dominantWalls, supportingWalls, deepAnchor, accentPops, and spineColour. This role-based structure ensures every generated palette has the right balance for real-room application rather than being an arbitrary collection of colours.
+
+The archetype engine uses weighted scoring across palette family affinity, undertone temperature, and saturation preference, with secondary family blending to capture users who sit between two archetypes.
+
+**DNA Drift Detection (implemented):**
+The app tracks all colour interactions (additions, removals, swaps, captures) via a `ColourInteractions` table. A drift detection algorithm periodically compares the user's recent interaction patterns against their original Colour DNA result. When the user's behaviour indicates a meaningful shift in preferences (sustained interest in a different palette family or undertone), the app surfaces a gentle prompt: "Your taste seems to be evolving. Want to retake the quiz?" This prevents the palette from feeling stale and drives re-engagement with the onboarding flow.
+
 **Web Experience:**
 The Colour DNA quiz is also available as a standalone web page (no app install required). The web version delivers a teaser result (palette family, top 3 colours, shareable card). The full detailed result (complete palette, paint matches, room recommendations) is gated behind app download. This turns every shared result into a zero-cost acquisition funnel.
 
@@ -152,6 +164,31 @@ The palette screen shows the user's 8-12 colours arranged in a visually pleasing
 - A "See it in a room" link that shows curated example photos featuring that colour family
 
 Premium users can add colours (from the interactive colour wheel, from a photo via camera extraction, or from the paint brand library), remove colours, or swap one for a related shade. The app gently flags when a new colour might clash with the existing palette and explains why.
+
+**Palette Feedback Engine (implemented):**
+Three interconnected feedback systems provide contextual, human-readable analysis throughout the palette experience:
+
+- _Impact feedback_: When a colour is added or swapped, a snackbar describes how it relates to the existing palette (e.g., "Coastal Blue brings cool contrast to your warm earth tones" or "This adds a complementary partner to Savage Ground"). Uses colour science (hue relationships, undertone classification, chroma band) to generate natural-language descriptions without jargon.
+
+- _Role descriptions_: When removing a colour, the confirmation dialog shows what role that colour plays (e.g., "This is your only cool accent" or "This anchors the dark end of your tonal range") plus a warning about what the palette would lose.
+
+- _Palette health analysis_: A summary engine (`analysePaletteHealth`) evaluates the overall palette for strengths, clashes, and insights, producing a verdict (e.g., "Dynamic balance", "Calm harmony"), an explanation, and structured observations about tonal range, chroma diversity, undertone balance, and colour family coherence.
+
+**Palette Story (implemented):**
+A magazine-style review experience that replaces inline health text dumps with visual, editorial analysis. A compact "story card" on the palette screen shows mini swatches, a one-line verdict, and a teaser. Tapping opens a `DraggableScrollableSheet` with staggered reveal animations containing:
+
+- _Strengths_: Visual cards pairing actual colour swatches (48x48) with their relationship type and plain-English explanation. For pairwise relationships (complementary, analogous, triadic), shows the two colours side by side with paint names. For palette-wide strengths (good tonal range, earth-tone coherence), shows a sorted palette strip. Pairwise findings are consolidated to one representative card per relationship type with count (e.g., "Analogous (27 pairs)") to prevent card bloat on large palettes.
+
+- _Clashes_: Large adjacent swatches (72x56) that "show don't tell" why two colours are too similar, with paint names overlaid. Includes a "Swap colour" action button. Also covers narrow tonal range, all-muted palettes, and bold disconnections.
+
+- _Insights_: Lighter styling for observations like "All warm-toned" with mini swatch strips.
+
+- _Suggestion CTA_: Contextual prompt (e.g., "A cool accent could add contrast and depth") with an "Add a colour" button.
+
+- _Explore strip_: Horizontal scrollable strip of all palette colours (56x56 swatches with paint names) that tap through to individual `ColourDetailSheet` views.
+
+**Paint name display (implemented):**
+Throughout the app, hex codes have been replaced with paint names wherever possible. The `_buildNameMap` helper matches palette hexes to their closest paint match (exact hex match first, then delta-E < 10 fallback) and uses these names in the colour detail sheet, room detail screen 70/20/10 tier rows, review sheet findings, add/remove/swap dialogs, and snackbar feedback. This makes the entire experience feel like working with real paint brands rather than abstract colour codes.
 
 Every paint colour swatch in the app displays a "Buy This Paint" button that deep-links to the retailer's product page with the exact colour code pre-selected. This is the primary affiliate touchpoint and should be frictionless (one tap to retailer checkout).
 
@@ -278,6 +315,11 @@ The compass requires the user to physically point their phone toward the window.
 
 **Existing Furniture Lock:**
 Users can "lock" items they are keeping (e.g., a brown leather sofa assigned as the 20% Beta). The algorithm dynamically adjusts the remaining tiers to accommodate the locked item. For example, locking a warm brown sofa shifts the wall colour suggestions toward cooler blues and greens to create balance. This dramatically increases the planner's real-world utility because almost no first-time buyer starts with an empty house.
+
+_Furniture conflict detection (implemented):_ When multiple locked items share a tier or have conflicting undertones/saturation, the app warns the user and explains why the combination creates tension. This prevents the algorithm from producing incoherent suggestions when constraints are contradictory.
+
+**Room Colour Psychology (implemented):**
+A structured mapping from room moods to colour recommendations based on colour science and interior design principles. Each mood (calm, energising, cocooning, etc.) maps to recommended palette families, undertone preferences, and saturation ranges. This data layer sits between the user's mood selection and the 70/20/10 auto-generation, ensuring suggestions feel intentional rather than arbitrary.
 
 **Renter Mode:**
 If the user selected "Renter" during onboarding, the 70/20/10 planner shifts focus. The 70% (walls) is locked to the landlord's existing colour (user photographs or selects "magnolia/white/other"). The planner concentrates on the 30% the renter can control: furniture (20%) and accessories/textiles/art (10%). All recommendations, product suggestions, and the Red Thread adapt to work within these constraints.
@@ -1073,7 +1115,61 @@ These are genuine unknowns that depend on external responses. Each has a clear a
 
 ---
 
+---
+
+## Implementation Status
+
+_Updated March 2026 after Palette Story milestone._
+
+### Phase 1A: ~95% complete (native app)
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| 1.1 Colour DNA Onboarding (app) | Done | 14 archetypes, system palette roles, DNA drift detection |
+| 1.1 Web Quiz & Handover | Not started | Separate Astro project, requires Supabase Edge Functions |
+| 1.2 My Palette | Done | Palette Story, feedback engine, paint name display throughout |
+| 1.4 Room Profiles | Done | 70/20/10, furniture lock, renter mode, light sim, room psychology |
+| 1.5 Colour Wheel & White Finder | Done | Zoomable wheel, undertone toggle, DNA overlay, context-aware whites |
+| 1.6 The Red Thread | Done | Templates, adjacency list, coherence check, PDF export |
+
+Remaining Phase 1A gaps:
+- Free user blurred preview for light direction recs (currently fully gated, should show blurred preview with upgrade CTA)
+- Web acquisition funnel (web quiz, Supabase backend, campaign URL handover) is a parallel engineering effort
+
+### Phase 1B: Not started
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| 1.3 Colour Capture | Placeholder only | Route exists at `/capture`, shows "Coming Soon" |
+| 1.7 Digital Moodboards | Not started | |
+| 1.8 Sample Ordering | Not started | |
+| 1.9 Re-engagement & Notifications | Not started | |
+
+### Phase 2: Not started
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| 2.1 AI Room Visualiser | Not started | Decor8 AI integration, credit system |
+| 2.2 Paint & Finish Recommender | Not started | |
+| 2.3 Curated Product Recs | Not started | |
+| 2.4 Partner Mode | Not started | Enums exist, no implementation |
+
+### Features added beyond original spec
+
+These emerged during implementation and strengthen the core product:
+
+- **Colour Archetypes** (14 personality-driven identities with system palette roles)
+- **DNA Drift Detection** (tracks preference evolution, prompts re-engagement)
+- **Palette Feedback Engine** (contextual natural-language impact descriptions)
+- **Palette Story/Review Sheet** (magazine-style visual analysis with colour swatches)
+- **Paint Name Display** (hex codes replaced with real paint names throughout)
+- **Room Colour Psychology** (mood-to-colour recommendation mapping)
+- **Locked Furniture Conflict Detection** (warns when constraints contradict)
+- **QA Mode** (debug-only developer tools at `/dev` route)
+
+---
+
 _This is a living document. Update it as decisions are made, requirements change, or new insights emerge from building._
 
-_Last updated: February 2026_
+_Last updated: March 2026_
 _Author: Jamie_
