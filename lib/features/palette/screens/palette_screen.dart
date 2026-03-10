@@ -689,6 +689,8 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            _DesignIdentityCard(archetypeDef: archetypeDef),
           ],
 
           // Palette story entry point
@@ -743,7 +745,7 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
           // Premium editing section
           PremiumGate(
             requiredTier: SubscriptionTier.plus,
-            upgradeMessage: 'Upgrade to edit your palette',
+            upgradeMessage: 'Customise your palette to match your evolving taste',
             child: _PaletteEditActions(
               editMode: _editMode,
               onAdd: _addColour,
@@ -933,6 +935,183 @@ class _PaletteStoryCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DesignIdentityCard extends StatelessWidget {
+  const _DesignIdentityCard({required this.archetypeDef});
+
+  final ArchetypeDefinition archetypeDef;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.auto_awesome,
+                size: 16,
+                color: PaletteColours.softGoldDark,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Your Design Identity',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Moods
+          _GuidanceRow(
+            icon: Icons.self_improvement,
+            iconColor: PaletteColours.sageGreenDark,
+            label: 'Your rooms should feel',
+            value: archetypeDef.bestMoods.join(', '),
+          ),
+          const SizedBox(height: 10),
+
+          // Surfaces & finishes group
+          Text(
+            'Surfaces & finishes',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: PaletteColours.textTertiary,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+          ),
+          const SizedBox(height: 6),
+          _GuidanceRow(
+            icon: Icons.build_outlined,
+            iconColor: PaletteColours.softGoldDark,
+            label: 'Materials',
+            value: archetypeDef.bestMaterials.join(', '),
+          ),
+          const SizedBox(height: 6),
+          _GuidanceRow(
+            icon: Icons.park_outlined,
+            iconColor: PaletteColours.softGoldDark,
+            label: 'Wood tones',
+            value: archetypeDef.bestWoodTones.join(', '),
+          ),
+          const SizedBox(height: 6),
+          _GuidanceRow(
+            icon: Icons.hardware_outlined,
+            iconColor: PaletteColours.softGoldDark,
+            label: 'Metals',
+            value: archetypeDef.bestMetalFinishes.join(', '),
+          ),
+          const SizedBox(height: 6),
+          _GuidanceRow(
+            icon: Icons.texture,
+            iconColor: PaletteColours.softGoldDark,
+            label: 'Fabrics',
+            value: archetypeDef.bestFabrics.join(', '),
+          ),
+          const SizedBox(height: 12),
+
+          // What to avoid — distinct styling
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: PaletteColours.warmGrey.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.visibility_off_outlined,
+                  size: 15,
+                  color: PaletteColours.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'What to avoid',
+                        style:
+                            Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        archetypeDef.whatToAvoid,
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuidanceRow extends StatelessWidget {
+  const _GuidanceRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: Icon(icon, size: 15, color: iconColor),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+              children: [
+                TextSpan(
+                  text: '$label  ',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: PaletteColours.textPrimary,
+                  ),
+                ),
+                TextSpan(text: value),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

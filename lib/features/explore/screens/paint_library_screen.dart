@@ -3,9 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/paint_colour.dart';
+import 'package:palette/data/models/room.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
+import 'package:palette/features/explore/logic/paint_match.dart';
+import 'package:palette/features/onboarding/data/archetype_definitions.dart';
+import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
+import 'package:palette/features/rooms/providers/room_providers.dart';
 
 class PaintLibraryScreen extends ConsumerStatefulWidget {
   const PaintLibraryScreen({super.key});
@@ -20,10 +26,15 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
   String? _brandFilter;
   PaletteFamily? _familyFilter;
   Undertone? _undertoneFilter;
+  bool _paletteFilter = false;
 
   @override
   Widget build(BuildContext context) {
     final allColoursAsync = ref.watch(allPaintColoursProvider);
+    final dnaAsync = ref.watch(latestColourDnaProvider);
+    final roomsAsync = ref.watch(allRoomsProvider);
+
+    final hasDna = dnaAsync.valueOrNull != null;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Paint Library')),
@@ -49,6 +60,16 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
+                if (hasDna) ...[
+                  FilterChip(
+                    avatar: const Icon(Icons.auto_awesome, size: 16),
+                    label: const Text('My palette'),
+                    selected: _paletteFilter,
+                    onSelected: (v) => setState(() => _paletteFilter = v),
+                    selectedColor: PaletteColours.sageGreenLight,
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 _FilterDropdown<String>(
                   label: 'Brand',
                   value: _brandFilter,
@@ -85,6 +106,7 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                       _brandFilter = null;
                       _familyFilter = null;
                       _undertoneFilter = null;
+                      _paletteFilter = false;
                       _searchQuery = '';
                     }),
                   ),
@@ -98,8 +120,14 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
           Expanded(
             child: allColoursAsync.when(
               data: (allColours) {
-                final filtered = _applyFilters(allColours);
-                if (filtered.isEmpty) {
+                final dna = dnaAsync.valueOrNull;
+                final rooms = roomsAsync.valueOrNull ?? <Room>[];
+                final results = _applyFiltersAndSort(
+                  allColours,
+                  dna: dna,
+                  rooms: rooms,
+                );
+                if (results.isEmpty) {
                   return Center(
                     child: Text(
                       'No colours match your filters',
@@ -111,9 +139,9 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filtered.length,
+                  itemCount: results.length,
                   itemBuilder: (context, index) =>
-                      _PaintColourTile(colour: filtered[index]),
+                      _PaintColourTile(result: results[index]),
                 );
               },
               loading: () =>
@@ -130,33 +158,70 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
       _brandFilter != null ||
       _familyFilter != null ||
       _undertoneFilter != null ||
+      _paletteFilter ||
       _searchQuery.isNotEmpty;
 
-  List<PaintColour> _applyFilters(List<PaintColour> colours) {
-    var result = colours;
+  List<PaintMatchResult> _applyFiltersAndSort(
+    List<PaintColour> colours, {
+    required ColourDnaResult? dna,
+    required List<Room> rooms,
+  }) {
+    var filtered = colours;
 
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      result = result
+      filtered = filtered
           .where((c) => c.name.toLowerCase().contains(query))
           .toList();
     }
 
     if (_brandFilter != null) {
-      result = result.where((c) => c.brand == _brandFilter).toList();
+      filtered = filtered.where((c) => c.brand == _brandFilter).toList();
     }
 
     if (_familyFilter != null) {
-      result =
-          result.where((c) => c.paletteFamily == _familyFilter).toList();
+      filtered =
+          filtered.where((c) => c.paletteFamily == _familyFilter).toList();
     }
 
     if (_undertoneFilter != null) {
-      result =
-          result.where((c) => c.undertone == _undertoneFilter).toList();
+      filtered =
+          filtered.where((c) => c.undertone == _undertoneFilter).toList();
     }
 
-    return result;
+    // Compute match data.
+    final paletteHexes = dna?.colourHexes ?? <String>[];
+    final archetypeName = dna?.archetype != null
+        ? archetypeDefinitions[dna!.archetype]?.name
+        : null;
+    final dnaUndertone = dna?.undertoneTemperature;
+
+    var results = computePaintMatches(
+      paints: filtered,
+      paletteHexes: paletteHexes,
+      dnaUndertone: dnaUndertone,
+      archetypeName: archetypeName,
+      rooms: rooms,
+    );
+
+    // Apply palette filter.
+    if (_paletteFilter) {
+      results = results.where((r) => r.isPaletteMatch).toList();
+    }
+
+    // Sort: palette matches first (by delta-E), then the rest.
+    if (paletteHexes.isNotEmpty && _searchQuery.isEmpty) {
+      results.sort((a, b) {
+        if (a.isPaletteMatch && !b.isPaletteMatch) return -1;
+        if (!a.isPaletteMatch && b.isPaletteMatch) return 1;
+        if (a.bestDeltaE != null && b.bestDeltaE != null) {
+          return a.bestDeltaE!.compareTo(b.bestDeltaE!);
+        }
+        return 0;
+      });
+    }
+
+    return results;
   }
 }
 
@@ -180,7 +245,9 @@ class _FilterDropdown<T> extends StatelessWidget {
     final isActive = value != null;
     return FilterChip(
       label: Text(
-        isActive ? (labelBuilder?.call(value as T) ?? value.toString()) : label,
+        isActive
+            ? (labelBuilder?.call(value as T) ?? value.toString())
+            : label,
       ),
       selected: isActive,
       onSelected: (_) {
@@ -217,15 +284,17 @@ class _FilterDropdown<T> extends StatelessWidget {
 }
 
 class _PaintColourTile extends StatelessWidget {
-  const _PaintColourTile({required this.colour});
+  const _PaintColourTile({required this.result});
 
-  final PaintColour colour;
+  final PaintMatchResult result;
 
   @override
   Widget build(BuildContext context) {
+    final colour = result.paint;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -297,6 +366,28 @@ class _PaintColourTile extends StatelessWidget {
               ),
             ],
           ),
+          // Match badge
+          if (result.matchReason != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 60),
+              child: _Badge(
+                icon: Icons.auto_awesome,
+                label: result.matchReason!,
+                color: PaletteColours.sageGreenDark,
+                bg: PaletteColours.sageGreenLight,
+              ),
+            ),
+          // Room badges (max 2)
+          for (final badge in result.roomBadges)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, left: 60),
+              child: _Badge(
+                icon: Icons.meeting_room_outlined,
+                label: badge,
+                color: PaletteColours.softGoldDark,
+                bg: PaletteColours.softGoldLight,
+              ),
+            ),
           if (colour.approximatePricePerLitre != null &&
               colour.priceLastChecked != null)
             Padding(
@@ -316,6 +407,48 @@ class _PaintColourTile extends StatelessWidget {
               brand: colour.brand,
               colourCode: colour.code,
               colourName: colour.name,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.bg,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w500,
+                  ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/core/colour/colour_suggestions.dart';
@@ -20,6 +21,7 @@ import 'package:palette/features/red_thread/logic/floor_plan_template.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/red_thread/widgets/floor_plan_painter.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -268,50 +270,54 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
       appBar: AppBar(
         title: const Text('Red Thread'),
         actions: [
-          PremiumGate(
-            requiredTier: SubscriptionTier.plus,
-            upgradeMessage: 'Upgrade to export your Red Thread',
-            child: _isExporting
-                ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : PopupMenuButton<String>(
-                    icon: const Icon(Icons.ios_share),
-                    tooltip: 'Export',
-                    onSelected: (value) {
-                      if (value == 'image') {
-                        _exportAsImage();
-                      } else if (value == 'pdf') {
-                        _exportAsPdf();
-                      }
-                    },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(
-                        value: 'image',
-                        child: ListTile(
-                          leading: Icon(Icons.image_outlined),
-                          title: Text('Export as image'),
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'pdf',
-                        child: ListTile(
-                          leading: Icon(Icons.picture_as_pdf_outlined),
-                          title: Text('Export as PDF'),
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ],
+          if (!(ref.watch(subscriptionTierProvider) >= SubscriptionTier.plus))
+            IconButton(
+              icon: const Icon(Icons.lock_outline,
+                  color: PaletteColours.premiumGold),
+              tooltip: 'Upgrade to export',
+              onPressed: () => context.push('/paywall'),
+            )
+          else if (_isExporting)
+            const Padding(
+              padding: EdgeInsets.all(12),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.ios_share),
+              tooltip: 'Export',
+              onSelected: (value) {
+                if (value == 'image') {
+                  _exportAsImage();
+                } else if (value == 'pdf') {
+                  _exportAsPdf();
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'image',
+                  child: ListTile(
+                    leading: Icon(Icons.image_outlined),
+                    title: Text('Export as image'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
                   ),
-          ),
+                ),
+                PopupMenuItem(
+                  value: 'pdf',
+                  child: ListTile(
+                    leading: Icon(Icons.picture_as_pdf_outlined),
+                    title: Text('Export as PDF'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
       body: roomsAsync.when(
@@ -321,7 +327,7 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
           return PremiumGate(
             requiredTier: SubscriptionTier.plus,
             upgradeMessage: rooms.length >= 3
-                ? 'Unlock whole-house colour coherence'
+                ? 'See how your rooms connect'
                 : 'Create 3+ rooms, then upgrade to see your Red Thread',
             child: threadsAsync.when(
               data: (threads) => templatesAsync.when(
@@ -410,12 +416,19 @@ class _RedThreadContent extends ConsumerWidget {
           // Thread colour selection
           const SectionHeader(title: 'Thread Colours'),
           const SizedBox(height: 4),
-          Text(
-            'Choose 2-4 unifying colours that will tie your rooms together.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PaletteColours.textSecondary,
-                ),
-          ),
+          Builder(builder: (context) {
+            final constraints = ref.watch(renterConstraintsProvider);
+            final medium = constraints.wallsAreLocked
+                ? 'furnishings and textiles'
+                : 'paint and furnishings';
+            return Text(
+              'Choose 2-4 unifying colours that will tie your rooms '
+              'together through $medium.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+            );
+          }),
           const SizedBox(height: 12),
           _ThreadColourRow(threadHexes: threadHexes),
           const SizedBox(height: 24),

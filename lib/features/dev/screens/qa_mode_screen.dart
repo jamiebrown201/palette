@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/constants/enums.dart';
+import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/features/dev/services/qa_seed_service.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/providers/app_providers.dart';
+import 'package:palette/providers/database_providers.dart';
 
 /// Debug-only QA Mode screen for quick navigation and state control.
 ///
@@ -95,6 +97,15 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+
+          // === RENTER CONSTRAINTS ===
+          Text('Renter Constraints',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )),
+          const SizedBox(height: 8),
+          _RenterConstraintControls(),
           const SizedBox(height: 16),
 
           // === DATA STATUS ===
@@ -342,6 +353,135 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
         final entry = screens[index];
         return _ScreenCard(entry: entry);
       },
+    );
+  }
+}
+
+class _RenterConstraintControls extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final constraints = ref.watch(renterConstraintsProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Quick presets
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ActionChip(
+                  label: const Text('Owner'),
+                  avatar: !constraints.isRenter
+                      ? const Icon(Icons.check, size: 16)
+                      : null,
+                  onPressed: () => _setPreset(ref, isRenter: false),
+                ),
+                ActionChip(
+                  label: const Text('Renter (can paint)'),
+                  avatar: constraints.isRenter && !constraints.wallsAreLocked
+                      ? const Icon(Icons.check, size: 16)
+                      : null,
+                  onPressed: () => _setPreset(ref,
+                      isRenter: true, canPaint: true),
+                ),
+                ActionChip(
+                  label: const Text("Renter (can't paint)"),
+                  avatar: constraints.wallsAreLocked
+                      ? const Icon(Icons.check, size: 16)
+                      : null,
+                  onPressed: () => _setPreset(ref,
+                      isRenter: true, canPaint: false),
+                ),
+              ],
+            ),
+            if (constraints.isRenter) ...[
+              const Divider(height: 24),
+              _ConstraintToggle(
+                label: 'Can paint',
+                value: constraints.canPaint,
+                onChanged: (v) => _update(ref, constraints.copyWith(canPaint: v)),
+              ),
+              _ConstraintToggle(
+                label: 'Can drill',
+                value: constraints.canDrill,
+                onChanged: (v) => _update(ref, constraints.copyWith(canDrill: v)),
+              ),
+              _ConstraintToggle(
+                label: 'Keeping flooring',
+                value: constraints.keepingFlooring,
+                onChanged: (v) =>
+                    _update(ref, constraints.copyWith(keepingFlooring: v)),
+              ),
+              _ConstraintToggle(
+                label: 'Temporary home',
+                value: constraints.isTemporaryHome,
+                onChanged: (v) =>
+                    _update(ref, constraints.copyWith(isTemporaryHome: v)),
+              ),
+              _ConstraintToggle(
+                label: 'Reversible only',
+                value: constraints.reversibleOnly,
+                onChanged: (v) =>
+                    _update(ref, constraints.copyWith(reversibleOnly: v)),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _setPreset(WidgetRef ref, {
+    required bool isRenter,
+    bool? canPaint,
+  }) {
+    final updated = RenterConstraints(
+      isRenter: isRenter,
+      canPaint: canPaint,
+      canDrill: isRenter ? canPaint : null,
+      keepingFlooring: isRenter ? !(canPaint ?? false) : null,
+      isTemporaryHome: isRenter ? false : null,
+      reversibleOnly: isRenter ? !(canPaint ?? false) : null,
+    );
+    _update(ref, updated);
+  }
+
+  void _update(WidgetRef ref, RenterConstraints updated) {
+    ref.read(renterConstraintsProvider.notifier).state = updated;
+    ref.read(userProfileRepositoryProvider).updateRenterConstraints(
+      canPaint: updated.canPaint,
+      canDrill: updated.canDrill,
+      keepingFlooring: updated.keepingFlooring,
+      isTemporaryHome: updated.isTemporaryHome,
+      reversibleOnly: updated.reversibleOnly,
+    );
+  }
+}
+
+class _ConstraintToggle extends StatelessWidget {
+  const _ConstraintToggle({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool? value;
+  final void Function(bool) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      title: Text(label),
+      value: value ?? false,
+      contentPadding: EdgeInsets.zero,
+      dense: true,
+      subtitle: value == null ? const Text('Not set') : null,
+      onChanged: (v) => onChanged(v),
     );
   }
 }

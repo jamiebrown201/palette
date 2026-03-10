@@ -3,13 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/core/widgets/progress_bar.dart';
 import 'package:palette/core/widgets/section_header.dart';
+import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
+import 'package:palette/features/home/logic/next_action.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/onboarding/logic/dna_drift.dart';
 import 'package:palette/features/onboarding/providers/dna_drift_provider.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
+import 'package:palette/features/red_thread/logic/coherence_checker.dart';
+import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/providers/database_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -19,10 +25,12 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dnaAsync = ref.watch(latestColourDnaProvider);
     final roomsAsync = ref.watch(allRoomsProvider);
+    final threadsAsync = ref.watch(threadColoursProvider);
+    final coherenceAsync = ref.watch(coherenceReportProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Palette'),
+        title: const Text('Your Design Plan'),
         actions: [
           IconButton(
             icon: const Icon(Icons.palette_outlined),
@@ -32,17 +40,10 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Your colour companion',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: 12),
             // Colour DNA card
             dnaAsync.when(
               data: (dna) {
@@ -50,7 +51,8 @@ class HomeScreen extends ConsumerWidget {
                   return _ActionCard(
                     icon: Icons.auto_awesome,
                     title: 'Discover Your Colour DNA',
-                    subtitle: 'Take a quick quiz to unlock your personal palette',
+                    subtitle:
+                        'Take a quick quiz to unlock your personal palette',
                     actionLabel: 'Start Quiz',
                     onAction: () => context.push('/onboarding'),
                   );
@@ -59,8 +61,8 @@ class HomeScreen extends ConsumerWidget {
                     ? archetypeDefinitions[dna.archetype]?.name
                     : null;
                 return _ColourDnaCard(
-                  primaryFamily: archetypeName ??
-                      dna.primaryFamily.displayName,
+                  primaryFamily:
+                      archetypeName ?? dna.primaryFamily.displayName,
                   colourCount: dna.colourHexes.length,
                   hexes: dna.colourHexes.take(6).toList(),
                   onTap: () => context.push('/palette'),
@@ -69,12 +71,42 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
-            // Drift prompt (below DNA card)
+
+            // Drift prompt
             _DriftPromptCard(),
+            const SizedBox(height: 16),
+
+            // Next Recommended Action
+            roomsAsync.when(
+              data: (rooms) {
+                if (rooms.isEmpty) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SectionHeader(title: 'Next Step'),
+                    const SizedBox(height: 4),
+                    _NextActionSection(
+                      rooms: rooms,
+                      coherenceReport: coherenceAsync.valueOrNull,
+                      threadColours: threadsAsync.valueOrNull ?? [],
+                    ),
+                  ],
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             const SizedBox(height: 20),
 
-            // My Rooms section
-            const SectionHeader(title: 'My Rooms'),
+            // My Rooms with progress
+            SectionHeader(
+              title: 'My Rooms',
+              actionLabel: roomsAsync.valueOrNull != null &&
+                      roomsAsync.valueOrNull!.length > 3
+                  ? 'See all'
+                  : null,
+              onAction: () => context.go('/rooms'),
+            ),
             const SizedBox(height: 8),
             roomsAsync.when(
               data: (rooms) {
@@ -84,46 +116,41 @@ class HomeScreen extends ConsumerWidget {
                     title: 'Create Your First Room',
                     subtitle: 'Get personalised colour recommendations',
                     actionLabel: 'Create Room',
-                    onAction: () => context.go('/rooms'),
+                    onAction: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        fullscreenDialog: true,
+                        builder: (context) => const CreateRoomScreen(),
+                      ),
+                    ),
                   );
                 }
-                return _RoomsSummary(rooms: rooms);
+                return _RoomProgressList(rooms: rooms);
               },
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 20),
 
-            // Quick actions
-            const SectionHeader(title: 'Explore'),
-            const SizedBox(height: 8),
-            _QuickActionsRow(
-              actions: [
-                _QuickAction(
-                  icon: Icons.palette_outlined,
-                  label: 'Colour Wheel',
-                  accentColour: PaletteColours.sageGreenLight,
-                  onTap: () => context.go('/explore/wheel'),
-                ),
-                _QuickAction(
-                  icon: Icons.format_paint_outlined,
-                  label: 'White Finder',
-                  accentColour: PaletteColours.softCream,
-                  onTap: () => context.go('/explore/white-finder'),
-                ),
-                _QuickAction(
-                  icon: Icons.linear_scale,
-                  label: 'Red Thread',
-                  accentColour: const Color(0xFFF0E0E0),
-                  onTap: () => context.push('/red-thread'),
-                ),
-                _QuickAction(
-                  icon: Icons.search,
-                  label: 'Paint Library',
-                  accentColour: PaletteColours.warmGrey,
-                  onTap: () => context.go('/explore/paint-library'),
-                ),
-              ],
+            // Whole-Home Coherence
+            ...threadsAsync.when(
+              data: (threads) {
+                if (threads.isEmpty) return <Widget>[];
+                return <Widget>[
+                  const SectionHeader(title: 'Whole-Home Coherence'),
+                  const SizedBox(height: 4),
+                  coherenceAsync.when(
+                    data: (report) => _CoherenceSummary(
+                      threadColours: threads,
+                      coherenceReport: report,
+                    ),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                  const SizedBox(height: 16),
+                ];
+              },
+              loading: () => <Widget>[],
+              error: (_, __) => <Widget>[],
             ),
           ],
         ),
@@ -131,6 +158,10 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Colour DNA Card (kept from previous version)
+// ---------------------------------------------------------------------------
 
 class _ColourDnaCard extends StatelessWidget {
   const _ColourDnaCard({
@@ -195,28 +226,27 @@ class _ColourDnaCard extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  ...hexes
-                      .map((hex) => Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: _hexToColor(hex),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.4),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
+                  ...hexes.map((hex) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _hexToColor(hex),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.4),
                             ),
-                          )),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )),
                   if (colourCount > hexes.length)
                     Container(
                       width: 40,
@@ -249,130 +279,434 @@ class _ColourDnaCard extends StatelessWidget {
   }
 }
 
-class _RoomsSummary extends StatelessWidget {
-  const _RoomsSummary({required this.rooms});
+// ---------------------------------------------------------------------------
+// Next Recommended Action
+// ---------------------------------------------------------------------------
+
+class _NextActionSection extends ConsumerWidget {
+  const _NextActionSection({
+    required this.rooms,
+    required this.coherenceReport,
+    required this.threadColours,
+  });
 
   final List<Room> rooms;
+  final CoherenceReport? coherenceReport;
+  final List<RedThreadColour> threadColours;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final furnitureMap = <String, bool>{};
+    var anyLoading = false;
+
+    for (final room in rooms) {
+      final furnitureAsync = ref.watch(furnitureForRoomProvider(room.id));
+      furnitureAsync.when(
+        data: (items) => furnitureMap[room.id] = items.isNotEmpty,
+        loading: () => anyLoading = true,
+        error: (_, __) => furnitureMap[room.id] = false,
+      );
+    }
+
+    if (anyLoading) return const SizedBox.shrink();
+
+    final action = computeNextAction(
+      rooms: rooms,
+      coherenceReport: coherenceReport,
+      threadColours: threadColours,
+      roomHasFurniture: furnitureMap,
+    );
+
+    return _NextActionCard(action: action);
+  }
+}
+
+class _NextActionCard extends StatelessWidget {
+  const _NextActionCard({required this.action});
+
+  final NextAction action;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ...rooms.take(3).map((room) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Material(
-              color: PaletteColours.cardBackground,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => context.go('/rooms/${room.id}'),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: PaletteColours.divider),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: room.heroColourHex != null
-                              ? _hexToColor(room.heroColourHex!)
-                              : PaletteColours.warmGrey,
-                          borderRadius: BorderRadius.circular(8),
+    if (action.type == NextActionType.allDone) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: PaletteColours.sageGreenLight,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle,
+                size: 24, color: PaletteColours.sageGreenDark),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    action.title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: PaletteColours.sageGreenDark,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              room.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w500),
-                            ),
-                            Text(
-                              _buildRoomSubtitle(room),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                      color: PaletteColours.textSecondary),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right,
-                        size: 20,
-                        color: PaletteColours.textTertiary,
-                      ),
-                    ],
                   ),
-                ),
+                  const SizedBox(height: 2),
+                  Text(
+                    action.subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.sageGreenDark,
+                        ),
+                  ),
+                ],
               ),
             ),
-          );
-        }),
-        if (rooms.length > 3)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: TextButton(
-              onPressed: () => context.go('/rooms'),
-              child: Text(
-                'See all ${rooms.length} rooms',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: PaletteColours.sageGreenDark,
-                      fontWeight: FontWeight.w500,
-                    ),
-              ),
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () => context.push('/rooms/create'),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+          ],
+        ),
+      );
+    }
+
+    final icon = switch (action.type) {
+      NextActionType.completeRoomSetup => Icons.edit_outlined,
+      NextActionType.defineRedThread => Icons.linear_scale,
+      NextActionType.resolveCoherence => Icons.link_off,
+      NextActionType.completeColourPlan => Icons.palette_outlined,
+      NextActionType.lockFurniture => Icons.chair_outlined,
+      NextActionType.allDone => Icons.check_circle_outline,
+    };
+
+    return Material(
+      color: PaletteColours.softCream,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => context.push(action.route),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: PaletteColours.sageGreen.withValues(alpha: 0.4),
-                    style: BorderStyle.solid,
-                  ),
+                  color: PaletteColours.sageGreenLight,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Icon(icon,
+                    size: 22, color: PaletteColours.sageGreenDark),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.add, size: 18, color: PaletteColours.sageGreenDark),
-                    const SizedBox(width: 6),
                     Text(
-                      'Add Room',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: PaletteColours.sageGreenDark,
-                            fontWeight: FontWeight.w500,
+                      action.title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      action.subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: PaletteColours.textSecondary,
                           ),
                     ),
                   ],
                 ),
               ),
-            ),
+              const Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: PaletteColours.textTertiary,
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Room Progress
+// ---------------------------------------------------------------------------
+
+class _RoomProgressList extends ConsumerWidget {
+  const _RoomProgressList({required this.rooms});
+
+  final List<Room> rooms;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final coherenceAsync = ref.watch(coherenceReportProvider);
+    final coherenceReport = coherenceAsync.valueOrNull;
+
+    return Column(
+      children: [
+        ...rooms.map((room) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _RoomProgressCard(
+                room: room,
+                coherenceReport: coherenceReport,
+              ),
+            )),
+        const _AddRoomButton(),
       ],
     );
   }
 }
+
+class _RoomProgressCard extends ConsumerWidget {
+  const _RoomProgressCard({
+    required this.room,
+    required this.coherenceReport,
+  });
+
+  final Room room;
+  final CoherenceReport? coherenceReport;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final furnitureAsync = ref.watch(furnitureForRoomProvider(room.id));
+
+    final hasFurniture = furnitureAsync.when(
+      data: (items) => items.isNotEmpty,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    final isRedThreadConnected = coherenceReport?.results
+            .any((r) => r.roomId == room.id && r.isConnected) ??
+        false;
+
+    final progress = computeRoomProgress(
+      room: room,
+      hasFurniture: hasFurniture,
+      isRedThreadConnected: isRedThreadConnected,
+    );
+
+    return Material(
+      color: PaletteColours.cardBackground,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => context.go('/rooms/${room.id}'),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: PaletteColours.divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: room.heroColourHex != null
+                          ? _hexToColor(room.heroColourHex!)
+                          : PaletteColours.warmGrey,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          room.name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          progress.summary,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                  color: PaletteColours.textSecondary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: PaletteColours.textTertiary,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              SteppedProgressBar(
+                totalSteps: progress.total,
+                currentStep: progress.completed,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${progress.completed} of ${progress.total} steps complete',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: PaletteColours.textTertiary,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddRoomButton extends StatelessWidget {
+  const _AddRoomButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              fullscreenDialog: true,
+              builder: (context) => const CreateRoomScreen(),
+            ),
+          ),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: PaletteColours.sageGreen.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.add,
+                    size: 18, color: PaletteColours.sageGreenDark),
+                const SizedBox(width: 6),
+                Text(
+                  'Add Room',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: PaletteColours.sageGreenDark,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Whole-Home Coherence Summary
+// ---------------------------------------------------------------------------
+
+class _CoherenceSummary extends StatelessWidget {
+  const _CoherenceSummary({
+    required this.threadColours,
+    required this.coherenceReport,
+  });
+
+  final List<RedThreadColour> threadColours;
+  final CoherenceReport coherenceReport;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCoherent = coherenceReport.overallCoherent;
+    final bgColour = isCoherent
+        ? PaletteColours.sageGreenLight
+        : PaletteColours.softGoldLight;
+    final accentColour = isCoherent
+        ? PaletteColours.sageGreenDark
+        : PaletteColours.softGoldDark;
+
+    final count = coherenceReport.disconnectedCount;
+    final verdict = isCoherent
+        ? 'All rooms connected'
+        : '$count room${count == 1 ? '' : 's'} not yet connected';
+
+    return Material(
+      color: bgColour,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => context.push('/red-thread'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              ...threadColours.take(4).map((t) => Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: _hexToColor(t.hex),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  )),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Red Thread',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: accentColour,
+                          ),
+                    ),
+                    Text(
+                      verdict,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: accentColour,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                isCoherent
+                    ? Icons.check_circle_outline
+                    : Icons.warning_amber_outlined,
+                size: 20,
+                color: accentColour,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared widgets (kept from previous version)
+// ---------------------------------------------------------------------------
 
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
@@ -392,6 +726,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
         color: PaletteColours.softCream,
@@ -443,81 +778,9 @@ class _LoadingCard extends StatelessWidget {
   }
 }
 
-class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow({required this.actions});
-
-  final List<_QuickAction> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: actions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) => actions[index],
-      ),
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.accentColour,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? accentColour;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 150,
-      child: Material(
-        color: PaletteColours.cardBackground,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: PaletteColours.divider),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: accentColour ?? PaletteColours.softCream,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 20, color: PaletteColours.sageGreenDark),
-                ),
-                const Spacer(),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.titleSmall,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// ---------------------------------------------------------------------------
+// Drift Prompt (kept from previous version)
+// ---------------------------------------------------------------------------
 
 class _DriftPromptCard extends ConsumerWidget {
   @override
@@ -644,12 +907,9 @@ class _DriftPromptCard extends ConsumerWidget {
   }
 }
 
-String _buildRoomSubtitle(Room room) {
-  final parts = <String>[];
-  if (room.direction != null) parts.add(room.direction!.displayName);
-  parts.add(room.usageTime.displayName);
-  return parts.join(' \u2022 ');
-}
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 Color _hexToColor(String hex) {
   final cleaned = hex.replaceAll('#', '');

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/features/onboarding/logic/quiz_notifier.dart';
+import 'package:palette/features/onboarding/logic/quiz_state.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 
 /// Property context stage: type, era, project stage, tenure.
@@ -104,6 +106,19 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
               );
             }).toList(),
           ),
+
+          // Renter constraint questions — revealed when tenure == renter
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: quizState.tenure == Tenure.renter
+                ? _RenterConstraintSection(
+                    quizState: quizState,
+                    notifier: notifier,
+                  )
+                : const SizedBox.shrink(),
+          ),
           const SizedBox(height: 32),
 
           FilledButton(
@@ -123,6 +138,101 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
                 : const Text('See My Colour DNA'),
           ),
           const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+}
+
+class _RenterConstraintSection extends StatelessWidget {
+  const _RenterConstraintSection({
+    required this.quizState,
+    required this.notifier,
+  });
+
+  final QuizState quizState;
+  final QuizNotifier notifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 24),
+        const _SectionLabel(label: 'Help us tailor your experience'),
+        const SizedBox(height: 4),
+        Text(
+          "We'll adapt recommendations to what you can actually change",
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: PaletteColours.textTertiary,
+              ),
+        ),
+        const SizedBox(height: 16),
+        _YesNoRow(
+          label: 'Can you paint the walls?',
+          value: quizState.canPaint,
+          onChanged: notifier.setCanPaint,
+        ),
+        _YesNoRow(
+          label: 'Can you drill or mount things?',
+          value: quizState.canDrill,
+          onChanged: notifier.setCanDrill,
+        ),
+        _YesNoRow(
+          label: 'Keeping the existing flooring?',
+          value: quizState.keepingFlooring,
+          onChanged: notifier.setKeepingFlooring,
+        ),
+        _YesNoRow(
+          label: 'Is this a temporary home?',
+          value: quizState.isTemporaryHome,
+          onChanged: notifier.setIsTemporaryHome,
+        ),
+        _YesNoRow(
+          label: 'Reversible changes only?',
+          value: quizState.reversibleOnly,
+          onChanged: notifier.setReversibleOnly,
+        ),
+      ],
+    );
+  }
+}
+
+class _YesNoRow extends StatelessWidget {
+  const _YesNoRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool? value;
+  final void Function(bool) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          const SizedBox(width: 12),
+          _SelectionChip(
+            label: 'Yes',
+            isSelected: value == true,
+            onTap: () => onChanged(true),
+          ),
+          const SizedBox(width: 8),
+          _SelectionChip(
+            label: 'No',
+            isSelected: value == false,
+            onTap: () => onChanged(false),
+          ),
         ],
       ),
     );

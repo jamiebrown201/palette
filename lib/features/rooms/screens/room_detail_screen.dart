@@ -8,6 +8,7 @@ import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/kelvin_simulation.dart';
 import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/constants/enums.dart';
+import 'package:palette/core/constants/room_mode_config.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
@@ -24,8 +25,10 @@ import 'package:palette/features/red_thread/providers/red_thread_providers.dart'
 import 'package:palette/features/rooms/data/room_colour_psychology.dart';
 import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
+import 'package:palette/features/rooms/logic/room_story.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:uuid/uuid.dart';
 
@@ -69,6 +72,8 @@ class _RoomDetailContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(roomModeConfigProvider(room.isRenterMode));
+
     return Scaffold(
       appBar: AppBar(
         title: Text(room.name),
@@ -103,29 +108,40 @@ class _RoomDetailContent extends ConsumerWidget {
                       icon: Icons.mood_outlined,
                       label: m.displayName,
                     )),
-                if (room.isRenterMode)
-                  const _InfoChip(
+                if (config.modeBadge != null)
+                  _InfoChip(
                     icon: Icons.vpn_key_outlined,
-                    label: 'Renter',
+                    label: config.modeBadge!,
                   ),
               ],
             ),
+
+            // Wall context row (can't-paint renters)
+            if (config.showWallAsFixedContext &&
+                room.wallColourHex != null) ...[
+              const SizedBox(height: 16),
+              _WallContextRow(hex: room.wallColourHex!),
+            ],
 
             // Hero colour swatch
             if (room.heroColourHex != null) ...[
               const SizedBox(height: 16),
               _HeroColourSwatch(
                 hex: room.heroColourHex!,
-                label: room.isRenterMode ? 'Wall colour' : 'Hero colour',
+                label: config.heroLabel,
               ),
             ],
+            const SizedBox(height: 16),
+
+            // Room checklist
+            _RoomChecklist(room: room),
             const SizedBox(height: 20),
 
             // Light direction (compact) — fully premium-gated
             if (room.direction != null) ...[
               PremiumGate(
                 requiredTier: SubscriptionTier.plus,
-                upgradeMessage: 'Unlock light & direction insights',
+                upgradeMessage: 'See how light affects colour in this room',
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -141,7 +157,7 @@ class _RoomDetailContent extends ConsumerWidget {
                         '/explore/white-finder?roomId=${room.id}',
                       ),
                       icon: const Icon(Icons.format_paint_outlined, size: 16),
-                      label: const Text('Find the right white'),
+                      label: Text(config.finderIntro),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: PaletteColours.sageGreenDark,
                         side: const BorderSide(color: PaletteColours.sageGreen),
@@ -154,7 +170,7 @@ class _RoomDetailContent extends ConsumerWidget {
             ],
 
             // Furniture Lock
-            const SectionHeader(title: 'Existing Furniture'),
+            SectionHeader(key: _furnitureSectionKey, title: 'Existing Furniture'),
             const SizedBox(height: 4),
             Text(
               "Lock items you're keeping so colour suggestions adapt around them.",
@@ -174,7 +190,7 @@ class _RoomDetailContent extends ConsumerWidget {
             const SizedBox(height: 8),
             PremiumGate(
               requiredTier: SubscriptionTier.plus,
-              upgradeMessage: 'Unlock the 70/20/10 colour planner',
+              upgradeMessage: 'Get a balanced colour plan for this room',
               child: _ColourPlanSection(room: room),
             ),
 
@@ -186,11 +202,20 @@ class _RoomDetailContent extends ConsumerWidget {
               _ColourHarmonyInsight(room: room),
             ],
 
+            // Why this room works card
+            if (room.heroColourHex != null && room.direction != null)
+              _WhyThisRoomWorksCard(room: room),
+
             // Room colour psychology tip
             _RoomPsychologyTip(roomName: room.name),
 
             // DNA trim white suggestion
             _TrimWhiteSuggestion(room: room),
+            const SizedBox(height: 12),
+
+            // Contextual tool links
+            if (room.heroColourHex != null)
+              _ContextualToolLinks(room: room),
             const SizedBox(height: 24),
 
             // Light simulation
@@ -394,6 +419,67 @@ class _HeroColourSwatch extends ConsumerWidget {
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: fgSecondary,
                 ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WallContextRow extends ConsumerWidget {
+  const _WallContextRow({required this.hex});
+
+  final String hex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allPaintsAsync = ref.watch(allPaintColoursProvider);
+    final paintName = allPaintsAsync.whenOrNull(data: (paints) {
+      final lab = hexToLab(hex);
+      PaintColour? closest;
+      var bestDe = 10.0;
+      for (final paint in paints) {
+        final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
+        final dE = deltaE2000(lab, paintLab);
+        if (dE < bestDe) {
+          bestDe = dE;
+          closest = paint;
+        }
+      }
+      return closest?.name;
+    });
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: PaletteColours.warmGrey,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: _hexToColor(hex),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: PaletteColours.divider),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Your walls \u00b7 ${paintName ?? hex.toUpperCase()}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+            ),
+          ),
+          const Icon(
+            Icons.lock_outline,
+            size: 16,
+            color: PaletteColours.textTertiary,
           ),
         ],
       ),
@@ -616,6 +702,7 @@ class _ColourPlanSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(roomModeConfigProvider(room.isRenterMode));
     final hasHero = room.heroColourHex != null;
     final allPaints =
         ref.watch(allPaintColoursProvider).whenOrNull(data: (p) => p);
@@ -624,16 +711,12 @@ class _ColourPlanSection extends ConsumerWidget {
       children: [
         if (!hasHero) ...[
           Text(
-            room.isRenterMode
-                ? 'Match your existing wall colour and we will build a plan '
-                    'around furniture and accessories you can change.'
-                : 'Pick one colour you love for this room and we will suggest '
-                    'the rest.',
+            config.heroPrompt,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: PaletteColours.textSecondary,
                 ),
           ),
-          if (room.isRenterMode) ...[
+          if (config.showLandlordPresets) ...[
             const SizedBox(height: 12),
             Text(
               'Common landlord colours',
@@ -658,38 +741,28 @@ class _ColourPlanSection extends ConsumerWidget {
           FilledButton.icon(
             onPressed: () => _showHeroColourPicker(context, ref),
             icon: const Icon(Icons.palette_outlined, size: 18),
-            label: Text(
-              room.isRenterMode
-                  ? 'Match your wall colour'
-                  : 'Choose your hero colour',
-            ),
+            label: Text(config.heroButtonLabel),
           ),
         ] else ...[
           _ColourTierRow(
-            label: room.isRenterMode ? 'Wall (fixed)' : 'Hero (70%)',
-            description: room.isRenterMode
-                ? 'Your existing wall colour'
-                : 'Walls & dominant surfaces',
+            label: config.heroLabel,
+            description: config.heroDescription,
             hex: room.heroColourHex,
             paintName: _lookupPaintName(allPaints, room.heroColourHex),
             onTap: () => _showHeroColourPicker(context, ref),
           ),
           const SizedBox(height: 8),
           _ColourTierRow(
-            label: room.isRenterMode ? 'Furnishings' : 'Supporting (20%)',
-            description: room.isRenterMode
-                ? 'Large items you can swap or add'
-                : 'Large furnishings & upholstery',
+            label: config.betaLabel,
+            description: config.betaDescription,
             hex: room.betaColourHex,
             paintName: _lookupPaintName(allPaints, room.betaColourHex),
             onTap: () => _showSwapPicker(context, ref, 'beta'),
           ),
           const SizedBox(height: 8),
           _ColourTierRow(
-            label: room.isRenterMode ? 'Accents' : 'Surprise (10%)',
-            description: room.isRenterMode
-                ? 'Cushions, throws & accessories'
-                : 'Accessories, artwork & accents',
+            label: config.surpriseLabel,
+            description: config.surpriseDescription,
             hex: room.surpriseColourHex,
             paintName: _lookupPaintName(allPaints, room.surpriseColourHex),
             onTap: () => _showSwapPicker(context, ref, 'surprise'),
@@ -820,13 +893,12 @@ class _ColourPlanSection extends ConsumerWidget {
       allPaints: allPaints,
     );
 
+    final config = ref.read(roomModeConfigProvider(room.isRenterMode));
     final selected = await showModalBottomSheet<PaintColour>(
       context: context,
       isScrollControlled: true,
       builder: (ctx) => SmartPaintColourPicker(
-        title: room.isRenterMode
-            ? 'Match your existing wall colour'
-            : 'Choose your hero colour',
+        title: config.heroButtonLabel,
         paintColours: allPaints,
         suggestions: suggestions,
       ),
@@ -1699,6 +1771,8 @@ class _LandlordPresetChip extends StatelessWidget {
   }
 }
 
+final _furnitureSectionKey = GlobalKey();
+
 bool _isLightColour(String hex) {
   final cleaned = hex.replaceAll('#', '');
   final value = int.parse(cleaned, radix: 16);
@@ -1711,4 +1785,420 @@ bool _isLightColour(String hex) {
 Color _hexToColor(String hex) {
   final cleaned = hex.replaceAll('#', '');
   return Color(int.parse('FF$cleaned', radix: 16));
+}
+
+// ---------------------------------------------------------------------------
+// Room Checklist
+// ---------------------------------------------------------------------------
+
+class _RoomChecklist extends ConsumerWidget {
+  const _RoomChecklist({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(roomModeConfigProvider(room.isRenterMode));
+    final furnitureAsync = ref.watch(furnitureForRoomProvider(room.id));
+    final coherenceAsync = ref.watch(coherenceReportProvider);
+
+    final hasFurniture = furnitureAsync.when(
+      data: (items) => items.isNotEmpty,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+    final hasRedThread = coherenceAsync.when(
+      data: (report) =>
+          report.results.any((r) => r.roomId == room.id && r.isConnected),
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    final items = [
+      _ChecklistItem(
+        label: 'Direction set',
+        done: room.direction != null,
+        actionLabel: 'Set',
+        onAction: () => _showEditRoomSheet(context, ref),
+      ),
+      _ChecklistItem(
+        label: 'Mood selected',
+        done: room.moods.isNotEmpty,
+        actionLabel: 'Set',
+        onAction: () => _showEditRoomSheet(context, ref),
+      ),
+      _ChecklistItem(
+        label: config.checklistHeroLabel,
+        done: room.heroColourHex != null,
+      ),
+      _ChecklistItem(
+        label: config.checklistPlanLabel,
+        done: room.betaColourHex != null && room.surpriseColourHex != null,
+      ),
+      _ChecklistItem(
+        label: config.checklistWhiteLabel,
+        done: false,
+        actionLabel: config.checklistWhiteAction,
+        onAction: () => context.push(
+          '/explore/white-finder?roomId=${room.id}',
+        ),
+        isInformational: true,
+      ),
+      _ChecklistItem(
+        label: 'Furniture locked',
+        done: hasFurniture,
+        actionLabel: 'Lock',
+        onAction: () {
+          final ctx = _furnitureSectionKey.currentContext;
+          if (ctx != null) {
+            Scrollable.ensureVisible(ctx,
+                duration: const Duration(milliseconds: 300));
+          }
+        },
+      ),
+      _ChecklistItem(
+        label: 'Red Thread connected',
+        done: hasRedThread,
+        actionLabel: 'Connect',
+        onAction: () => context.push('/red-thread'),
+      ),
+    ];
+
+    final completed = items.where((i) => i.done).length;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Room checklist',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$completed/${items.length}',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: PaletteColours.textSecondary,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Progress bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: completed / items.length,
+              minHeight: 6,
+              backgroundColor: PaletteColours.divider,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                PaletteColours.sageGreen,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => _buildChecklistRow(context, item)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChecklistRow(BuildContext context, _ChecklistItem item) {
+    final icon = item.done
+        ? const Icon(Icons.check_circle, size: 18, color: PaletteColours.sageGreen)
+        : Icon(Icons.circle_outlined, size: 18, color: PaletteColours.textTertiary);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          icon,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              item.label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: item.done
+                        ? PaletteColours.textPrimary
+                        : PaletteColours.textSecondary,
+                  ),
+            ),
+          ),
+          if (!item.done && item.actionLabel != null && item.onAction != null)
+            GestureDetector(
+              onTap: item.onAction,
+              child: Text(
+                item.actionLabel!,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: PaletteColours.sageGreenDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditRoomSheet(BuildContext context, WidgetRef ref) {
+    _showRoomEditSheet(context, ref, room);
+  }
+}
+
+class _ChecklistItem {
+  const _ChecklistItem({
+    required this.label,
+    required this.done,
+    this.actionLabel,
+    this.onAction,
+    this.isInformational = false,
+  });
+
+  final String label;
+  final bool done;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final bool isInformational;
+}
+
+// ---------------------------------------------------------------------------
+// Why This Room Works Card
+// ---------------------------------------------------------------------------
+
+class _WhyThisRoomWorksCard extends ConsumerWidget {
+  const _WhyThisRoomWorksCard({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(roomModeConfigProvider(room.isRenterMode));
+    final allPaintsAsync = ref.watch(allPaintColoursProvider);
+    final heroName = allPaintsAsync.when(
+      data: (paints) => _findPaintName(paints, room.heroColourHex!),
+      loading: () => null,
+      error: (_, __) => null,
+    );
+
+    final story = generateRoomStory(
+      roomName: room.name,
+      direction: room.direction,
+      usageTime: room.usageTime,
+      moods: room.moods,
+      heroHex: room.heroColourHex,
+      betaHex: room.betaColourHex,
+      surpriseHex: room.surpriseColourHex,
+      isRenterMode: room.isRenterMode,
+      heroName: heroName,
+      renterMoodTemplate: config.moodSentenceTemplate,
+    );
+
+    if (story.summary.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: PaletteColours.sageGreenLight.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.auto_awesome,
+                    size: 16, color: PaletteColours.sageGreenDark),
+                const SizedBox(width: 8),
+                Text(
+                  'Why this works',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: PaletteColours.sageGreenDark,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              story.summary,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textPrimary,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String? _findPaintName(List<PaintColour> paints, String hex) {
+    final lab = hexToLab(hex);
+    PaintColour? closest;
+    var bestDe = 10.0;
+    for (final paint in paints) {
+      final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
+      final dE = deltaE2000(lab, paintLab);
+      if (dE < bestDe) {
+        bestDe = dE;
+        closest = paint;
+      }
+    }
+    return closest?.name;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Contextual Tool Links
+// ---------------------------------------------------------------------------
+
+class _ContextualToolLinks extends StatelessWidget {
+  const _ContextualToolLinks({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () => context.push('/red-thread'),
+      icon: const Icon(Icons.hub_outlined, size: 16),
+      label: const Text('Check whole-home coherence'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: PaletteColours.sageGreenDark,
+        side: const BorderSide(color: PaletteColours.sageGreen),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared edit sheet (used by checklist)
+// ---------------------------------------------------------------------------
+
+void _showRoomEditSheet(BuildContext context, WidgetRef ref, Room room) {
+  var name = room.name;
+  var direction = room.direction;
+  var usageTime = room.usageTime;
+  var budget = room.budget;
+  var isRenterMode = room.isRenterMode;
+
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setSheetState) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          24 + MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Edit Room',
+              style: Theme.of(ctx).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              initialValue: name,
+              decoration: const InputDecoration(
+                labelText: 'Room name',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (v) => name = v,
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<CompassDirection>(
+              initialValue: direction,
+              decoration: const InputDecoration(
+                labelText: 'Window direction',
+                border: OutlineInputBorder(),
+              ),
+              items: CompassDirection.values.map((d) {
+                return DropdownMenuItem(
+                  value: d,
+                  child: Text(d.displayName),
+                );
+              }).toList(),
+              onChanged: (v) => setSheetState(() => direction = v),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<UsageTime>(
+              initialValue: usageTime,
+              decoration: const InputDecoration(
+                labelText: 'Primary usage time',
+                border: OutlineInputBorder(),
+              ),
+              items: UsageTime.values.map((t) {
+                return DropdownMenuItem(
+                  value: t,
+                  child: Text(t.displayName),
+                );
+              }).toList(),
+              onChanged: (v) {
+                if (v != null) setSheetState(() => usageTime = v);
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<BudgetBracket>(
+              initialValue: budget,
+              decoration: const InputDecoration(
+                labelText: 'Budget bracket',
+                border: OutlineInputBorder(),
+              ),
+              items: BudgetBracket.values.map((b) {
+                return DropdownMenuItem(
+                  value: b,
+                  child: Text(b.displayName),
+                );
+              }).toList(),
+              onChanged: (v) {
+                if (v != null) setSheetState(() => budget = v);
+              },
+            ),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              title: const Text('Renter Mode'),
+              subtitle: const Text('Focus on furniture and accessories'),
+              value: isRenterMode,
+              onChanged: (v) => setSheetState(() => isRenterMode = v),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () async {
+                final repo = ref.read(roomRepositoryProvider);
+                await repo.updateRoom(
+                  RoomsCompanion(
+                    id: Value(room.id),
+                    name: Value(name),
+                    direction: Value(direction),
+                    usageTime: Value(usageTime),
+                    moods: Value(room.moods),
+                    budget: Value(budget),
+                    isRenterMode: Value(isRenterMode),
+                    updatedAt: Value(DateTime.now()),
+                  ),
+                );
+                if (ctx.mounted) Navigator.of(ctx).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

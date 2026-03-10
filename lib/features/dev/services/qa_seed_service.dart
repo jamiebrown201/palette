@@ -4,6 +4,7 @@ import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 
@@ -140,7 +141,11 @@ class QaSeedService {
         colourDnaResultId: 'qa-demo-dna-001');
     await profileRepo.setSubscriptionTier(SubscriptionTier.plus);
 
-    // 4. Invalidate providers so UI refreshes
+    // 5. Set renter constraints for demo (owner mode)
+    ref.read(renterConstraintsProvider.notifier).state =
+        RenterConstraints.none;
+
+    // 6. Invalidate providers so UI refreshes
     ref
       ..invalidate(allRoomsProvider)
       ..invalidate(latestColourDnaProvider);
@@ -163,10 +168,19 @@ class QaSeedService {
     ref.read(hasCompletedOnboardingProvider.notifier).state = false;
     ref.read(subscriptionTierProvider.notifier).state = SubscriptionTier.free;
     ref.read(colourBlindModeProvider.notifier).state = false;
+    ref.read(renterConstraintsProvider.notifier).state =
+        RenterConstraints.none;
 
     final profileRepo = ref.read(userProfileRepositoryProvider);
     await profileRepo.setSubscriptionTier(SubscriptionTier.free);
     await profileRepo.setColourBlindMode(enabled: false);
+    await profileRepo.updateRenterConstraints(
+      canPaint: null,
+      canDrill: null,
+      keepingFlooring: null,
+      isTemporaryHome: null,
+      reversibleOnly: null,
+    );
     // Reset onboarding by updating the profile directly
     await (db.update(db.userProfiles)
           ..where((t) => t.id.equals('default')))

@@ -52,31 +52,43 @@ get_route() {
 # --- Seed DB via sqlite3 ---
 seed_db() {
   echo "Seeding demo data..."
-  $ADB shell "run-as $PKG sqlite3 $DB \"
-    INSERT OR REPLACE INTO user_profiles VALUES('default', 1, 'plus', 0, 'qa-demo-dna-001', NULL, $NOW, $NOW);
 
-    INSERT OR REPLACE INTO colour_dna_results
-      (id, primary_family, secondary_family, colour_hexes,
-       dna_confidence, archetype,
-       property_type, property_era, project_stage, tenure,
-       undertone_temperature, saturation_preference, system_palette_json,
-       completed_at, is_complete)
-      VALUES(
-      'qa-demo-dna-001', 'warmNeutrals', 'earthTones',
-      '#C4A882,#8B7355,#D4C5A9,#A0522D,#DEB887,#F5DEB3,#BC8F8F,#CD853F,#D2B48C,#4A6741',
-      'high', 'theCocooner',
-      'terraced', 'victorian', 'planning', 'owner',
-      'warm', 'mid', '{\"trimWhite\":{\"paintId\":\"qa-trim\",\"hex\":\"#F5F0E8\",\"name\":\"White Cotton\",\"brand\":\"Dulux\",\"role\":\"trimWhite\",\"roleLabel\":\"Trim White\"},\"dominantWalls\":[{\"paintId\":\"qa-dom\",\"hex\":\"#C4A882\",\"name\":\"Camel\",\"brand\":\"Farrow & Ball\",\"role\":\"dominantWall\",\"roleLabel\":\"Dominant Wall\"}],\"supportingWalls\":[{\"paintId\":\"qa-sup1\",\"hex\":\"#D4C5A9\",\"name\":\"Stony Ground\",\"brand\":\"Farrow & Ball\",\"role\":\"supportingWall\",\"roleLabel\":\"Supporting Wall\"},{\"paintId\":\"qa-sup2\",\"hex\":\"#D2B48C\",\"name\":\"Tan\",\"brand\":\"Dulux\",\"role\":\"supportingWall\",\"roleLabel\":\"Supporting Wall\"}],\"deepAnchor\":{\"paintId\":\"qa-deep\",\"hex\":\"#8B7355\",\"name\":\"Dark Buff\",\"brand\":\"Little Greene\",\"role\":\"deepAnchor\",\"roleLabel\":\"Deep Anchor\"},\"accentPops\":[{\"paintId\":\"qa-accent\",\"hex\":\"#4A6741\",\"name\":\"Calke Green\",\"brand\":\"Farrow & Ball\",\"role\":\"accentPop\",\"roleLabel\":\"Accent Pop\"}],\"spineColour\":{\"paintId\":\"qa-spine\",\"hex\":\"#DEB887\",\"name\":\"Burlywood\",\"brand\":\"Dulux\",\"role\":\"spineColour\",\"roleLabel\":\"Spine Colour\"}}',
-      $NOW, 1);
+  # Write SQL to a temp file to avoid shell escaping issues with JSON
+  local tmpfile=$(mktemp /tmp/qa_seed_XXXXX.sql)
+  cat > "$tmpfile" << 'SEEDEOF'
+INSERT OR REPLACE INTO user_profiles (id, has_completed_onboarding, subscription_tier, colour_blind_mode, colour_dna_result_id, drift_prompt_dismissed_at, can_paint, can_drill, keeping_flooring, is_temporary_home, reversible_only, created_at, updated_at) VALUES('default', 1, 'plus', 0, 'qa-demo-dna-001', NULL, NULL, NULL, NULL, NULL, NULL, PLACEHOLDER_NOW, PLACEHOLDER_NOW);
 
-    INSERT OR REPLACE INTO rooms VALUES('qa-room-living', 'Living Room', 'south', 'evening', 'cocooning,elegant', 'midRange', '#C4A882', '#8B7355', '#4A6741', 0, 0, NULL, $NOW, $NOW);
-    INSERT OR REPLACE INTO rooms VALUES('qa-room-bedroom', 'Bedroom', 'east', 'morning', 'calm', 'affordable', '#D4C5A9', '#BC8F8F', '#DEB887', 0, 1, NULL, $NOW, $NOW);
-    INSERT OR REPLACE INTO rooms VALUES('qa-room-kitchen', 'Kitchen', 'north', 'allDay', 'fresh,energising', 'investment', '#F5DEB3', '#CD853F', '#A0522D', 0, 2, NULL, $NOW, $NOW);
+INSERT OR REPLACE INTO colour_dna_results
+  (id, primary_family, secondary_family, colour_hexes,
+   dna_confidence, archetype,
+   property_type, property_era, project_stage, tenure,
+   undertone_temperature, saturation_preference, system_palette_json,
+   completed_at, is_complete)
+  VALUES(
+  'qa-demo-dna-001', 'warmNeutrals', 'earthTones',
+  '#C4A882,#8B7355,#D4C5A9,#A0522D,#DEB887,#F5DEB3,#BC8F8F,#CD853F,#D2B48C,#4A6741',
+  'high', 'theCocooner',
+  'terraced', 'victorian', 'planning', 'owner',
+  'warm', 'mid', '{"trimWhite":{"paintId":"qa-trim","hex":"#F5F0E8","name":"White Cotton","brand":"Dulux","role":"trimWhite","roleLabel":"Trim White"},"dominantWalls":[{"paintId":"qa-dom","hex":"#C4A882","name":"Camel","brand":"Farrow & Ball","role":"dominantWall","roleLabel":"Dominant Wall"}],"supportingWalls":[{"paintId":"qa-sup1","hex":"#D4C5A9","name":"Stony Ground","brand":"Farrow & Ball","role":"supportingWall","roleLabel":"Supporting Wall"},{"paintId":"qa-sup2","hex":"#D2B48C","name":"Tan","brand":"Dulux","role":"supportingWall","roleLabel":"Supporting Wall"}],"deepAnchor":{"paintId":"qa-deep","hex":"#8B7355","name":"Dark Buff","brand":"Little Greene","role":"deepAnchor","roleLabel":"Deep Anchor"},"accentPops":[{"paintId":"qa-accent","hex":"#4A6741","name":"Calke Green","brand":"Farrow & Ball","role":"accentPop","roleLabel":"Accent Pop"}],"spineColour":{"paintId":"qa-spine","hex":"#DEB887","name":"Burlywood","brand":"Dulux","role":"spineColour","roleLabel":"Spine Colour"}}',
+  PLACEHOLDER_NOW, 1);
 
-    INSERT OR REPLACE INTO colour_interactions VALUES('qa-int-001', 'heroSelected', NULL, '#C4A882', 'qa-room-living', 'planner', NULL, $NOW);
-    INSERT OR REPLACE INTO colour_interactions VALUES('qa-int-002', 'colourSwapped', NULL, '#8B7355', 'qa-room-living', 'planner', '#6B5340', $NOW);
-    INSERT OR REPLACE INTO colour_interactions VALUES('qa-int-003', 'colourFavourited', NULL, '#DEB887', NULL, 'redThread', NULL, $NOW);
-  \""
+INSERT OR REPLACE INTO rooms VALUES('qa-room-living', 'Living Room', 'south', 'evening', 'cocooning,elegant', 'midRange', '#C4A882', '#8B7355', '#4A6741', 0, 0, NULL, PLACEHOLDER_NOW, PLACEHOLDER_NOW);
+INSERT OR REPLACE INTO rooms VALUES('qa-room-bedroom', 'Bedroom', 'east', 'morning', 'calm', 'affordable', '#D4C5A9', '#BC8F8F', '#DEB887', 0, 1, NULL, PLACEHOLDER_NOW, PLACEHOLDER_NOW);
+INSERT OR REPLACE INTO rooms VALUES('qa-room-kitchen', 'Kitchen', 'north', 'allDay', 'fresh,energising', 'investment', '#F5DEB3', '#CD853F', '#A0522D', 0, 2, NULL, PLACEHOLDER_NOW, PLACEHOLDER_NOW);
+
+INSERT OR REPLACE INTO colour_interactions VALUES('qa-int-001', 'heroSelected', NULL, '#C4A882', 'qa-room-living', 'planner', NULL, PLACEHOLDER_NOW);
+INSERT OR REPLACE INTO colour_interactions VALUES('qa-int-002', 'colourSwapped', NULL, '#8B7355', 'qa-room-living', 'planner', '#6B5340', PLACEHOLDER_NOW);
+INSERT OR REPLACE INTO colour_interactions VALUES('qa-int-003', 'colourFavourited', NULL, '#DEB887', NULL, 'redThread', NULL, PLACEHOLDER_NOW);
+SEEDEOF
+
+  # Replace timestamp placeholder
+  sed -i '' "s/PLACEHOLDER_NOW/$NOW/g" "$tmpfile"
+
+  # Push to device and execute via pipe
+  $ADB push "$tmpfile" /data/local/tmp/qa_seed.sql > /dev/null 2>&1
+  $ADB shell "cat /data/local/tmp/qa_seed.sql | run-as $PKG sqlite3 app_flutter/palette.sqlite" 2>&1
+  $ADB shell rm /data/local/tmp/qa_seed.sql
+  rm "$tmpfile"
   echo "Done."
 }
 

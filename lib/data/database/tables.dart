@@ -208,6 +208,11 @@ class UserProfiles extends Table {
   TextColumn get colourDnaResultId =>
       text().nullable().references(ColourDnaResults, #id)();
   DateTimeColumn get driftPromptDismissedAt => dateTime().nullable()();
+  BoolColumn get canPaint => boolean().nullable()();
+  BoolColumn get canDrill => boolean().nullable()();
+  BoolColumn get keepingFlooring => boolean().nullable()();
+  BoolColumn get isTemporaryHome => boolean().nullable()();
+  BoolColumn get reversibleOnly => boolean().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 

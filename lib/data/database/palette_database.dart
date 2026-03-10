@@ -31,7 +31,7 @@ class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -75,6 +75,13 @@ class PaletteDatabase extends _$PaletteDatabase {
               userProfiles,
               userProfiles.driftPromptDismissedAt,
             );
+          }
+          if (from < 6) {
+            await m.addColumn(userProfiles, userProfiles.canPaint);
+            await m.addColumn(userProfiles, userProfiles.canDrill);
+            await m.addColumn(userProfiles, userProfiles.keepingFlooring);
+            await m.addColumn(userProfiles, userProfiles.isTemporaryHome);
+            await m.addColumn(userProfiles, userProfiles.reversibleOnly);
           }
         },
       );

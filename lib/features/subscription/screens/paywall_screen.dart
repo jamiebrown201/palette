@@ -24,7 +24,7 @@ class PaywallScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Hero message
+            // Hero message — outcome-focused
             const Icon(
               Icons.auto_awesome,
               size: 48,
@@ -32,39 +32,52 @@ class PaywallScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Unlock the full Palette experience',
+              'Avoid expensive colour mistakes',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 6),
+            Text(
+              'Get personalised recommendations for every room in your home',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
 
-            // Tier cards
+            // Free tier
             _TierCard(
               tier: SubscriptionTier.free,
               isCurrent: currentTier == SubscriptionTier.free,
               features: const [
-                'Colour DNA quiz',
-                'View palette (no editing)',
-                'Room profiles (basic)',
-                'Colour Wheel',
-                'White Finder',
+                'Colour DNA quiz & shareable result',
+                'View your palette',
+                'Unlimited room profiles',
+                'Colour Wheel & White Finder',
+                'Educational content',
+                'Paint shopping links',
               ],
               onSelect: null,
             ),
             const SizedBox(height: 16),
+
+            // Plus tier — recommended
             _TierCard(
               tier: SubscriptionTier.plus,
               isCurrent: currentTier == SubscriptionTier.plus,
               isRecommended: true,
+              price: '\u00A33.99/mo',
+              priceSubtext: 'or \u00A329.99/year (save 37%)',
               features: const [
-                'Everything in Free',
-                'Edit & customise palette',
-                'Light recommendations',
-                '70/20/10 planner',
-                'Red Thread coherence',
-                'Export as PDF',
+                'Everything in Free, plus:',
+                'Edit & customise your palette',
+                'Light direction recommendations',
+                '70/20/10 colour planner',
+                'Red Thread whole-house flow',
+                'Export room plans as PDF',
               ],
               onSelect: () {
                 ref.read(subscriptionTierProvider.notifier).state =
@@ -73,14 +86,19 @@ class PaywallScreen extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 16),
+
+            // Pro tier
             _TierCard(
               tier: SubscriptionTier.pro,
               isCurrent: currentTier == SubscriptionTier.pro,
+              price: '\u00A37.99/mo',
+              priceSubtext: 'or \u00A359.99/year (save 37%)',
               features: const [
-                'Everything in Plus',
-                'Partner mode',
-                'Priority support',
-                'Early access to features',
+                'Everything in Plus, plus:',
+                'AI Visualiser (coming soon)',
+                'Product recommendations (coming soon)',
+                'Partner Mode (coming soon)',
+                'Paint & Finish Recommender (coming soon)',
               ],
               onSelect: () {
                 ref.read(subscriptionTierProvider.notifier).state =
@@ -88,7 +106,29 @@ class PaywallScreen extends ConsumerWidget {
                 context.pop();
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+
+            // Project Pass — compact card
+            _ProjectPassCard(
+              isCurrent: currentTier == SubscriptionTier.projectPass,
+              onSelect: () {
+                ref.read(subscriptionTierProvider.notifier).state =
+                    SubscriptionTier.projectPass;
+                context.pop();
+              },
+            ),
+            const SizedBox(height: 20),
+
+            // Annual framing
+            Text(
+              'Less than a Farrow & Ball sample pot per month.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.softGoldDark,
+                    fontStyle: FontStyle.italic,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
 
             // Disclaimer
             Text(
@@ -113,6 +153,8 @@ class _TierCard extends StatelessWidget {
     required this.features,
     required this.onSelect,
     this.isRecommended = false,
+    this.price,
+    this.priceSubtext,
   });
 
   final SubscriptionTier tier;
@@ -120,6 +162,8 @@ class _TierCard extends StatelessWidget {
   final bool isRecommended;
   final List<String> features;
   final VoidCallback? onSelect;
+  final String? price;
+  final String? priceSubtext;
 
   @override
   Widget build(BuildContext context) {
@@ -181,15 +225,53 @@ class _TierCard extends StatelessWidget {
                 ),
             ],
           ),
+          if (price != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              price!,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: PaletteColours.premiumGold,
+                  ),
+            ),
+            if (priceSubtext != null)
+              Text(
+                priceSubtext!,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: PaletteColours.textTertiary,
+                    ),
+              ),
+          ],
           const SizedBox(height: 12),
           ...features.map((f) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.check,
-                        size: 16, color: PaletteColours.sageGreen),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Icon(
+                        f.contains('coming soon')
+                            ? Icons.schedule
+                            : Icons.check,
+                        size: 16,
+                        color: f.contains('coming soon')
+                            ? PaletteColours.textTertiary
+                            : PaletteColours.sageGreen,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Text(f, style: Theme.of(context).textTheme.bodySmall),
+                    Expanded(
+                      child: Text(
+                        f,
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: f.contains('coming soon')
+                                      ? PaletteColours.textTertiary
+                                      : null,
+                                ),
+                      ),
+                    ),
                   ],
                 ),
               )),
@@ -208,6 +290,89 @@ class _TierCard extends StatelessWidget {
                     ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ProjectPassCard extends StatelessWidget {
+  const _ProjectPassCard({
+    required this.isCurrent,
+    required this.onSelect,
+  });
+
+  final bool isCurrent;
+  final VoidCallback onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Project Pass',
+                      style:
+                          Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                    ),
+                    if (isCurrent) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: PaletteColours.sageGreenLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Current',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: PaletteColours.sageGreenDark,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '6 months of Palette Pro \u2022 \u00A324.99 one-time',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: PaletteColours.textSecondary,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Perfect for a single decorating project',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: PaletteColours.textTertiary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          if (!isCurrent)
+            OutlinedButton(
+              onPressed: onSelect,
+              child: const Text('Get'),
+            ),
         ],
       ),
     );

@@ -16,6 +16,11 @@ class QuizState {
     this.propertyEra,
     this.projectStage,
     this.tenure,
+    this.canPaint,
+    this.canDrill,
+    this.keepingFlooring,
+    this.isTemporaryHome,
+    this.reversibleOnly,
     this.generatedPalette,
     this.dnaConfidence,
     this.archetype,
@@ -46,6 +51,13 @@ class QuizState {
   final ProjectStage? projectStage;
   final Tenure? tenure;
 
+  // Renter constraints (shown when tenure == renter)
+  final bool? canPaint;
+  final bool? canDrill;
+  final bool? keepingFlooring;
+  final bool? isTemporaryHome;
+  final bool? reversibleOnly;
+
   // Result
   final GeneratedPalette? generatedPalette;
   final DnaConfidence? dnaConfidence;
@@ -72,6 +84,11 @@ class QuizState {
     PropertyEra? propertyEra,
     ProjectStage? projectStage,
     Tenure? tenure,
+    bool? canPaint,
+    bool? canDrill,
+    bool? keepingFlooring,
+    bool? isTemporaryHome,
+    bool? reversibleOnly,
     GeneratedPalette? generatedPalette,
     DnaConfidence? dnaConfidence,
     ColourArchetype? archetype,
@@ -89,6 +106,11 @@ class QuizState {
       propertyEra: propertyEra ?? this.propertyEra,
       projectStage: projectStage ?? this.projectStage,
       tenure: tenure ?? this.tenure,
+      canPaint: canPaint ?? this.canPaint,
+      canDrill: canDrill ?? this.canDrill,
+      keepingFlooring: keepingFlooring ?? this.keepingFlooring,
+      isTemporaryHome: isTemporaryHome ?? this.isTemporaryHome,
+      reversibleOnly: reversibleOnly ?? this.reversibleOnly,
       generatedPalette: generatedPalette ?? this.generatedPalette,
       dnaConfidence: dnaConfidence ?? this.dnaConfidence,
       archetype: archetype ?? this.archetype,

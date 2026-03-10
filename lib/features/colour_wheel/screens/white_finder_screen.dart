@@ -12,6 +12,7 @@ import 'package:palette/features/onboarding/models/system_palette.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/providers/app_providers.dart';
 
 class WhiteFinderScreen extends ConsumerWidget {
   const WhiteFinderScreen({this.roomId, super.key});
@@ -40,8 +41,12 @@ class WhiteFinderScreen extends ConsumerWidget {
       }
     }
 
+    final constraints = ref.watch(renterConstraintsProvider);
+    final finderTitle =
+        constraints.wallsAreLocked ? 'Neutral Finder' : 'White Finder';
+
     return Scaffold(
-      appBar: AppBar(title: const Text('White Finder')),
+      appBar: AppBar(title: Text(finderTitle)),
       body: whitesAsync.when(
         data: (grouped) => _WhiteFinderContent(
           grouped: grouped,

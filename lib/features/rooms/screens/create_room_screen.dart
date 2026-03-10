@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/database/palette_database.dart';
+import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:uuid/uuid.dart';
 
@@ -26,7 +27,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   UsageTime _usageTime = UsageTime.allDay;
   final _moods = <RoomMood>{};
   BudgetBracket _budget = BudgetBracket.midRange;
-  bool _isRenterMode = false;
+  late bool _isRenterMode;
 
   static const _presetNames = [
     'Living Room',
@@ -47,6 +48,12 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     'How should it feel?',
     'Budget & ownership',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _isRenterMode = ref.read(renterConstraintsProvider).isRenter;
+  }
 
   @override
   void dispose() {
@@ -723,8 +730,8 @@ class _BudgetStep extends StatelessWidget {
           child: SwitchListTile(
             title: const Text('Renter mode'),
             subtitle: const Text(
-              'Lock wall colour to landlord paint, '
-              'focus on furniture & accessories',
+              'Your renter settings will adapt '
+              "this room's recommendations",
             ),
             value: isRenterMode,
             onChanged: onRenterChanged,

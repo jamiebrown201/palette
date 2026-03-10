@@ -151,6 +151,22 @@ class QuizNotifier extends StateNotifier<QuizState> {
     state = state.copyWith(tenure: tenure);
   }
 
+  // Renter constraint setters
+  void setCanPaint(bool value) =>
+      state = state.copyWith(canPaint: value);
+
+  void setCanDrill(bool value) =>
+      state = state.copyWith(canDrill: value);
+
+  void setKeepingFlooring(bool value) =>
+      state = state.copyWith(keepingFlooring: value);
+
+  void setIsTemporaryHome(bool value) =>
+      state = state.copyWith(isTemporaryHome: value);
+
+  void setReversibleOnly(bool value) =>
+      state = state.copyWith(reversibleOnly: value);
+
   /// Navigate back to a previous stage.
   void goBackToMemoryPrompts() {
     state = state.copyWith(
@@ -254,6 +270,17 @@ class QuizNotifier extends StateNotifier<QuizState> {
     await userProfileRepo.setOnboardingComplete(
       colourDnaResultId: resultId,
     );
+
+    // Persist renter constraints (if any were answered)
+    if (state.tenure == Tenure.renter) {
+      await userProfileRepo.updateRenterConstraints(
+        canPaint: state.canPaint,
+        canDrill: state.canDrill,
+        keepingFlooring: state.keepingFlooring,
+        isTemporaryHome: state.isTemporaryHome,
+        reversibleOnly: state.reversibleOnly,
+      );
+    }
   }
 
   /// Reset quiz state for retaking.

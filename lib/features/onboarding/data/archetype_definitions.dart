@@ -11,6 +11,14 @@ class ArchetypeDefinition {
     required this.styleTips,
     required this.watchOutFor,
     required this.suggestedRooms,
+    required this.bestMaterials,
+    required this.bestMoods,
+    required this.whatToAvoid,
+    required this.bestWoodTones,
+    required this.bestMetalFinishes,
+    required this.bestFabrics,
+    required this.contrastLevel,
+    required this.idealAccentSaturation,
   });
 
   final ColourArchetype archetype;
@@ -21,6 +29,14 @@ class ArchetypeDefinition {
   final List<String> styleTips;
   final String watchOutFor;
   final List<String> suggestedRooms;
+  final List<String> bestMaterials;
+  final List<String> bestMoods;
+  final String whatToAvoid;
+  final List<String> bestWoodTones;
+  final List<String> bestMetalFinishes;
+  final List<String> bestFabrics;
+  final String contrastLevel;
+  final String idealAccentSaturation;
 }
 
 /// Maps primary family + saturation preference to an archetype.
@@ -123,6 +139,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'Ensure at least 15 points of lightness difference between '
         'your lightest and darkest wall colours.',
     suggestedRooms: ['Living room', 'Bedroom', 'Hallway'],
+    bestMaterials: ['Warm oak', 'linen', 'textured ceramics'],
+    bestMoods: ['Cocooning', 'elegant', 'grounded'],
+    whatToAvoid:
+        'Stark cool whites, chrome-heavy finishes, high-gloss surfaces',
+    bestWoodTones: ['Honey oak', 'weathered pine', 'light walnut'],
+    bestMetalFinishes: ['Antique brass', 'brushed gold'],
+    bestFabrics: ['Linen', 'bouclé', 'chunky wool'],
+    contrastLevel: 'low',
+    idealAccentSaturation: 'muted',
   ),
 
   ColourArchetype.theGoldenHour: ArchetypeDefinition(
@@ -149,6 +174,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'In small or north-facing rooms, rich warm tones can feel heavy. '
         'Balance with generous warm white on ceilings and trim.',
     suggestedRooms: ['Dining room', 'Living room', 'Study'],
+    bestMaterials: ['Aged leather', 'raw plaster', 'terracotta'],
+    bestMoods: ['Inviting', 'confident', 'warm'],
+    whatToAvoid:
+        'Cool greys, blue-toned whites, silver or chrome finishes',
+    bestWoodTones: ['Rich walnut', 'dark oak', 'teak'],
+    bestMetalFinishes: ['Brass', 'aged gold'],
+    bestFabrics: ['Velvet', 'raw silk', 'heavy linen'],
+    contrastLevel: 'medium',
+    idealAccentSaturation: 'moderate',
   ),
 
   // ── Cool Neutrals ─────────────────────────────────────────────────────
@@ -177,6 +211,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'In north-facing rooms, cool neutrals can feel cold and unwelcoming. '
         'Consider shifting one shade warmer or adding warm-toned textiles.',
     suggestedRooms: ['Home office', 'Bathroom', 'Open-plan living'],
+    bestMaterials: ['Polished concrete', 'marble', 'pale timber'],
+    bestMoods: ['Calm', 'curated', 'spacious'],
+    whatToAvoid:
+        'Warm yellowy whites, heavy ornate patterns, rustic textures',
+    bestWoodTones: ['Ash', 'bleached oak', 'pale birch'],
+    bestMetalFinishes: ['Brushed nickel', 'matte chrome'],
+    bestFabrics: ['Cotton', 'fine linen', 'cashmere'],
+    contrastLevel: 'medium',
+    idealAccentSaturation: 'muted',
   ),
 
   ColourArchetype.theMonochromeModernist: ArchetypeDefinition(
@@ -204,6 +247,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'Choose an off-black (like a very dark grey) and a warm white '
         'for a more liveable result.',
     suggestedRooms: ['Hallway', 'Bathroom', 'Kitchen'],
+    bestMaterials: ['Glass', 'polished stone', 'lacquer'],
+    bestMoods: ['Bold', 'architectural', 'graphic'],
+    whatToAvoid:
+        'Warm earthy tones, busy patterns, rustic or distressed finishes',
+    bestWoodTones: ['Ebonised wood', 'dark stain', 'charcoal veneer'],
+    bestMetalFinishes: ['Chrome', 'polished nickel', 'gunmetal'],
+    bestFabrics: ['Leather', 'crisp cotton', 'felt'],
+    contrastLevel: 'high',
+    idealAccentSaturation: 'muted',
   ),
 
   // ── Pastels ────────────────────────────────────────────────────────────
@@ -234,6 +286,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'one deeper accent — a soft navy cushion, a charcoal frame — '
         'to add grown-up sophistication.',
     suggestedRooms: ['Bedroom', 'Nursery', 'Bathroom'],
+    bestMaterials: ['Painted furniture', 'porcelain', 'rattan'],
+    bestMoods: ['Calm', 'nurturing', 'airy'],
+    whatToAvoid:
+        'Dark heavy colours, industrial metals, high-contrast schemes',
+    bestWoodTones: ['Pale pine', 'whitewashed oak', 'light beech'],
+    bestMetalFinishes: ['Rose gold', 'soft brass'],
+    bestFabrics: ['Muslin', 'cotton voile', 'embroidered linen'],
+    contrastLevel: 'low',
+    idealAccentSaturation: 'muted',
   ),
 
   ColourArchetype.theColourOptimist: ArchetypeDefinition(
@@ -261,6 +322,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'Limit yourself to two pastel wall colours per room and let '
         'one dominate.',
     suggestedRooms: ['Kitchen', 'Children\'s room', 'Living room'],
+    bestMaterials: ['Painted wood', 'glazed ceramics', 'resin'],
+    bestMoods: ['Joyful', 'playful', 'optimistic'],
+    whatToAvoid:
+        'Too many neutrals, dark moody tones, overly formal finishes',
+    bestWoodTones: ['Birch', 'light maple', 'natural plywood'],
+    bestMetalFinishes: ['Coloured enamel', 'brass'],
+    bestFabrics: ['Cotton', 'printed linen', 'terry cloth'],
+    contrastLevel: 'medium',
+    idealAccentSaturation: 'bold',
   ),
 
   // ── Earth Tones ────────────────────────────────────────────────────────
@@ -290,6 +360,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'Reserve your deepest shades for well-lit south-facing rooms '
         'and use lighter tones elsewhere.',
     suggestedRooms: ['Living room', 'Bedroom', 'Conservatory'],
+    bestMaterials: ['Raw linen', 'unglazed ceramics', 'stone'],
+    bestMoods: ['Restful', 'grounded', 'connected to nature'],
+    whatToAvoid:
+        'Bright synthetic colours, high-gloss finishes, chrome metals',
+    bestWoodTones: ['Elm', 'reclaimed timber', 'driftwood'],
+    bestMetalFinishes: ['Blackened iron', 'matte bronze'],
+    bestFabrics: ['Hemp', 'jute', 'undyed wool'],
+    contrastLevel: 'low',
+    idealAccentSaturation: 'muted',
   ),
 
   ColourArchetype.theStoryteller: ArchetypeDefinition(
@@ -317,6 +396,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'Use lighter, muted versions in connecting spaces like hallways '
         'to give the eye a rest.',
     suggestedRooms: ['Dining room', 'Kitchen', 'Study'],
+    bestMaterials: ['Terracotta', 'handmade tiles', 'woven baskets'],
+    bestMoods: ['Characterful', 'spiced', 'storied'],
+    whatToAvoid:
+        'Cool minimalist schemes, pale pastels, shiny modern finishes',
+    bestWoodTones: ['Dark walnut', 'teak', 'burnt oak'],
+    bestMetalFinishes: ['Hammered copper', 'antique brass'],
+    bestFabrics: ['Kilim', 'woven cotton', 'raw silk'],
+    contrastLevel: 'medium',
+    idealAccentSaturation: 'moderate',
   ),
 
   // ── Jewel Tones ────────────────────────────────────────────────────────
@@ -346,6 +434,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'Test your chosen colour under your room\'s actual lighting '
         'conditions before committing.',
     suggestedRooms: ['Living room', 'Bedroom', 'Dining room'],
+    bestMaterials: ['Marble', 'smoked glass', 'lacquer'],
+    bestMoods: ['Luxurious', 'intimate', 'layered'],
+    whatToAvoid:
+        'Bright primary colours, cheap-looking plastics, overly casual textures',
+    bestWoodTones: ['Dark mahogany', 'ebony veneer', 'rich cherry'],
+    bestMetalFinishes: ['Antique gold', 'darkened brass'],
+    bestFabrics: ['Velvet', 'silk', 'mohair'],
+    contrastLevel: 'medium',
+    idealAccentSaturation: 'muted',
   ),
 
   ColourArchetype.theMaximalist: ArchetypeDefinition(
@@ -373,6 +470,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'artificial lighting and consider a lighter hallway palette '
         'to provide contrast as you move through the house.',
     suggestedRooms: ['Dining room', 'Snug', 'Master bedroom'],
+    bestMaterials: ['Enamel', 'lacquer', 'ornate ceramics'],
+    bestMoods: ['Dramatic', 'opulent', 'statement-making'],
+    whatToAvoid:
+        'Timid neutrals, plain white walls, understated or minimal schemes',
+    bestWoodTones: ['Rosewood', 'polished mahogany', 'gilded wood'],
+    bestMetalFinishes: ['Polished gold', 'ornate brass'],
+    bestFabrics: ['Silk', 'brocade', 'heavy velvet'],
+    contrastLevel: 'high',
+    idealAccentSaturation: 'bold',
   ),
 
   // ── Brights ────────────────────────────────────────────────────────────
@@ -402,6 +508,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'The 70/20/10 rule is your best friend — 70% neutral, '
         '20% supporting colour, 10% bright accent.',
     suggestedRooms: ['Kitchen', 'Playroom', 'Home office'],
+    bestMaterials: ['Laminate', 'painted wood', 'acrylic'],
+    bestMoods: ['Energising', 'optimistic', 'lively'],
+    whatToAvoid:
+        'All-dark rooms, heavy muted palettes, too many competing brights',
+    bestWoodTones: ['Pale oak', 'birch plywood', 'light ash'],
+    bestMetalFinishes: ['Powder-coated colour', 'chrome'],
+    bestFabrics: ['Canvas', 'thick cotton', 'outdoor fabric'],
+    contrastLevel: 'medium',
+    idealAccentSaturation: 'bold',
   ),
 
   // ── Darks ──────────────────────────────────────────────────────────────
@@ -432,6 +547,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'lighting. Plan your lighting before painting — wall lights '
         'and table lamps work better than harsh overhead spots.',
     suggestedRooms: ['Snug', 'Bedroom', 'Dining room'],
+    bestMaterials: ['Leather', 'dark stone', 'smoked glass'],
+    bestMoods: ['Intimate', 'cocooning', 'dramatic'],
+    whatToAvoid:
+        'Bright accent walls, shiny white surfaces, cold overhead lighting',
+    bestWoodTones: ['Black-stained oak', 'dark walnut', 'espresso'],
+    bestMetalFinishes: ['Matte black', 'dark bronze'],
+    bestFabrics: ['Heavy linen', 'wool felt', 'dark velvet'],
+    contrastLevel: 'medium',
+    idealAccentSaturation: 'muted',
   ),
 
   ColourArchetype.theMidnightArchitect: ArchetypeDefinition(
@@ -459,6 +583,15 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'imperfection. Use high-quality paint and prepare surfaces '
         'thoroughly for the best result.',
     suggestedRooms: ['Hallway', 'Cloakroom', 'Dining room'],
+    bestMaterials: ['Polished marble', 'lacquer', 'metal'],
+    bestMoods: ['Architectural', 'dramatic', 'gallery-like'],
+    whatToAvoid:
+        'Warm rustic tones, soft pastels, cosy cottage textures',
+    bestWoodTones: ['Ebonised timber', 'charred wood', 'black veneer'],
+    bestMetalFinishes: ['Black nickel', 'polished chrome'],
+    bestFabrics: ['Leather', 'stiff cotton', 'silk satin'],
+    contrastLevel: 'high',
+    idealAccentSaturation: 'moderate',
   ),
 
   // ── Cross-family (Phase 2 activation) ──────────────────────────────────
@@ -488,5 +621,14 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
         'truly has warmth (check the undertone) and layer plenty of '
         'natural textures.',
     suggestedRooms: ['Open-plan living', 'Bedroom', 'Bathroom'],
+    bestMaterials: ['Pale stone', 'pale timber', 'white ceramics'],
+    bestMoods: ['Calm', 'purposeful', 'effortless'],
+    whatToAvoid:
+        'Busy patterns, multiple competing colours, ornate details',
+    bestWoodTones: ['Pale ash', 'light oak', 'maple'],
+    bestMetalFinishes: ['Brushed stainless', 'matte silver'],
+    bestFabrics: ['Linen', 'cotton', 'fine merino'],
+    contrastLevel: 'low',
+    idealAccentSaturation: 'muted',
   ),
 };

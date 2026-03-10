@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/constants/enums.dart';
+import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/progress_bar.dart';
 import 'package:palette/features/onboarding/logic/quiz_state.dart';
@@ -38,7 +40,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _onQuizComplete() {
+    final quiz = ref.read(quizNotifierProvider);
     ref.read(hasCompletedOnboardingProvider.notifier).state = true;
+
+    // Update renter constraints provider for this session.
+    ref.read(renterConstraintsProvider.notifier).state = RenterConstraints(
+      isRenter: quiz.tenure == Tenure.renter,
+      canPaint: quiz.canPaint,
+      canDrill: quiz.canDrill,
+      keepingFlooring: quiz.keepingFlooring,
+      isTemporaryHome: quiz.isTemporaryHome,
+      reversibleOnly: quiz.reversibleOnly,
+    );
+
     context.go('/home');
   }
 

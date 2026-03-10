@@ -11,6 +11,11 @@ class UserProfile {
     required this.updatedAt,
     this.colourDnaResultId,
     this.driftPromptDismissedAt,
+    this.canPaint,
+    this.canDrill,
+    this.keepingFlooring,
+    this.isTemporaryHome,
+    this.reversibleOnly,
   });
 
   final String id;
@@ -19,6 +24,11 @@ class UserProfile {
   final bool colourBlindMode;
   final String? colourDnaResultId;
   final DateTime? driftPromptDismissedAt;
+  final bool? canPaint;
+  final bool? canDrill;
+  final bool? keepingFlooring;
+  final bool? isTemporaryHome;
+  final bool? reversibleOnly;
   final DateTime createdAt;
   final DateTime updatedAt;
 }

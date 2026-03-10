@@ -86,4 +86,25 @@ class UserProfileRepository {
       ),
     );
   }
+
+  Future<void> updateRenterConstraints({
+    required bool? canPaint,
+    required bool? canDrill,
+    required bool? keepingFlooring,
+    required bool? isTemporaryHome,
+    required bool? reversibleOnly,
+  }) async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        canPaint: Value(canPaint),
+        canDrill: Value(canDrill),
+        keepingFlooring: Value(keepingFlooring),
+        isTemporaryHome: Value(isTemporaryHome),
+        reversibleOnly: Value(reversibleOnly),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 }
