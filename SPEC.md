@@ -1128,7 +1128,7 @@ Online: AI Visualiser, product recommendations, web image saving, share/export, 
 
 ## Implementation Status
 
-_Updated March 2026 after strategic review._
+_Updated March 2026. Phase 1A + 1B complete._
 
 ### Phase 1A: ~95% complete (native app)
 
@@ -1146,17 +1146,17 @@ _Updated March 2026 after strategic review._
 - Red Thread flow visualisation (diagram showing colour flow through rooms)
 - Shareable Colour DNA card deep-linking to web quiz (depends on Phase 1C)
 
-### Phase 1B: Not started (NEW PRIORITY)
+### Phase 1B: Complete
 
-| Feature                            | Status      | Priority |
-| ---------------------------------- | ----------- | -------- |
-| 1B.1 Home Screen Redesign          | Not started | Highest  |
-| 1B.2 Room Detail Enhancement       | Not started | Highest  |
-| 1B.3 Explore Tab Reorganisation    | Not started | High     |
-| 1B.4 Paint Library Personalisation | Not started | High     |
-| 1B.5 Colour DNA Expansion          | Not started | Medium   |
-| 1B.6 Paywall Restructure           | Not started | High     |
-| 1B.7 Renter Mode Enhancement       | Not started | High     |
+| Feature                            | Status | Notes                                                                                          |
+| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| 1B.1 Home Screen Redesign          | Done   | Next-action engine, progress cards, room quick-access, smart CTAs based on completion state     |
+| 1B.2 Room Detail Enhancement       | Done   | Room Story engine, decision checklist, config-driven 70/20/10 labels, wall context row          |
+| 1B.3 Explore Tab Reorganisation    | Done   | Card-based layout, "For Your Rooms" section, learn content carousel, category navigation        |
+| 1B.4 Paint Library Personalisation | Done   | DNA-matched paints, brand filtering, "Your Palette Match" badges, search                        |
+| 1B.5 Colour DNA Expansion          | Done   | Bold variant support, archetype engine with 14 personalities, system palette roles               |
+| 1B.6 Paywall Restructure           | Done   | Three-tier (Free/Plus/Pro), Project Pass, feature comparison, benefit-led design                 |
+| 1B.7 Renter Mode Enhancement       | Done   | RoomModeConfig strategy pattern, 5 renter constraints, Neutral Finder, textile-first canvas      |
 
 ### Phase 1C: Not started (PARALLEL)
 
@@ -1193,7 +1193,7 @@ _Updated March 2026 after strategic review._
 
 ### Features added beyond original spec
 
-These emerged during Phase 1A implementation and strengthen the core product:
+These emerged during Phase 1A and 1B implementation and strengthen the core product:
 
 - **Colour Archetypes** (14 personality-driven identities with system palette roles)
 - **DNA Drift Detection** (tracks preference evolution, prompts re-engagement)
@@ -1202,7 +1202,12 @@ These emerged during Phase 1A implementation and strengthen the core product:
 - **Paint Name Display** (hex codes replaced with real paint names throughout)
 - **Room Colour Psychology** (mood-to-colour recommendation mapping)
 - **Locked Furniture Conflict Detection** (warns when constraints contradict)
-- **QA Mode** (debug-only developer tools at `/dev` route)
+- **QA Mode** (debug-only developer tools at `/dev` route with renter constraint toggles)
+- **Room Story Engine** (narrative room descriptions combining mood, light, and colour choices)
+- **Next Action Logic** (smart home screen CTAs that adapt to user progress and completion state)
+- **RoomModeConfig Strategy Pattern** (single config object replaces scattered if/else renter branches)
+- **Renter Constraint System** (5 home-level constraints: paint, drill, flooring, temporary, reversible)
+- **Neutral Finder** (White Finder variant for can't-paint renters, textile-focused neutrals)
 
 ---
 
