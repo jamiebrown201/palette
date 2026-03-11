@@ -54,7 +54,7 @@ seed_db() {
   echo "Seeding demo data..."
 
   # Write SQL to a temp file to avoid shell escaping issues with JSON
-  local tmpfile=$(mktemp /tmp/qa_seed_XXXXX.sql)
+  local tmpfile=$(mktemp /tmp/qa_seed_XXXXXXXX)
   cat > "$tmpfile" << 'SEEDEOF'
 INSERT OR REPLACE INTO user_profiles (id, has_completed_onboarding, subscription_tier, colour_blind_mode, colour_dna_result_id, drift_prompt_dismissed_at, can_paint, can_drill, keeping_flooring, is_temporary_home, reversible_only, created_at, updated_at) VALUES('default', 1, 'plus', 0, 'qa-demo-dna-001', NULL, NULL, NULL, NULL, NULL, NULL, PLACEHOLDER_NOW, PLACEHOLDER_NOW);
 

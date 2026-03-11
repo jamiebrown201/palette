@@ -72,29 +72,128 @@ The app encodes professional interior design knowledge into algorithmic rules. T
 - **Material Balance:** Mix warm and cool materials. If a room has a lot of wood (warm), introduce some metal or glass (cool) for contrast.
 - **Something Old, Something New, Something Black, Something Gold:** Watson-Smyth's checklist for a room that feels layered and intentional. Codified as a gentle nudge, not a hard rule.
 
+### Paint Finish Rules (to implement in Phase 2)
+
+Every paint recommendation includes a finish recommendation, not just a colour. The wrong finish undermines the right colour. These rules are encoded as a structured mapping in JSON configuration, not hardcoded logic.
+
+**Surface-to-finish mapping:**
+
+| Room Type       | Surface                          | Recommended Finish    | Why                                                                                            |
+| --------------- | -------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| Living room     | Walls                            | Matt / Flat           | Absorbs light evenly across large surfaces, hides imperfections, creates a calm backdrop       |
+| Living room     | Woodwork (skirting, architraves) | Eggshell              | More durable than matt, easier to clean, subtle sheen creates definition between wall and trim |
+| Living room     | Ceiling                          | Matt / Flat           | Reduces glare from overhead light, recedes visually to make the room feel taller               |
+| Bedroom         | Walls                            | Matt / Flat           | Soft, restful quality, no reflective glare from bedside lighting                               |
+| Bedroom         | Woodwork                         | Eggshell              | Same durability logic as living room                                                           |
+| Kitchen         | Walls                            | Satin / Soft Sheen    | Wipeable, resists moisture and grease, holds up to daily wear                                  |
+| Kitchen         | Woodwork                         | Satin                 | Maximum durability in high-traffic, high-moisture environment                                  |
+| Kitchen         | Ceiling                          | Matt / Flat           | Hides condensation marks better than sheen finishes                                            |
+| Bathroom        | Walls                            | Satin / Soft Sheen    | Essential for moisture resistance, prevents peeling and mould                                  |
+| Bathroom        | Woodwork                         | Satin or Gloss        | Maximum moisture protection                                                                    |
+| Bathroom        | Ceiling                          | Satin / Soft Sheen    | Moisture resistance on the surface most exposed to steam                                       |
+| Hallway         | Walls (lower half)               | Eggshell / Satin      | High-traffic area, needs to withstand scuffs and be wipeable                                   |
+| Hallway         | Walls (upper half)               | Matt / Flat           | Less exposed to contact, softer finish visually balances the sheen below                       |
+| Hallway         | Woodwork                         | Eggshell              | Durability for high-traffic                                                                    |
+| Children's room | Walls                            | Eggshell / Soft Sheen | Wipeable for inevitable handprints and marks                                                   |
+| Children's room | Woodwork                         | Satin                 | Maximum durability                                                                             |
+| Home office     | Walls                            | Matt / Flat           | Reduces screen glare, calm visual environment for focus                                        |
+
+**Finish interaction with light direction:**
+
+- North-facing rooms: matt finishes absorb already-limited light. Consider soft sheen on one feature wall to gently bounce light back into the room. The recommendation explains: "A soft sheen on your feature wall will help bounce the limited northern light around the room."
+- South-facing rooms: matt works beautifully because there is plenty of natural light. Sheen finishes can create uncomfortable glare in bright southern light. The recommendation explains: "Matt is ideal here because your generous southern light means you don't need the finish to do any work reflecting light."
+- East-facing rooms (morning light): matt is generally fine; the strong morning light compensates.
+- West-facing rooms (evening light): same logic as east, but if the room is primarily used in the morning (when west-facing rooms are darker), consider soft sheen.
+
+**Finish interaction with colour:**
+
+- Dark colours in matt finish absorb more light and look deeper and richer, which is desirable for feature walls but can make a small room feel cave-like.
+- Light colours in satin finish can look plasticky and cheap. Light colours almost always look best in matt or flat.
+- The recommendation engine cross-references the chosen colour's LRV (Light Reflectance Value) with the finish recommendation: low-LRV colours in small rooms trigger a note: "This deep colour in matt will absorb a lot of light. Consider using it on a single feature wall rather than all four walls."
+
+**Output format in recommendations:**
+When recommending paint, the output includes colour + finish + surface + quantity + explanation:
+"Use Savage Ground in Matt Emulsion for your living room walls (2.5L for two coats), and Savage Ground in Eggshell for the skirting boards (1L). Matt absorbs light evenly across large surfaces, while eggshell on your woodwork is more durable and easier to clean."
+
+### Finish and Material Harmony Rules (to implement in Phase 2)
+
+Products are not just colours. A brass lamp, a chrome tap, an oak table, and a velvet cushion each bring a material character that affects how the room feels. The Design Rules Engine scores product recommendations not just on colour compatibility but on whether the product's finish and material harmonise with what is already in the room and with the user's design identity.
+
+**Archetype-to-finish mapping:**
+Each Colour DNA archetype defines preferred finishes and materials (already captured in the archetype data model's `bestMetalFinishes`, `bestWoodTones`, `bestFabrics` fields). The recommendation engine explicitly cross-references these when scoring products:
+
+| Archetype Family                                     | Preferred Metals                             | Preferred Woods                    | Preferred Fabrics                      | Avoid                            |
+| ---------------------------------------------------- | -------------------------------------------- | ---------------------------------- | -------------------------------------- | -------------------------------- |
+| Warm archetypes (Cocooner, Earthkeeper, Golden Hour) | Antique brass, brushed gold, matte black     | Honey oak, walnut, weathered pine  | Linen, bouclé, chunky knit, velvet     | Chrome, high-gloss, acrylic      |
+| Cool archetypes (Northern Light, Mineral)            | Brushed nickel, polished chrome, matte black | White oak, ash, light birch        | Cotton, smooth linen, light wool       | Brass, copper, dark stained wood |
+| Rich archetypes (Curator, Bloomsbury, Archive)       | Aged brass, dark bronze, matte black         | Dark walnut, mahogany, ebony stain | Velvet, heavy linen, tapestry, leather | Chrome, plastic, light pine      |
+| Nature archetypes (Rewild, Patina, Bohemian)         | Matte black, copper, aged brass              | Reclaimed wood, teak, bamboo       | Jute, rattan, raw linen, cotton        | Chrome, high-gloss, synthetic    |
+| Bold archetypes (Signal Fire, Prism)                 | Polished brass, chrome, copper               | Any with strong grain contrast     | Velvet, silk, bold-pattern cotton      | Muted finishes, weathered looks  |
+| Soft archetypes (Romantic)                           | Rose gold, brushed gold, antique brass       | Light oak, painted white wood      | Velvet, silk, sheer linen              | Industrial metals, raw concrete  |
+
+**The Wood Tone Harmony Check:**
+When a user has locked furniture with a specific wood tone, the recommendation engine checks new product recommendations against it:
+
+- Same wood tone family: strong match, but flag if it creates monotony ("Both your table and this shelf are honey oak, which is harmonious but consider a darker accent piece for contrast")
+- Compatible undertone, different tone: ideal ("Your honey oak table pairs beautifully with this walnut shelf because both have warm undertones but the contrast adds depth")
+- Clashing undertone: warning ("This ash shelf has cool undertones that may clash with your warm honey oak table. Consider walnut or teak instead")
+
+**The Metal Finish Consistency Check:**
+A room should have a dominant metal finish with at most one accent metal. The recommendation engine tracks which metals are already present (from locked furniture and previous recommendations):
+
+- Same metal as existing: safe, consistent
+- Complementary metal (e.g., brass + matte black): good contrast, encouraged
+- Clashing metal (e.g., brushed nickel + antique brass): flagged with explanation ("Your room already has chrome lighting. This brass lamp would introduce a second warm metal that competes. Consider a matte black option that bridges warm and cool.")
+
+**The Fabric Texture Balance Check:**
+The recommendation engine tracks the texture profile of locked items and fills gaps:
+
+- All smooth surfaces (leather, glass, polished wood): aggressively recommend high-texture items (chunky knit throw, woven rug, rattan basket)
+- All soft/plush surfaces (velvet, carpet, upholstered everything): recommend harder textures (glass, metal, smooth ceramic) for contrast
+- Good mix already: recommend items that maintain the balance
+
+**Sheen coherence:**
+Products with visible sheen (polished metal, high-gloss ceramic, lacquered wood) are tracked. Too many high-sheen items in one room creates visual noise. The engine flags when sheen saturation is high: "Your room already has several reflective surfaces. This matte ceramic vase adds visual calm."
+
+### Multi-Colour Product Handling
+
+Many products (rugs, cushions, curtains, patterned ceramics) contain multiple colours. The product data model captures `primaryColour` and `secondaryColour` (both as Lab values), plus an optional `patternColours` array for products with three or more significant colours.
+
+**Scoring logic for multi-colour products:**
+
+- Primary colour is scored at full weight against the room's palette (delta-E, undertone compatibility)
+- Secondary colour is checked for clashes: if the secondary colour's undertone conflicts with the room's dominant undertone, the product is penalised. If the secondary colour matches a Red Thread colour or an accent tier colour, the product is boosted.
+- Pattern colours (if present) are checked for any strong clashes (delta-E > 40 against any locked item). One clash is acceptable for accent pieces; multiple clashes disqualify.
+
+**Explanation for multi-colour products:**
+The "why this works" copy acknowledges the secondary colours: "The warm ochre base harmonises with your Cocooner palette, and the cream pattern picks up your trim white, tying the rug to your woodwork." Or: "The dominant teal complements your accent tier, while the gold thread connects to your antique brass lighting."
+
 ### Scoring Dimensions (for the Recommendation Engine, Phase 2)
 
-When recommending any product, score it across these dimensions:
+When recommending any product, score it across these dimensions with explicit weights:
 
-- Colour compatibility (delta-E to palette)
-- Undertone compatibility (warm/cool alignment)
-- Style fit (matches Colour DNA aesthetic)
-- Scale fit (appropriate for room size)
-- Material balance (adds missing texture/material)
-- Contrast contribution (adds needed visual contrast or calm)
-- Warmth/coolness correction (compensates for light direction)
-- Budget fit (within room's budget bracket)
-- Renter suitability (removable/freestanding if in Renter Mode)
-- Whole-home coherence (contains Red Thread colour or compatible material)
-- Room function fit (appropriate for room type and usage)
+| Dimension                                                                                                      | Weight | Rationale                                                                                 |
+| -------------------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| Colour compatibility (delta-E to palette, including secondary/pattern colour checks for multi-colour products) | 22%    | Core product promise                                                                      |
+| Undertone compatibility (warm/cool alignment)                                                                  | 15%    | The subtle expertise users cannot do themselves                                           |
+| Finish and material harmony (metal/wood/fabric compatibility with locked items and archetype preferences)      | 13%    | The dimension no other app scores; connects products to each other and to design identity |
+| Budget fit (within room's bracket)                                                                             | 13%    | Hard constraint; violating this breaks trust                                              |
+| Style fit (matches Colour DNA archetype aesthetic)                                                             | 12%    | Personalisation differentiator                                                            |
+| Material balance (adds missing texture/material to the room's texture profile)                                 | 10%    | Design rule application: texture layering, fabric balance, sheen coherence                |
+| Scale fit (appropriate for room size)                                                                          | 10%    | Prevents the "rug too small" problem                                                      |
+| Renter suitability (removable/freestanding if Renter Mode)                                                     | 5%     | Binary filter for renters                                                                 |
 
-Each recommendation surfaces a plain-language "why this works" explanation referencing the top 2-3 scoring dimensions.
+Additional soft scoring factors applied after primary ranking: warmth/coolness correction (compensates for light direction), whole-home coherence (contains Red Thread colour or compatible material), room function fit (appropriate for room type and usage), contrast contribution (adds needed visual contrast or calm), wood tone harmony (compatible with existing locked wood items), metal finish consistency (no more than one dominant + one accent metal per room).
+
+Weights are stored in a JSON configuration file, not hardcoded. This allows tuning based on aggregate engagement data (click-through rates, dismiss reasons) without code changes.
+
+Each recommendation surfaces a plain-language "why this works" explanation referencing the top 2-3 scoring dimensions and the specific room context that informed the recommendation. Structure: [Rule reference] + [Specific room context]. Example: "This rug grounds your seating area (Scale Rule) and its warm gold undertone harmonises with your south-facing evening light (Light Direction)."
 
 ---
 
 ## Phased Feature Plan
 
-The app ships in four phases. Each phase is a complete, usable product. The phasing has been restructured from the original spec to reflect the strategic pivot toward room outcomes and product recommendations.
+The app ships in five phases. Each phase is a complete, usable product. The phasing reflects the strategic pivot toward room outcomes and product recommendations, with a new Phase 1E added to address conversion, polish, and instrumentation gaps identified through expert review.
 
 ---
 
@@ -138,6 +237,21 @@ Each archetype defines a structured "system palette" with functional roles: trim
 
 The archetype engine uses weighted scoring across palette family affinity, undertone temperature, and saturation preference, with secondary family blending.
 
+**Archetype practical guidance (implemented in Phase 1B.5):**
+
+Each archetype includes practical design attributes:
+
+```
+recommendedMaterials: [String]
+recommendedMoods: [String]
+avoidMaterials: [String]
+bestWoodTones: [String]
+bestMetalFinishes: [String]
+bestFabrics: [String]
+contrastLevel: "low" | "medium" | "high"
+idealAccentSaturation: "muted" | "moderate" | "bold"
+```
+
 **DNA Drift Detection (implemented):**
 The app tracks all colour interactions (additions, removals, swaps, captures) via a `ColourInteractions` table. A drift detection algorithm periodically compares recent interaction patterns against the original Colour DNA result. When the user's behaviour indicates a meaningful shift, the app surfaces a gentle prompt: "Your taste seems to be evolving. Want to retake the quiz?"
 
@@ -158,7 +272,7 @@ The user's personal colour palette, always accessible. Viewing is free; editing 
 
 **What shipped:**
 
-The palette screen shows 8-12 colours in a visually pleasing layout (see screenshot 02). Each colour is tappable to reveal its palette family, undertone, colour wheel relationships, and matched paint colours from UK brands with names, codes, and approximate prices per litre.
+The palette screen shows 8-12 colours in a visually pleasing layout. Each colour is tappable to reveal its palette family, undertone, colour wheel relationships, and matched paint colours from UK brands with names, codes, and approximate prices per litre.
 
 **Palette Feedback Engine (implemented):**
 Three interconnected feedback systems:
@@ -187,7 +301,7 @@ The room-by-room planning hub. This is where colour theory meets reality.
 
 **What shipped:**
 
-Users create unlimited rooms (free and premium). For each room (see screenshots 03, 04):
+Users create rooms (free: up to 2 rooms; premium: unlimited). For each room:
 
 - Room name (preset list or custom)
 - Direction the main window faces (N/S/E/W, or compass detection)
@@ -195,10 +309,17 @@ Users create unlimited rooms (free and premium). For each room (see screenshots 
 - Desired mood (calm, energising, cocooning, elegant, fresh, grounded, dramatic, playful)
 - Budget bracket per room (affordable / mid-range / investment)
 
+**Room Dimensions (added in Phase 1E):**
+Each room captures approximate dimensions for sizing recommendations:
+
+- Room size: small / medium / large (quick picker, default)
+- Optional manual entry: length x width in metres (override)
+- Property type defaults used as fallback ("A typical 1930s semi-detached living room is approximately 4m x 5m")
+
 **Light Direction Recommendations (Premium):**
 Cross-references room's light direction and usage time against the user's palette to generate tailored colour recommendations. North-facing evening rooms get different suggestions than south-facing morning rooms. This is the primary conversion trigger.
 
-_Free user experience:_ Free users enter compass direction (data stored for upgrade). They see a personalised educational message about their room's light characteristics. **Remaining gap:** The blurred preview of premium recommendations below the educational message is not yet implemented. Currently the light recommendations are fully gated rather than showing a blurred preview with upgrade CTA. This should be implemented to strengthen the conversion trigger.
+_Free user experience:_ Free users enter compass direction (data stored for upgrade). They see a personalised educational message about their room's light characteristics. Below the educational message, a blurred preview of the premium recommendations is shown with an upgrade CTA.
 
 _Premium user experience:_ Full light-matched recommendations with specific colour suggestions tailored to direction, usage time, and mood.
 
@@ -212,14 +333,14 @@ The user picks one hero colour. The app auto-generates:
 
 The algorithm is deterministic (rule-based colour theory, not ML).
 
-**Existing Furniture Lock (implemented):**
-Users "lock" items they are keeping. The algorithm adjusts remaining tiers to accommodate locked items. Furniture conflict detection warns when multiple locked items have conflicting undertones/saturation.
+**Existing Furniture Lock (implemented, basic):**
+Users "lock" items they are keeping. The algorithm adjusts remaining tiers to accommodate locked items. Furniture conflict detection warns when multiple locked items have conflicting undertones/saturation. See Phase 2A for the expanded Furniture Lock.
 
 **Room Colour Psychology (implemented):**
 Structured mapping from room moods to colour recommendations based on colour science. Each mood maps to recommended palette families, undertone preferences, and saturation ranges.
 
-**Renter Mode (implemented, basic):**
-If "Renter" was selected during onboarding, the 70/20/10 planner shifts focus. Walls locked to landlord's existing colour. Planner concentrates on the 30% the renter controls: furniture (20%) and accessories/textiles/art (10%).
+**Renter Mode (implemented):**
+If "Renter" was selected during onboarding, the 70/20/10 planner shifts focus. Walls locked to landlord's existing colour. Planner concentrates on the 30% the renter controls: furniture (20%) and accessories/textiles/art (10%). See Phase 1B.7 for full Renter Mode details.
 
 **Light Simulation Preview (implemented):**
 Three swatches side by side: morning, midday, evening. Kelvin lookup + RGB blend overlay at 10-20% opacity. LRV data adds brightness indicator. Phrased as "helpful preview" not "photorealistic simulation."
@@ -230,19 +351,23 @@ Three swatches side by side: morning, midday, evening. Kelvin lookup + RGB blend
 
 #### Feature 1.5: Interactive Colour Wheel and White Finder [COMPLETE]
 
-**What shipped (see screenshots 06, 07):**
+**What shipped:**
 
 A zoomable, tappable colour wheel. Selecting any colour highlights complementary, analogous, triadic, and split-complementary relationships. Each has a one-sentence explanation. Undertone layer toggleable. DNA overlay shows where the user's palette colours sit on the wheel.
 
-**White Finder:** Spectrum of whites organised by undertone (blue, pink, yellow, grey) with Sowerby's "Paper Test" tutorial. When accessed from a room profile, pre-filters to whites that suit the room's light direction. DNA Match badges indicate which undertone families harmonise with the user's Colour DNA (see screenshot 07).
+**Contextual entry (implemented in Phase 1E):** When opened from a room profile, the wheel pre-selects the user's hero colour and shows relationships relative to their palette rather than starting from a blank slate.
 
-**Context improvement needed (v2):** When opening the Colour Wheel, pre-select the user's hero colour and show relationships relative to their palette rather than starting from a blank slate. This connects the tool to the user's actual rooms rather than feeling like a standalone utility.
+**White Finder:** Spectrum of whites organised by undertone (blue, pink, yellow, grey) with Sowerby's "Paper Test" tutorial. When accessed from a room profile, pre-filters to whites that suit the room's light direction. DNA Match badges indicate which undertone families harmonise with the user's Colour DNA.
+
+**Badge legend:** On first view, a small legend tooltip explains the badge labels (W = Warm undertone, C = Cool undertone, N = Neutral undertone). The legend is dismissible and accessible from a small info icon thereafter.
+
+**Room context header:** When accessed from a room, the White Finder shows "Finding whites for your south-facing Living Room" at the top, reinforcing that this is not an abstract tool.
 
 ---
 
 #### Feature 1.6: The Red Thread (Whole-House Flow) [COMPLETE]
 
-**What shipped (see screenshot 11):**
+**What shipped:**
 
 Users select a floor plan template based on property type (Victorian Terrace, 1930s Semi-Detached, Post-War Estate, Modern Flat, New Build). Each template has predefined tappable room zones. Users assign rooms to zones.
 
@@ -252,45 +377,35 @@ Red thread defined at the top: 2-4 colours that appear in some form in every roo
 
 Thread colours show brand attributions and role descriptions (e.g., "Burlywood, Dulux: Connects naturally to your whole palette"). Room Transitions section allows defining connections between rooms.
 
-**Remaining gaps:**
+**Red Thread Flow Visualisation (implemented in Phase 1E):**
+A visual node-and-edge diagram showing how colour flows through the house. Each room is a node showing its hero colour swatch and name. Edges connect adjacent rooms, coloured with the thread colour(s) they share. Rooms missing a thread colour are highlighted with a gentle warning state. Example: Living Room [Savage Ground] > Hallway [Burlywood thread] > Bedroom [Dark Buff accent]. The diagram is tappable; tapping a room node navigates to its room detail. The diagram is exportable as an image (premium).
 
-- Red Thread flow visualisation: Currently thread colours are listed and rooms connected, but there is no visual diagram showing how colour flows through the house (e.g., Living Room [Savage Ground] > Hallway [Burlywood thread] > Bedroom [Dark Buff accent]). This visual would make the concept much more tangible.
-- Adjacent room comparison (tapping two rooms to see palettes side by side) needs verification.
-- Whole-house view exportable as image and PDF (premium).
-- Free users see blurred preview after creating 3+ rooms (verify implementation).
+**Adjacent room comparison:** Tapping two connected rooms shows their palettes side by side.
+
+**Whole-house view:** Exportable as image and PDF (premium).
+
+**Free user experience:** Blurred preview of the flow visualisation shown after creating 3+ rooms, with upgrade CTA.
 
 ---
 
-### Phase 1B: Connect the Dots (NEW PRIORITY)
+### Phase 1B: Connect the Dots (COMPLETE)
 
 **Theme:** Transform the existing colour toolkit into a connected, guided experience. Make the app feel like it knows your home and tells you what to do next, rather than presenting isolated tools.
 
-This phase was restructured based on strategic feedback. The original Phase 1B (Colour Capture, Moodboards, Sample Ordering, Notifications) is deferred to Phase 1D. The new Phase 1B focuses on the connective tissue that makes Phase 1A features feel like one guided system.
-
 ---
 
-#### Feature 1B.1: Home Screen Redesign ("Your Design Plan")
-
-The Home screen currently shows Colour DNA and a room list (screenshot 01). It is passive. It should answer three questions immediately when opened.
-
-**User Stories:**
-
-- As a user, I want to see what I should do next when I open the app so that I always have a clear next step.
-- As a user, I want to see my progress across all rooms so that I feel motivated to continue.
-- As a user, I want to understand whether my home feels cohesive so that I can fix problems before buying.
-
-**How it works:**
+#### Feature 1B.1: Home Screen Redesign ("Your Design Plan") [COMPLETE]
 
 The Home screen becomes "Your Design Plan" with three sections:
 
 _1. Next Recommended Action (top, most prominent):_
-A single, contextual card recommending the user's most impactful next step. The card changes based on project state:
+A single, contextual card recommending the user's most impactful next step. The card uses outcome-led language, not feature-led:
 
-- "Set up your bedroom" (if rooms are incomplete)
-- "Choose a warm white for the kitchen" (if room has hero but no white)
+- "Connect your 3 rooms so the house feels cohesive" (not "Define your Red Thread")
+- "Choose the right white for the kitchen before buying samples" (not "White selection missing")
+- "Your bedroom still needs a grounding colour" (not "Hero colour not set")
 - "Your living room needs a grounding rug to anchor the sofa" (Phase 2, when product recs are live)
 - "Test your paint samples this weekend. Morning light is best for your east-facing kitchen" (after sample ordering)
-- "Define your Red Thread to connect your 3 rooms" (after 3+ rooms created)
 
 The logic for determining the next action follows a priority hierarchy:
 
@@ -304,9 +419,9 @@ The logic for determining the next action follows a priority hierarchy:
 _2. Project Progress (middle):_
 Room cards with visual progress indicators. Each room shows:
 
-- Hero colour swatch
+- Hero colour swatch (used to fill progress segments instead of generic green)
 - Completion score: direction set, mood set, hero colour chosen, 70/20/10 planned, white selected, furniture locked, Red Thread connected
-- Status: "3 of 6 steps complete"
+- Status: "3 of 7 steps complete"
 - One-line summary: "South-facing, Evening, Cocooning"
 
 Progress tracking is gamified: small animations at milestones ("You've planned 3 of 5 rooms!").
@@ -318,107 +433,87 @@ A compact Red Thread summary showing:
 - One-line coherence verdict: "Your warm neutral scheme flows well across 3 rooms" or "Your kitchen is drifting cooler than the rest of the home"
 - Tap to open Red Thread detail
 
-**Explore tools strip:** The current Explore cards (Colour Wheel, White Finder, Paint Library, Red Thread) move to the Explore tab exclusively. They no longer appear on the Home screen. Instead, these tools are surfaced contextually from within room profiles and recommendations (e.g., "Find the right white" button in room detail links directly to the White Finder pre-filtered for that room).
+_4. Mini palette strip (top, below greeting):_
+A small row of the user's Colour DNA swatches above the main content. This provides emotional context ("look what you're building") alongside the functional next-action card.
 
-**Acceptance Criteria:**
-
-- Next action card is contextual and changes based on project state
-- Room cards show visual completion scores
-- Coherence summary updates in real time as rooms are edited
-- Home screen loads in under 1 second
-- Tapping any room card navigates to room detail
-- Tapping the coherence summary navigates to Red Thread
+**Explore tools strip:** The Explore cards (Colour Wheel, White Finder, Paint Library, Red Thread) live in the Explore tab exclusively. They do not appear on the Home screen. Instead, these tools are surfaced contextually from within room profiles and recommendations (e.g., "Find the right white" button in room detail links directly to the White Finder pre-filtered for that room).
 
 ---
 
-#### Feature 1B.2: Room Detail Enhancement ("Room Decision Board")
+#### Feature 1B.2: Room Detail Enhancement ("Room Decision Board") [COMPLETE]
 
-The Room Detail screen (screenshot 04) is the most promising screen in the app. It already captures light direction, mood, hero colour, furniture lock, and 70/20/10 plan. The next step is to make it feel like a complete decision board rather than a colour configuration page.
+The Room Detail screen is the most important screen in the app. It is where colour theory meets reality and where users build purchase confidence.
 
-**User Stories:**
+**Screen structure (ordered by importance):**
 
-- As a user, I want to understand why my room's configuration works (or doesn't) so that I feel confident before spending money.
-- As a user, I want to see what my room still needs so that I know what to do next.
-- As a user, I want contextual guidance tied to my specific room so that I do not need to visit separate tools.
+1. **Room header with tags** (South-facing, Evening, Cocooning)
+2. **"Why This Room Works" card** (the emotional payoff, 2-3 sentences connecting room context to colour plan)
+3. **Hero colour with 70/20/10 visual**
+4. **Room Checklist** (collapsed by default once 4+ items complete, expandable)
+5. **Room Preview** (colour-blocked mockup, see below)
+6. **Action buttons** (Find white, Lock furniture, Connect thread)
 
-**How it works:**
-
-Add the following modules below the existing 70/20/10 plan:
-
-_"Why This Room Works" card:_
+**"Why This Room Works" card:**
 A 2-3 sentence explanation connecting the room's tags to its colour plan. Example: "Because your living room faces south and you prefer evenings, Savage Ground's warm undertone will glow beautifully in golden-hour light. The cool green accent creates contrast without fighting the warmth."
 
-This card updates dynamically when any room setting changes. It uses the room's direction, usage time, mood, hero colour, and locked furniture as inputs.
+This card updates dynamically when any room setting changes. It references the specific inputs used: direction, usage time, mood, hero colour, locked furniture, and Red Thread status.
 
-_"Room Checklist" module:_
-Visual checklist showing what is configured and what is missing:
+**Room Preview (colour-blocked mockup):**
+Even before AI visualisation (Phase 3), a simple colour-blocked representation of the room shows the 70/20/10 proportions using the actual selected colours. Three rectangles showing proportional areas with the hero, beta, and surprise colours. This addresses the Visualisation Gap (Problem #1) at zero API cost and creates a tangible "wow" moment when the hero colour is chosen.
 
-- Direction set (checkmark)
-- Mood selected (checkmark)
-- Hero colour chosen (checkmark)
-- 70/20/10 plan complete (checkmark or "Beta colour needed")
-- White selected (empty circle with "Find the right white" link)
-- Existing furniture locked (empty circle with "Lock items" link)
-- Red Thread connected (checkmark or "Not yet connected")
+**Room Checklist:**
+Visual checklist showing what is configured and what is missing. Each incomplete item is tappable and navigates to the relevant configuration step with explicit action copy:
 
-Each incomplete item is tappable and navigates to the relevant configuration step.
+- Direction set (checkmark or "Set direction")
+- Mood selected (checkmark or "Choose mood")
+- Hero colour chosen (checkmark or "Pick hero colour")
+- 70/20/10 plan complete (checkmark or "Complete colour plan")
+- White selected (empty circle with "Choose white")
+- Existing furniture locked (empty circle with "Add furniture")
+- Red Thread connected (checkmark or "Connect this room")
 
-_Contextual tool links:_
+Each incomplete item uses pill-shaped buttons with chevrons to make interactivity obvious.
+
+**Contextual tool links:**
 Replace standalone tool navigation with in-context links:
 
-- "Find the right white" button (already present in screenshot 04) navigates to White Finder pre-filtered for this room's direction
+- "Choose white" navigates to White Finder pre-filtered for this room's direction
 - "See how colours change through the day" links to light simulation for this room's hero colour
 - "Check whole-home coherence" links to Red Thread with this room highlighted
 
-**Acceptance Criteria:**
-
-- "Why This Room Works" card appears for any room with hero colour + direction set
-- Room Checklist shows accurate completion state
-- All checklist items are tappable and navigate to the correct configuration step
-- Contextual links pass room context (direction, palette) to the target tool
-
 ---
 
-#### Feature 1B.3: Explore Tab Reorganisation
+#### Feature 1B.3: Explore Tab Reorganisation [COMPLETE]
 
-The Explore tab (screenshot 05) currently lists four tools: Colour Wheel, White Finder, Paint Library, Red Thread. This feels like a disconnected toolbox.
-
-**Restructure into three sections:**
+Three sections:
 
 _1. Tools:_
 
-- Colour Wheel (with contextual note: "See where your palette sits")
-- White Finder (with contextual note: "Find the right white for your rooms and light")
-- Paint Library (with contextual note: "Browse colours from UK paint brands")
+- Colour Wheel (contextual note: "See where your palette sits")
+- White Finder (contextual note: "Find the right white for your rooms and light")
+- Paint Library (contextual note: "Browse colours from UK paint brands")
+
+When room context exists, tool entries show personalised notes: "Recommended paints for your south-facing Living Room" instead of generic "Browse colours from UK paint brands."
 
 _2. Learn:_
-Educational content that builds confidence:
+Educational content that builds confidence. Each is personalised to the user's context where possible:
 
-- "Why undertones matter" (short article or card-based walkthrough)
-- "How light direction changes colour" (with diagrams)
+- "Why undertones matter" (personalised: "Why your warm undertones work best with yellow-based whites")
+- "How light direction changes colour" (personalised: "How your south-facing living room changes Savage Ground through the day")
 - "The 70/20/10 rule explained"
-- "What is a Red Thread?"
+- "What is a Red Thread?" (subtitle: "Keep your whole home feeling connected")
 - "Choosing the right white" (Sowerby's Paper Test, expanded)
 
-Each educational item is a card that expands into a short, image-rich walkthrough. Content should be written in plain language with real examples. These are evergreen and can be created as static content.
+Each educational item is a card that expands into a short, image-rich walkthrough. Content is written in plain language with real examples. These are evergreen and created as static content. Format: illustrated card-based walkthroughs (not video at launch).
 
 _3. Your Palette:_
 
-- Red Thread (with contextual note: "Plan colour flow across your whole home")
+- Red Thread (contextual note: "Plan colour flow across your whole home")
 - Colour DNA summary (quick access to archetype and palette)
-
-**Acceptance Criteria:**
-
-- Explore tab has three clearly labelled sections
-- Educational content is readable without scrolling excessively
-- Tools pass user context where relevant (e.g., Colour Wheel pre-loads palette colours)
-- Paint Library adds a "Matches your palette" filter badge on compatible colours
 
 ---
 
-#### Feature 1B.4: Paint Library Personalisation
-
-The Paint Library (screenshot 08) is currently a browse-only catalogue. It shows brand, hex, price, and undertone badge, but has no connection to the user's palette or rooms.
+#### Feature 1B.4: Paint Library Personalisation [COMPLETE]
 
 **Enhancements:**
 
@@ -428,25 +523,17 @@ A toggle filter that shows only paints compatible with the user's Colour DNA (de
 _"Recommended for [room name]" badges:_
 When browsing, paints that suit a specific room's light direction show a room badge: "Good for your north-facing kitchen."
 
+_Price bracket filter:_
+A primary filter alongside existing "My palette" / "Brand" / "Family" options. Three tiers: £ (under £25/L), ££ (£25-50/L), £££ (over £50/L). First-time homeowners (primary persona) are price-conscious; seeing Benjamin Moore at £72/L alongside Crown at £16/L without context creates sticker shock.
+
 _Sorting by relevance:_
-Default sort should prioritise paints that match the user's palette and room contexts, not alphabetical or brand-first.
-
-**Acceptance Criteria:**
-
-- "Works with my palette" toggle filters the library
-- Room-specific badges appear where applicable
-- At least one filter combination returns results for any Colour DNA archetype
-- Performance: filter applies in under 500ms
+Default sort prioritises paints that match the user's palette and room contexts, not alphabetical or brand-first.
 
 ---
 
-#### Feature 1B.5: Colour DNA Expansion ("Your Design Identity")
+#### Feature 1B.5: Colour DNA Expansion ("Your Design Identity") [COMPLETE]
 
-The Colour DNA result (screenshot 02) is memorable and beautiful but currently abstract. "The Cocooner: Warmth without fuss" is a great identity, but users need to know what it means for their actual decisions.
-
-**Enhancements:**
-
-Below the existing palette display and "Why these colours work" section, add a "Your Design Identity" card with practical guidance:
+Below the existing palette display and "Why these colours work" section, a "Your Design Identity" card with practical guidance:
 
 - **Best materials:** "Warm oak, linen, antique brass, textured ceramics"
 - **Best moods:** "Cocooning, elegant, grounded"
@@ -454,33 +541,9 @@ Below the existing palette display and "Why these colours work" section, add a "
 - **Best wood tones:** "Honey oak, walnut, weathered pine"
 - **Best metal finishes:** "Antique brass, brushed gold, matte black"
 
-This guidance is generated from the archetype definition. Each archetype should have these practical attributes defined in its data model alongside the existing colour roles.
-
-**Data model addition per archetype:**
-
-```
-recommendedMaterials: [String]
-recommendedMoods: [String]
-avoidMaterials: [String]
-bestWoodTones: [String]
-bestMetalFinishes: [String]
-bestFabrics: [String]
-contrastLevel: "low" | "medium" | "high"
-idealAccentSaturation: "muted" | "moderate" | "bold"
-```
-
-**Acceptance Criteria:**
-
-- Every archetype has practical guidance defined
-- Guidance appears on the Colour DNA screen below existing content
-- Guidance uses plain language with no jargon
-- Guidance is consistent with the archetype's colour palette
-
 ---
 
-#### Feature 1B.6: Paywall Restructure
-
-The current paywall (screenshot 10) gates features that feel like "more tools." The tier differentiation between Plus and Pro is weak (Pro adds Partner Mode, Priority Support, Early Access).
+#### Feature 1B.6: Paywall Restructure [COMPLETE, updated in Phase 1E]
 
 **Restructured tiers:**
 
@@ -488,23 +551,26 @@ The current paywall (screenshot 10) gates features that feel like "more tools." 
 
 - Colour DNA quiz and shareable result
 - Personal palette (view only, no edits)
-- Unlimited room creation (invest effort before paywall)
+- Up to 2 rooms (enough to experience the product, not enough to complete a home)
 - Basic room setup (direction, mood, hero colour)
 - Colour Wheel and White Finder (browse only)
 - 1 moodboard (Phase 1D)
 - Colour Capture (view results, save to moodboard, not palette) (Phase 1D)
 - Educational content
 - "Buy This Paint" affiliate links on all swatches (live from day one)
-- Personalised educational message for light direction (not blurred preview, but explaining what light direction means for their room)
+- Personalised educational message for light direction
+- Blurred preview of premium recommendations (light direction, 70/20/10, Red Thread) with upgrade CTA
+- Room Preview (colour-blocked mockup)
 
 **Palette Plus (£3.99/month or £29.99/year):**
 
 - Everything in Free, plus:
+- Unlimited rooms
 - Palette editing (add, remove, swap)
 - Light direction recommendations per room (full, not blurred)
 - 70/20/10 planner with auto-generation and furniture lock
-- Red Thread whole-house flow with coherence checking
-- "Why This Room Works" explanations on all recommendations
+- Red Thread whole-house flow with coherence checking and flow visualisation
+- "Why This Room Works" explanations on all rooms
 - Unlimited moodboards with share and export (Phase 1D)
 - Colour Capture save to palette with clash warnings (Phase 1D)
 - Sample ordering flow with testing reminders (Phase 1D)
@@ -519,7 +585,6 @@ The current paywall (screenshot 10) gates features that feel like "more tools." 
 - "Complete the Room" product recommendations per room (Phase 2)
 - Room shopping lists with affiliate links (Phase 2)
 - Paint & Finish Recommender with quantities (Phase 2)
-- Partner Mode with shared palette and budget alignment (Phase 2)
 - Seasonal refresh suggestions (Phase 2)
 - AI design assistant (Phase 3)
 
@@ -527,42 +592,44 @@ The current paywall (screenshot 10) gates features that feel like "more tools." 
 
 - 6 months of full Palette Pro access
 - For users who prefer a one-time purchase for a defined project
+- **Trigger:** Surfaced specifically when a user creates 4+ rooms within the first week, signalling active renovation mode. Copy: "Looks like you're decorating your whole home. Get 6 months of everything for less than one hour with an interior designer."
 - **Expiry behaviour:** When the 6 months end, the user downgrades to Free. All data preserved. They retain view access to everything they created but lose premium features. Gentle re-conversion prompt 2 weeks before expiry and on expiry day. No data ever deleted.
+
+**14-Day Free Trial of Palette Plus:**
+Triggered after the user creates their second room. The user has invested effort (room setup data) that creates switching cost, and the trial lets them experience light direction recommendations and 70/20/10 planning before committing. Trial converts to annual billing by default (with clear disclosure). Trial users who do not convert retain all their data in view-only mode.
 
 **AI Visualiser Credit Top-ups:**
 
 - 10 credits for £1.99 (in-app purchase, available to any tier)
 
-**Paywall copy restructure:**
-The upgrade screen should lead with outcomes, not features. Instead of "Edit & customise palette" lead with "Avoid expensive colour mistakes" or "Get personalised recommendations for every room." Show a blurred preview of what the premium output looks like (blurred Red Thread, blurred room recommendations) before the paywall.
+**Paywall design principles (updated in Phase 1E):**
+
+The upgrade screen leads with visual outcomes, not feature lists:
+
+- Show the user's own room data in a blurred preview: "See how Savage Ground will look in your south-facing living room at sunset"
+- Use outcome-led headlines: "Avoid expensive colour mistakes" not "Edit & customise palette"
+- Show a before/after: blurred premium output (Red Thread flow, room recommendations) above the paywall
+- Price visible and anchored: "Less than a Farrow & Ball sample pot per month"
+- Primary CTA button uses a warm accent colour that stands out from the sage green palette, making it the most prominent element on the screen
 
 **Conversion triggers (contextual upgrade prompts):**
 
 - After creating second room: "Unlock light-matched recommendations for all your rooms"
+- Attempting to create third room (free limit): "Your home has more than 2 rooms. Unlock your full design plan"
 - When tapping Red Thread with 3+ rooms: blurred preview + "See how your rooms connect"
 - When tapping Export: "Save your room plan as a PDF"
 - When trying to edit palette: "Customise your palette to match your evolving taste"
 - When tapping "Save to Palette" in Colour Capture: "Add colours to your palette with clash warnings"
 - Phase 2: When viewing "Complete the Room": "Get personalised product recommendations"
 
-**Annual pricing framing:** "Less than a Farrow & Ball sample pot per month."
-
-**Acceptance Criteria:**
-
-- Paywall screen leads with outcome-focused copy
-- Blurred previews shown for at least 2 premium features before paywall
-- Conversion triggers fire at contextually appropriate moments
-- Tier differentiation is immediately clear
-- Price is visible on the upgrade screen (currently not visible in screenshot 10)
-
 ---
 
-#### Feature 1B.7: Renter Mode Enhancement
+#### Feature 1B.7: Renter Mode Enhancement [COMPLETE]
 
-Renter Mode currently shifts the 70/20/10 planner to lock walls and focus on furniture/accessories. This needs to be expanded into a first-class experience that makes renters feel the app was built for them.
+Renter Mode currently shifts the 70/20/10 planner to lock walls and focus on furniture/accessories. This is expanded into a first-class experience that makes renters feel the app was built for them.
 
 **Renter onboarding expansion:**
-When "Renter" is selected during onboarding or room setup, ask additional constraint questions:
+When "Renter" is selected during onboarding or room setup, additional constraint questions:
 
 - Can you paint? (Some landlords allow it)
 - Can you drill or mount things on walls?
@@ -588,39 +655,24 @@ These answers are stored per-home (not per-room) and filter all subsequent recom
 **Landlord palette detection:**
 If renters cannot paint, prompt them to identify their existing wall colour: photograph the wall, or select from common landlord colours (Magnolia, Builder's White, Cool Grey, Off-White). The app identifies the undertone and recommends complementary furnishings that work with those fixed walls.
 
-**Dynamic algorithm restructuring (Gemini's insight):**
+**Dynamic algorithm restructuring:**
 For renters who cannot paint, the entire 70/20/10 algorithm restructures. Instead of walls being the Hero, the Hero shifts to the rug (to define the floor) and the sofa/bed (the largest visual items). The algorithm recalculates from these anchors outward. This is not just "hiding paint features" but a fundamentally different design canvas.
 
+**RoomModeConfig strategy pattern (implemented):**
+A single configuration object replaces scattered if/else renter branches. The config drives labels, available features, checklist items, and recommendation filters based on the user's renter constraints.
+
 **Move-out portability:**
-Since renters move more often, their Colour DNA and design preferences should travel with them. When setting up a new home, the app should offer: "Moving to a new place? Here's how to adapt your palette to your new rooms."
+Since renters move more often, their Colour DNA and design preferences travel with them. When setting up a new home, the app offers: "Moving to a new place? Here's how to adapt your palette to your new rooms."
 
-**Renter-specific product categories (Phase 2):**
-
-- Removable wallpaper and wall decals
-- Peel-and-stick tiles (bathroom/kitchen backsplash)
-- Freestanding furniture (no built-ins)
-- Soft furnishing layers (rugs over existing flooring, throws over existing sofas)
-- Lighting (plug-in pendants, floor lamps, table lamps, LED strips)
-- Leaning art and mirrors (no drilling)
-- Renter-safe hardware swaps (drawer pulls, showerheads)
-- Portable storage and shelving
-
-**Important UX principle:** Renter Mode must feel additive, not restrictive. Label adaptations as "Renter Edition" or "Designed for renters" rather than "Limited Mode." The messaging should be: "Make this place feel like yours without risking your deposit."
-
-**Acceptance Criteria:**
-
-- Renter constraint questions appear during onboarding or room setup
-- Constraints are stored per-home and filter all recommendations
-- 70/20/10 algorithm dynamically restructures for renters who cannot paint
-- Landlord palette detection identifies undertone from common wall colours
-- Renter Mode feels like a tailored experience, not a stripped-down one
-- All renter adaptations are reversible if the user later buys a property
+**UX principle:** Renter Mode feels additive, not restrictive. Label adaptations as "Renter Edition" or "Designed for renters" rather than "Limited Mode." The messaging is: "Make this place feel like yours without risking your deposit." Onboarding copy: "We'll help you create a home you love, deposit intact." The 70/20/10 visually shows what is locked (landlord walls) versus what is the user's canvas (furniture, textiles, lighting). The renter path gets the same narrative warmth, recommendation richness, and visual polish as the owner path.
 
 ---
 
 ### Phase 1C: Web Acquisition Funnel (PARALLEL EFFORT)
 
-**Theme:** Turn the Colour DNA quiz into a viral acquisition channel. This is a separate web project that ships alongside or shortly after Phase 1B.
+**Theme:** Turn the Colour DNA quiz into a viral acquisition channel. This is a separate web project that ships alongside Phase 1E or early Phase 2.
+
+**Priority note:** The web quiz should ship as early as possible. It is the lowest-cost acquisition channel (shareable Colour DNA cards on Instagram Stories), enables Partner Mode v1 later (partner takes quiz on web without installing), and generates installs that Phase 2 converts to revenue. These are complementary, not sequential.
 
 **Status: Not started.**
 
@@ -653,20 +705,13 @@ Prominently offered on the web result screen (not buried). User enters email, re
 
 **Universal Links and App Links:** Host `apple-app-site-association` and `assetlinks.json` on the domain so `palette.app/quiz/[result_id]` opens the app if installed. Free platform features, no third-party provider needed.
 
-**Acceptance Criteria:**
-
-- Web quiz completable in under 3 minutes without app install
-- Teaser result shows archetype name, top 3 colours, shareable card
-- Full result gated behind app download
-- Campaign URL handover works on iOS and Android
-- Email save is prominent and functional
-- Shared links render a beautiful OG image preview
-
 ---
 
-### Phase 1D: Retention and Deepening (ORIGINAL PHASE 1B)
+### Phase 1D: Retention and Deepening
 
-**Theme:** Features that make the product stickier but do not drive the initial "aha" moment. Build after validating Phase 1B conversions.
+**Theme:** Features that make the product stickier but do not drive the initial "aha" moment. Build after validating Phase 1E conversions.
+
+**Status: Not started.**
 
 ---
 
@@ -688,13 +733,6 @@ Capture screen displays:
 - "Nudge warmer/cooler" slider for manual adjustment
 
 **Free/premium boundary:** Free users can capture, view results, save to moodboard. Premium gate on "save to palette with clash warnings."
-
-**Acceptance Criteria:**
-
-- Colour extraction works in real time
-- At least 3 paint matches displayed sorted by delta-E proximity
-- Palette fit uses defined thresholds
-- "Capture in natural daylight" guidance in viewfinder
 
 ---
 
@@ -739,122 +777,596 @@ All dismissible. Frequency configurable (daily/weekly/off).
 
 ---
 
-### Phase 2: The Recommendation Engine
+### Phase 1E: Conversion, Polish & Instrumentation (NEW)
 
-**Theme:** Move users from planning to purchasing with confidence. This is the biggest leap in usefulness and the primary monetisation unlock.
+**Theme:** Tighten the last 10% of the app around guidance, visibility, confidence, and measurement before building the commerce engine. Expert review identified that the app has strong intelligence but users still do too much interpretation before feeling ready to spend. This phase closes that gap.
 
-**Ship order:** Furniture Lock expansion first (data capture), then product recommendations, then shopping lists, then seasonal refresh.
+**Ship order:** Analytics instrumentation first (you cannot improve what you do not measure), then visual polish, then conversion optimisation, then the remaining feature gaps.
 
 ---
 
-#### Feature 2.1: Expanded Furniture Lock ("What You Already Own")
+#### Feature 1E.1: Analytics Instrumentation
 
-The current furniture lock is a placeholder (screenshot 04 shows "+ Lock existing furniture" button). This needs to become a rich data capture system because it is the data that makes all recommendations personal and defensible.
+**Why this is first:** Without event tracking, none of the success metrics can be validated. The web acquisition funnel (Phase 1C) and commerce engine (Phase 2) cannot be optimised without stage-by-stage data.
+
+**Analytics tool:** PostHog (self-hostable, privacy-respecting, generous free tier) or Supabase logging (zero additional cost).
+
+**Event taxonomy (minimum viable):**
+
+_Onboarding:_
+
+- `quiz_started`, `quiz_stage_completed` (with stage number), `quiz_skipped` (with stage number), `quiz_completed`, `quiz_shared`
+- `archetype_assigned` (with archetype name)
+- `quiz_drop_off_stage` (which stage they abandoned)
+
+_Rooms:_
+
+- `room_created`, `room_step_completed` (with step name), `room_deleted`
+- `room_checklist_item_tapped` (with item name)
+- `room_completion_score_changed` (with old/new score)
+- `red_thread_created`, `red_thread_room_connected`
+
+_Conversion:_
+
+- `paywall_viewed` (with trigger source), `paywall_dismissed`, `upgrade_tapped` (with tier), `upgrade_completed` (with tier and billing period)
+- `trial_started`, `trial_converted`, `trial_expired`
+- `blurred_preview_viewed` (with feature name)
+- `project_pass_viewed`, `project_pass_purchased`
+
+_Commerce:_
+
+- `buy_paint_tapped` (with brand, colour, source screen), `buy_paint_completed` (if trackable via affiliate)
+- `product_rec_viewed`, `product_rec_tapped`, `product_rec_dismissed` (with reason), `product_rec_saved`
+- `affiliate_link_tapped` (with product category, price, retailer)
+
+_Engagement:_
+
+- `colour_wheel_opened` (with context: standalone vs room), `white_finder_opened` (with context)
+- `paint_library_filtered` (with filter type), `palette_edited`
+- `explore_learn_card_opened` (with article name)
+- `time_on_screen` (for key screens: room detail, home, explore)
+
+_Retention:_
+
+- `session_started`, `session_duration`, `days_since_last_session`
+- `notification_opt_in`, `notification_tapped`
+
+---
+
+#### Feature 1E.2: A/B Testing Infrastructure
+
+Build the ability to test variations on the most conversion-sensitive surfaces before Phase 2 adds density:
+
+- Different paywall copy and layouts
+- Different entry points for upgrade prompts (after room 2 vs. room 3)
+- Annual vs. monthly default selection
+- Blurred preview intensity
+- Trial length (7-day vs. 14-day)
+- Next-action card copy variations
+
+**Implementation:** Feature flag system (PostHog feature flags, or simple Supabase-backed config). Each user assigned to a cohort at first launch. Cohort assignment stored locally and synced to analytics.
+
+---
+
+#### Feature 1E.3: Blurred Premium Previews
+
+**Why this matters:** Research on progressive paywall patterns shows that showing users a tantalising preview of premium output (then gating the full detail) converts 2-3x better than fully hiding the feature. Currently, premium features show a hard lock (padlock icon). This must change to blurred previews that create desire.
+
+**Where to implement:**
+
+1. **Light Direction recommendations (Room Detail):** Generate the actual recommendations for the user's room, render them blurred with an upgrade CTA overlaid. The user can see that specific, personalised content exists for their room.
+
+2. **70/20/10 planner preview (Room Detail):** Show the colour breakdown blurred, with the hero colour visible but beta and surprise colours obscured.
+
+3. **Red Thread flow visualisation:** Show the flow diagram with room names visible but colour swatches blurred. The structure is visible; the specific guidance is gated.
+
+4. **"Complete the Room" product recommendations (Phase 2):** Show that recommendations exist for the user's room (category labels visible, product images blurred).
+
+**Design:** Each blurred preview includes: a 2-3 word description of what the content is ("Your personalised colour plan"), the blurred content, and a single CTA button ("Unlock with Palette Plus"). The blur level should be enough to obscure detail but allow the user to see that real, personalised content is present.
+
+---
+
+#### Feature 1E.4: Paywall Visual Redesign
+
+The paywall screen is the single highest-leverage conversion surface. The current implementation leads with feature lists. The redesign leads with visual outcomes using the user's own data.
+
+**Paywall structure:**
+
+1. **Headline:** Outcome-led. "Avoid expensive colour mistakes" or "Get personalised recommendations for every room."
+2. **Visual hero:** A blurred-then-revealed animation showing the user's own room data. Example: their Living Room's light direction recommendation, initially blurred, partially revealed to show the personalised content.
+3. **Tier comparison:** Clean, scannable. Three tiers with clear value progression: Free = explore, Plus = plan, Pro = buy. Short descriptions, not exhaustive feature lists.
+4. **Price with anchor:** "£3.99/month. Less than a Farrow & Ball sample pot per month."
+5. **CTA:** Primary button in a warm accent colour (not the standard sage green) that stands out as the most prominent interactive element on the screen. Copy: "Start free trial" (if trial) or "Upgrade to Plus."
+6. **Social proof:** "Join [X] homeowners planning with confidence" (once user count is meaningful).
+
+---
+
+#### Feature 1E.5: Visual Polish Pass
+
+Address the visual hierarchy, contrast, and styling issues identified across all reviews. This is a systematic pass, not a redesign.
+
+**Typography hierarchy:**
+Establish a strict type scale applied consistently across all screens:
+
+- Display weight: screen titles (e.g., "Your Design Plan", "Living Room")
+- Section headings: card group labels (e.g., "Light & Direction", "Room Checklist")
+- Card titles: individual card headers
+- Body text: descriptions, explanations
+- Caption: metadata, badges, timestamps
+
+The editorial serif for headings should come through more strongly. Consider pairing a refined serif (Instrument Serif or DM Serif Display) for headings with the existing sans-serif body font.
+
+**Sage green accent colour discipline:**
+The sage green currently appears on buttons, progress bars, navigation highlights, tags, and card accents simultaneously. When everything is sage green, nothing stands out. Reserve the primary sage accent for primary CTAs and interactive elements only. Use a warm neutral (existing cream/gold tones) for secondary UI elements like tags and progress bars.
+
+**Card depth system:**
+Add clearer depth differentiation:
+
+- Level 0 (flush): backgrounds
+- Level 1 (subtle shadow): content cards, informational panels
+- Level 2 (elevated shadow): interactive cards, CTAs, the "Next Action" card on Home
+
+**Contrast accessibility pass:**
+WCAG AA requires 4.5:1 contrast for normal text and 3:1 for UI components and large text. Run a systematic check on all screens, with particular attention to:
+
+- Pale green labels on light backgrounds
+- Muted secondary text
+- Soft badge treatments on cards
+- Disabled states and tertiary links
+- All interactive elements (buttons, toggles, chips)
+
+**Progress indicators:**
+Replace generic green progress bar segments with the room's hero colour. This creates visual identity per room and makes progress feel personal rather than clinical.
+
+---
+
+#### Feature 1E.6: Branded Term Consistency
+
+Every branded term must always appear with its plain-English subtitle. This is not optional; it is a systematic requirement across every screen where the term appears.
+
+| Branded Term      | Plain-English Subtitle                 |
+| ----------------- | -------------------------------------- |
+| Colour DNA        | Your personal design identity          |
+| Red Thread        | Keep your whole home feeling connected |
+| Hero colour       | The main colour for this room          |
+| 70/20/10          | Your room's colour balance             |
+| Palette Story     | How your colours work together         |
+| Colour Archetypes | Your design personality                |
+| DNA Match         | Suits your personal palette            |
+
+The subtitle appears in smaller, lighter text directly below or beside the branded term. It is persistent, not shown only on first encounter.
+
+---
+
+#### Feature 1E.7: Capture Tab Resolution
+
+The Capture tab (Tab 3) currently leads to a "Coming Soon" screen. An empty tab in the primary navigation damages perceived app quality and user trust.
+
+**Resolution options (choose one):**
+
+Option A (recommended): **Temporarily restructure to 4 tabs.** Remove the Capture tab entirely. Use Home, Rooms, Explore, Profile. When Colour Capture ships (Phase 1D), reintroduce the tab.
+
+Option B: **Ship a minimal Colour Capture MVP.** A basic camera-to-colour extraction (photograph, identify dominant colour, show 3 closest paint matches). No palette integration, no clash warnings. Enough to make the tab functional and valuable.
+
+Option C: **Repurpose the tab temporarily.** Replace "Capture" with "Inspiration" or "My Moodboard" until Capture ships.
+
+---
+
+#### Feature 1E.8: Red Thread Flow Visualisation
+
+Implement the visual flow diagram described in Feature 1.6. This is the single most impactful remaining Phase 1 gap because it makes the app's most differentiated concept (whole-home coherence) tangible.
+
+**Implementation:**
+A node-and-edge diagram rendered with CustomPainter (Flutter). Each room is a rounded rectangle node containing the room name and hero colour swatch. Edges connect adjacent rooms, drawn as curved lines coloured with the shared thread colour(s). Rooms with no thread colour present show a subtle dashed border or warning indicator.
+
+The diagram is scrollable and zoomable for homes with many rooms. Tapping a room node navigates to its room detail. A "Share" button exports the diagram as an image (premium).
+
+---
+
+#### Feature 1E.9: Room Preview Colour-Block Mockup
+
+For each room with a hero colour and 70/20/10 plan, generate a simple colour-blocked representation showing the proportional colour balance. This is not a room render; it is an abstract visualisation of the colour proportions.
+
+**Implementation:**
+Three horizontal bands or rectangles:
+
+- 70% band in the hero colour (largest area, representing walls/dominant surfaces)
+- 20% band in the beta colour
+- 10% band in the surprise/accent colour
+- Optional thin line in the Red Thread dash colour
+
+Labels on each band: "Walls & curtains", "Sofa & rug", "Cushions & art" (or renter equivalents).
+
+This zero-cost visualisation addresses the Visualisation Gap and creates a satisfying output moment when the user completes their 70/20/10 plan.
+
+---
+
+#### Feature 1E.10: Applied State System
+
+As more filters, badges, room matches, and recommendation contexts appear (especially in Phase 2), users need persistent evidence of the active context. Without this, users lose track of why they are seeing what they are seeing.
+
+**Implementation:**
+
+- Persistent filter chips above results in Paint Library, White Finder, and later product recommendations
+- Room-context badge at the top of any tool accessed from a room: "Showing results for: Living Room (south-facing, evening)"
+- Clear "Reset filters" action
+- Filters remembered per room session (returning to a room's White Finder shows the same filters)
+
+---
+
+### Phase 1E Implementation Status
+
+| Feature                               | Status      | Priority |
+| ------------------------------------- | ----------- | -------- |
+| 1E.1 Analytics Instrumentation        | Not started | P0       |
+| 1E.2 A/B Testing Infrastructure       | Not started | P1       |
+| 1E.3 Blurred Premium Previews         | Not started | P0       |
+| 1E.4 Paywall Visual Redesign          | Not started | P0       |
+| 1E.5 Visual Polish Pass               | Not started | P1       |
+| 1E.6 Branded Term Consistency         | Not started | P1       |
+| 1E.7 Capture Tab Resolution           | Not started | P1       |
+| 1E.8 Red Thread Flow Visualisation    | Not started | P0       |
+| 1E.9 Room Preview Colour-Block Mockup | Not started | P1       |
+| 1E.10 Applied State System            | Not started | P2       |
+
+---
+
+### Phase 2: The Recommendation Engine
+
+**Theme:** Move users from planning to purchasing with confidence. Colour intelligence powers personalised product recommendations that solve the Action Gap. This is the biggest leap in usefulness and the primary monetisation unlock.
+
+**Core principle:** Palette wins if it feels like a calm, literate interior designer who knows your room and explains herself. Palette loses if it feels like a pastel affiliate storefront. Every product decision in Phase 2 is judged against that line. Diagnose first, recommend second, monetise third.
+
+**Ship order:** Paint recommendations from existing data (immediate), then Furniture Lock expansion (data capture), then Room Gap engine, then rug recommendations, then lighting recommendations, then shopping lists, then paint & finish recommender, then seasonal refresh.
+
+**The primary object in Phase 2 is a Room Gap, not a Product.** The user should never land in a generic shopping list. They should land in a diagnosis: what this room still needs, why that matters, and the best few ways to solve it.
+
+**Commercial model:** Affiliate commerce. Every recommendation must pass two tests: (1) Would a good interior designer recommend this? (2) Does the "why this works" explanation teach the user something? If either answer is no, the product does not ship in that recommendation slot.
+
+**Architectural decision:** Build the scoring engine as a configurable, category-agnostic system. Scoring dimensions and weights are defined in JSON configuration, not hardcoded. This lets you add new product categories by adding category data and adjusting weights, not rewriting the engine.
+
+---
+
+#### Phase 2A: Recommendation Foundations
+
+---
+
+##### Feature 2A.0: Paint Recommendations from Existing Data (Quick Win)
+
+**Why this is first:** The existing Paint Library already contains 500+ colours with affiliate links, palette matching, and room context. Paint recommendations require zero new catalogue work. Filter the existing database by room context, add "Recommended for your [room]" badges, and surface contextual "Buy This Paint" affiliate links throughout the app (not just in the Paint Library, but also in Colour DNA results, Room Detail, White Finder, and Red Thread).
+
+**Implementation:** Within the Room Detail screen, below the 70/20/10 plan, add a "Paint for this room" section showing 3-4 recommended paints filtered by: hero colour match, undertone compatibility with room direction, budget bracket. Each paint shows brand, name, swatch, price, and a "Buy" CTA.
+
+**Effort estimate:** 1-2 weeks. Generates affiliate revenue immediately.
+
+---
+
+##### Feature 2A.1: Expanded Furniture Lock ("What You Already Own")
+
+The current furniture lock is a basic placeholder. This becomes a rich data capture system because the data it generates makes all recommendations personal and defensible. Without knowing what the user already owns, recommendations feel generic immediately.
 
 **User Stories:**
 
 - As a user, I want to photograph my existing furniture and have the app understand its colour, material, and style so that recommendations work around what I already own.
 - As a user, I want to mark items as "keeping" or "replacing" so that the app knows what to recommend.
 
-**How it works:**
+**How it works: Photo-first, not form-first.**
 
-For each locked item, the user provides:
+The camera is the primary input. Users photograph an item, and the app auto-extracts colour (via Colour Capture logic) and suggests material and category. Manual entry is the fallback, not the primary flow.
 
-- Photo (optional but encouraged)
+**Progressive data capture (minimum viable lock is 3 taps):**
+
+_Minimum viable lock:_
+
+- Name/label (free text or preset)
 - Category (sofa, bed, table, rug, chair, shelving, lighting, storage, other)
-- Primary colour (extracted from photo via Colour Capture, or manually selected)
+- Status: keeping / might replace / replacing
+
+_Enhanced lock (optional, encouraged via "Want better recommendations? Add a photo"):_
+
+- Photo (triggers auto-extraction)
+- Primary colour (extracted from photo, with manual correction: "We detected warm brown. Is this correct?" with colour picker fallback)
 - Primary material (wood, metal, fabric, leather, glass, stone, wicker/rattan, plastic)
-- Status: keeping, might replace, replacing
+- Wood tone (shown conditionally when material = wood): light oak, honey oak, walnut, dark stain, white-painted, reclaimed, teak, ash. This is critical for the Wood Tone Harmony Check in the scoring engine.
+- Metal finish (shown conditionally when material = metal): antique brass, brushed gold, chrome, brushed nickel, matte black, copper, dark bronze. This is critical for the Metal Finish Consistency Check.
+- Style (modern / traditional / eclectic, simple 3-option picker)
 - Assigned 70/20/10 tier (which tier does this item occupy?)
 
-The app extracts colour from the photo and auto-assigns undertone. Locked items with "keeping" status become hard constraints. "Might replace" items are soft constraints (recommendations may suggest upgrades). "Replacing" items generate active recommendations.
+_Advanced lock (for power users):_
 
-**Why this matters:** Once the app knows the user has a warm brown leather sofa (keeping), a light oak coffee table (keeping), and wants to replace their rug, the recommendation engine can suggest a specific rug that grounds those two items, matches the room's undertones, and fits the budget bracket.
+- Visual weight: light / medium / heavy
+- Finish/sheen: matte / low-sheen / polished
+- Texture feel: smooth / low-texture / high-texture / chunky
 
-**Acceptance Criteria:**
+**Camera white-balance fallback:**
+Phone cameras auto-adjust white balance, often shifting warm woods grey or white sofas yellow. After auto-extraction, enforce a manual verification step: present the detected colour with a "Is this correct?" confirmation and material selector. The material is as important as the colour for balancing texture.
 
-- Users can lock multiple items per room
-- Photo capture extracts dominant colour and suggests material
-- Each item has keep/might-replace/replacing status
-- Locked items visually appear in the room's 70/20/10 plan
-- Algorithm adjusts recommendations around kept items
+**"I don't have this yet" option:**
+For first-time homeowners (primary persona), many rooms will be empty. The recommendation engine handles rooms with zero locked items as the default case, not an edge case. An "I don't have this yet" option alongside keeping/replacing is available for each category, and the engine recommends items for empty slots.
+
+**Why this matters:** Once the app knows the user has a warm brown leather sofa (keeping), a light oak coffee table (keeping), an antique brass floor lamp (keeping), and wants to replace their rug, the recommendation engine can suggest a specific rug that grounds those two items, matches the room's warm undertones, adds the chunky texture the room is missing (all existing surfaces are smooth), avoids cool-toned metals that would clash with the brass lamp, and fits the budget bracket. The locked item data is what makes every recommendation feel like it was chosen by a designer who has actually been in the room.
+
+**Recommendation quality gate:** In rooms with weak Furniture Lock data, the app says so honestly: "Add your sofa and rug to get better recommendations." This is better than pretending certainty the engine does not have.
 
 ---
 
-#### Feature 2.2: "Complete the Room" Product Recommendations (Pro)
+##### Feature 2A.2: Room Gap Engine ("What This Room Still Needs")
 
-The core commercial feature. Based on the room's 70/20/10 plan, light direction, mood, locked furniture, and budget bracket, the app generates curated product recommendations organised by what the room still needs.
+The Room Gap is the primary diagnostic concept in Phase 2. Before recommending products, the app identifies what a room is missing based on the Design Rules Engine.
 
-**User Stories:**
+**Room Gap data model:**
 
-- As a Pro user, I want to see 3-4 product recommendations for what my room needs next so that I can buy with confidence.
-- As a user, I want to understand why each product was recommended so that I trust the suggestion.
-- As a user, I want to see options at different price points so that I can choose what fits my budget.
+```
+gapType: rug | task-lighting | accent-lighting | ambient-lighting | texture-contrast | accent-colour | storage | artwork | curtain | throw | cushions | mirror | warm-material | cool-material | metal-clash | wood-clash | sheen-balance
+severity: low | medium | high
+confidence: low | medium | high
+whyItMatters: String (plain-English sentence)
+evidence: [String] (array of inputs used, e.g., "no rug locked", "all materials smooth", "room is north-facing", "accent tier empty")
+recommendedCategories: [String] (ranked list)
+blocker: String? (optional, e.g., "Add room dimensions for better rug sizing")
+```
 
-**How it works:**
+**Gap detection logic:**
 
-Below the 70/20/10 plan in room detail, a "Complete the Room" section shows:
+The engine analyses each room's locked furniture, 70/20/10 plan, mood, direction, and Red Thread status against the Design Rules:
 
-_Missing layers analysis:_
-The app identifies what the room is missing based on the Design Rules Engine:
-
-- "Your room needs a grounding rug" (no rug locked in 70% tier)
-- "Add layered lighting" (no task or accent lighting)
-- "Introduce texture contrast" (all locked items are smooth surfaces)
+- "Your room needs a grounding rug" (no rug locked in 70% or 20% tier)
+- "Add layered lighting" (no task or accent lighting locked)
+- "Introduce texture contrast" (all locked items are smooth surfaces, or all are soft/plush)
 - "Add your accent colour" (10% tier empty)
+- "Your Red Thread colour isn't present in this room" (thread check fails)
+- "This room has no soft surfaces" (texture layering rule violated)
+- "Balance the visual weight" (all heavy items on one side, if dimensions captured)
+- "Add a warm material" (room has only cool materials like chrome, glass; Material Balance rule violated)
+- "Add a cool material" (room has only warm materials like wood, fabric; Material Balance rule violated)
+- "Your metals are fighting each other" (3+ different metal finishes detected across locked items; Metal Finish Consistency Check violated)
+- "Your wood tones have clashing undertones" (warm-toned and cool-toned woods locked in the same room; Wood Tone Harmony Check violated. Recommendation: swap one item or introduce a bridging material)
+- "Too many reflective surfaces" (3+ high-sheen items locked; Sheen Coherence check triggered. Recommendation: add a matte-finish item to balance)
 
-_Product recommendations per gap:_
-For each identified gap, show 3-4 product options:
+**Gap prioritisation:**
+Gaps are ranked by severity (how much the room is affected) and confidence (how much data the engine has). A room with no rug, no lighting, and no accent colour shows the rug gap first (highest impact), not all three simultaneously. One confident next step is psychologically cleaner than multiple equally weighted suggestions.
 
-- Product image, name, brand, price
-- "Why this works" explanation (2 sentences max, referencing Design Rules)
-- "Buy" button with affiliate link
-- At least one affordable alternative in every set
-- Budget bracket filter applied before results shown
+**UI integration:**
+Below the Room Checklist on the Room Detail screen, a "What this room still needs" section appears once the 70/20/10 plan exists. Each gap shows:
 
-_Commission disclosure:_ "We may earn a commission on purchases" visible on the recommendations section.
+- Gap name in plain English ("Your room needs a grounding rug")
+- Why it matters in one sentence ("Without a rug, the room feels unfinished and the sofa floats")
+- "See recommendations" link (leads to product recommendations for that gap)
+- Confidence label ("Strong suggestion" vs "Worth considering")
+
+---
+
+##### Feature 2A.3: Product Catalogue (Manual Curation)
+
+**Decision: Manual curation for v1. Automated sourcing via affiliate feeds for v2.**
+
+Manually curate a "Capsule Collection" of 250 high-quality items across three categories. Each item is tagged in Supabase with exact parameters that the scoring engine requires. Manual curation ensures recommendation quality at launch; API feeds (Awin product data) are a pluggable enhancement for later scale.
+
+**Catalogue composition:**
+
+_Rugs (100 items):_
+
+- 4 size brackets (120x170, 160x230, 200x290, 240x340 cm)
+- 6 colour families (matching the palette family system)
+- 3 price tiers (affordable: under £150, mid-range: £150-400, investment: £400+)
+- 4 texture types (flat-weave, low-pile, chunky/shag, natural fibre)
+- Source from: John Lewis (8% commission via Awin), Dunelm (5-8%), Wayfair, The Rug Company (higher-end)
+
+_Lighting (80 items):_
+
+- Split across ambient (ceiling/pendant), task (desk/reading/floor), accent (table lamps, LED strips, plug-in wall lights)
+- 3 price tiers per sub-category
+- Material/finish variety (brass, matte black, chrome, ceramic, wood)
+- Renter-safe flags on all items (plug-in vs. hardwired)
+- Source from: John Lewis, Habitat, Dunelm, Pooky
+
+_Soft furnishings (70 items):_
+
+- Cushions, throws, curtains
+- 6 colour families
+- 3 price tiers
+- Texture variety (velvet, linen, chunky knit, woven)
 
 **Product data model:**
 
 ```
-category: String (sofa, rug, lamp, cushion, throw, vase, mirror, art, table, chair, shelving, curtain, blind)
-style: String[] (modern, traditional, scandi, mid-century, industrial, bohemian, minimalist)
-primaryColour: Lab colour
-undertone: warm | cool | neutral
-materials: String[] (wood-oak, wood-walnut, metal-brass, metal-chrome, fabric-linen, fabric-velvet, leather, glass, ceramic, rattan)
-priceGBP: Number
+id: String
+category: String (rug, pendant-light, floor-lamp, table-lamp, cushion, throw, curtain)
+subcategory: String? (ambient, task, accent for lighting)
+name: String
+brand: String
 retailer: String
+priceGBP: Number
 affiliateUrl: String
 imageUrl: String
-dimensions: { width, height, depth } (for scale checking)
+primaryColour: Lab colour
+secondaryColour: Lab colour?
+patternColours: [Lab colour]? (for products with 3+ significant colours, e.g., patterned rugs, printed cushions)
+undertone: warm | cool | neutral
+materials: [String] (wood-oak, wood-walnut, wood-ash, wood-teak, wood-birch, wood-pine, wood-reclaimed, metal-brass, metal-antique-brass, metal-brushed-gold, metal-chrome, metal-brushed-nickel, metal-matte-black, metal-copper, metal-bronze, fabric-linen, fabric-velvet, fabric-bouclé, fabric-cotton, fabric-silk, fabric-wool, fabric-jute, leather, glass, ceramic, rattan, stone)
+woodTone: String? (light-oak, honey-oak, walnut, dark-stain, white-painted, reclaimed, teak, ash, birch, pine)
+metalFinish: String? (antique-brass, brushed-gold, polished-brass, rose-gold, chrome, brushed-nickel, matte-black, copper, dark-bronze, aged-brass)
+style: [String] (modern, traditional, scandi, mid-century, industrial, bohemian, minimalist)
+textureFeel: smooth | low-texture | high-texture | chunky
+dimensions: { width: Number, height: Number, depth: Number? } (cm)
+sizeBracket: String? (for rugs: "120x170", "160x230", etc.)
+visualWeight: light | medium | heavy
+finishSheen: matte | low-sheen | polished
 renterSafe: Boolean
 removable: Boolean
+available: Boolean
+lastVerified: Date
 ```
 
-**Phase 2A launch scope:** Start with 3 categories: paint, rugs, lighting. These have the highest combination of emotional importance, affiliate commission rates, and purchase frequency. Expand to furniture, soft furnishings, and accessories in Phase 2B.
+**Product Colour and Material Extraction Workflow (for manual curation):**
 
-**Product sourcing approach:** Begin with a manually curated catalogue of 50-100 items per category, selected for colour variety, price range, and affiliate availability. The curation ensures quality recommendations while the catalogue is small. Scale to automated sourcing via affiliate network APIs as volume grows.
+Each of the 250 curated items must have accurate colour, material, and finish data for the scoring engine to work. This is the curation pipeline:
 
-**Acceptance Criteria:**
+1. **Source the product.** Identify item from retailer, confirm affiliate availability, save product URL and high-resolution image.
 
-- Missing layers analysis identifies at least one gap for rooms with incomplete 70/20/10
-- 3-4 product options per gap, sorted by relevance score
-- Every recommendation has a "Why this works" explanation
-- At least one affordable option per set
-- Budget bracket filter applied
-- Commission disclosure visible
-- "Buy" buttons use affiliate links where available, plain links where not
-- Renter Mode filters to renter-safe products only
+2. **Extract primary colour.** Open the product image. Sample the dominant colour region (the largest area of a single colour). Use a colour picker tool (e.g., macOS Digital Color Meter, or a simple Flutter utility built for this purpose) to capture the RGB value. Convert to CIE L*a*b\* using the same sRGB/D65 conversion used in the paint database pipeline. Record as `primaryColour`.
+
+3. **Extract secondary colour (if applicable).** If the product has a clearly distinct second colour covering at least 15% of the visible surface, sample and convert it the same way. Record as `secondaryColour`.
+
+4. **Extract pattern colours (if applicable).** For products with 3+ significant colours (patterned rugs, printed cushions, multi-colour ceramics), sample each additional colour and record in `patternColours`. Cap at 5 colours; beyond that, the scoring gains diminishing returns.
+
+5. **Classify undertone.** Using the extracted primary Lab colour, run the same undertone classification algorithm used for paints (warm if a* > 0 and b* > 0, cool if a* < 0 or b* < -5, neutral otherwise; thresholds configurable). Manually verify; the auto-classification is a starting point, not gospel.
+
+6. **Tag materials, wood tone, and metal finish.** From the product description and image, select all applicable values from the data model enums. If the product has visible wood, tag the `woodTone`. If the product has visible metal, tag the `metalFinish`. These fields are what the Wood Tone Harmony Check and Metal Finish Consistency Check score against.
+
+7. **Tag texture, visual weight, and sheen.** Assess from the image: is this smooth or chunky? Light or heavy? Matte or polished?
+
+8. **Tag style.** Select 1-3 style tags from the enum based on the product's design language.
+
+9. **Verify archetype compatibility.** Check that the product's colour, material, and finish attributes result in a match score > 0 for at least 3 of the 14 archetypes. If a product only matches one archetype, it is too niche for the initial catalogue unless it fills a specific gap.
+
+10. **Record and review.** Enter all data into the Supabase `products` table. A second person (or a second pass by the same person on a different day) verifies the colour extraction and material tags. Inaccurate colour data produces bad recommendations, which destroys trust.
+
+**Automation target for Phase 2B:** When transitioning to Awin product feed sourcing, steps 2-5 can be partially automated: extract dominant colours from product images using k-means clustering, auto-classify undertone, and auto-tag materials from product description keywords. Human review remains mandatory for quality assurance, but the pipeline reduces per-item curation time from ~10 minutes to ~3 minutes.
+
+**Ensure coverage:** Each of the 14 Colour DNA archetypes must have at least 10 strong product matches across categories. Run the scoring engine against the full catalogue for each archetype and verify. If any archetype has fewer than 10 matches, curate additional items specifically for that archetype before launch.
 
 ---
 
-#### Feature 2.3: Paint & Finish Recommender with Shopping List
+##### Feature 2A.4: "Complete the Room" Product Recommendations (Pro)
 
-Finish recommendations based on Sowerby's guide (matt for living rooms/bedrooms, eggshell for woodwork, satin for bathrooms/kitchens). Paint calculator estimates quantity from room dimensions. Shopping list aggregates all paint across rooms with brand, colour, code, finish, quantity, price, and "Buy This Paint" deep links.
+The core commercial feature. Based on the room's gaps, 70/20/10 plan, light direction, mood, locked furniture, and budget bracket, the app generates curated product recommendations organised by what the room still needs.
+
+**Architecture:**
+
+1. **Gap Analysis Layer** (Feature 2A.2): Identifies what is missing using the Design Rules Engine.
+
+2. **Hard Filters (Pass/Fail):** Remove anything that is wrong outright before scoring. Over budget, wrong dimensions for room size, not renter-safe (if Renter Mode), clashes with locked item undertones, unavailable, introduces a third metal finish when two are already present, wood tone undertone directly clashes with existing locked wood items (warm vs cool).
+
+3. **Soft Scoring (Weighted):** Score remaining candidates across the dimensions defined in the Scoring Dimensions table. Weights stored in JSON configuration.
+
+4. **Diversity Logic:** Do not simply show the top 4 highest-scoring beige rugs. For each gap, force the recommendation set to include variety:
+   - Best overall fit ("Recommended")
+   - Best budget option ("Best value")
+   - Slightly bolder option ("Something different")
+   - Safest option ("Safe choice")
+
+5. **Explanation Layer:** Generate the "Why this works" copy for each recommendation.
+
+**Explanation payload per recommendation:**
+
+```
+primaryReason: String ("Grounds your seating area with the right scale")
+secondaryReason: String ("Warm gold undertone harmonises with south-facing evening light")
+finishNote: String? ("The antique brass base complements your Cocooner palette's preference for warm metals and pairs with your existing brass door handles")
+materialNote: String? ("The chunky jute weave adds the texture contrast your room needs; all your current surfaces are smooth")
+supportingInputs: [String] ("room direction: south", "locked sofa: warm brown leather", "palette: Cocooner", "existing metals: antique brass", "texture profile: all smooth")
+tradeoffNote: String? ("Slightly above your budget bracket but exceptional colour match")
+confidenceLabel: "Strong match" | "Good alternative" | "Worth considering"
+```
+
+The explanation references the specific room context, not generic rules. Example: "Works because it introduces your 10% rust accent, softens the leather sofa with texture, and suits the room's warm evening light. The antique brass frame matches your existing hardware and fits your Cocooner identity. Based on your room direction, locked sofa, texture profile, and Cocooner palette."
+
+**Room Detail integration:**
+Below the Room Checklist and Room Preview on the Room Detail screen:
+
+1. "What this room still needs" (gap analysis)
+2. "Recommended next buy" (single top recommendation for the highest-priority gap)
+3. "Alternatives" (3 more options for the same gap)
+4. "Other gaps" (expandable sections for lower-priority gaps)
+
+**Recommendation actions:**
+Each recommendation card supports:
+
+- "Buy" button with affiliate link
+- "Save" to a room wishlist
+- "Compare" (side-by-side with another saved item)
+- "Not for me" with reason capture (style, price, colour, scale, wrong material)
+
+"Not for me" feedback is high-quality data. Capture whether the rejection was style, price, colour, scale, or renter constraints. This data informs scoring weight adjustments over time even without ML; aggregate engagement patterns (which reasons appear most) suggest weight recalibration.
+
+**Commission disclosure:**
+A compact disclosure directly above the recommendation list: "We may earn a commission if you buy through these links. This never affects which products we recommend." Short, visible, plain. Repeated near the buy action on each card.
+
+Commission rates must never influence sort order. This is architecturally enforced: the scoring engine has no access to commission data. Commission is a property of the affiliate link layer, not the recommendation layer.
+
+**Renter Mode filtering:**
+For renters, the entire recommendation set is filtered to renter-safe items. The gap analysis also changes: "define the floor" (rug), "define the soft layers" (curtains, throws), "define the lighting mood" (plug-in lamps), "define one vertical focal point without drilling" (leaning art, mirror). This is a native renter story, not "same product engine, fewer options."
+
+**Mobile UX for recommendations:**
+
+- Visible applied-filter chips above results (budget, renter-safe, room context)
+- Persistent room-context badge: "For your north-facing kitchen"
+- One-tap sort by "best match", "lowest price", "boldest option"
+- Remembered filters per room session
+- No modal filter sheets that require repeated trips in and out
+
+**Edge cases:**
+
+- Zero compatible products: "We don't have a perfect match in your budget range yet. Here are close alternatives, or try adjusting your budget bracket."
+- Low confidence: "We need more information about this room to give you great recommendations. Add your existing furniture to improve results."
+- Conflicting constraints: "Your locked sofa and chosen hero colour have different undertones. Here are products that bridge the gap."
 
 ---
 
-#### Feature 2.4: Seasonal Refresh Suggestions
+##### Feature 2A.5: Instrumentation for Recommendations
+
+Track everything from day one:
+
+- `recommendation_viewed` (gap type, product ID, position in list, room ID)
+- `recommendation_tapped` (product ID, action: buy/save/compare/dismiss)
+- `recommendation_dismissed` (product ID, reason: style/price/colour/scale/material/other)
+- `recommendation_bought` (product ID, via affiliate callback if available)
+- `gap_identified` (gap type, severity, room ID)
+- `filter_applied` (filter type, value)
+- `filter_cleared`
+
+---
+
+#### Phase 2B: Recommendation Expansion
+
+---
+
+##### Feature 2B.1: Expanded Product Categories
+
+Add curtains, artwork, mirrors, cushion sets, and throws to the curated catalogue. Target: 150 additional items. Each new category uses the same scoring engine with category-specific weight adjustments stored in JSON configuration.
+
+**Renter-specific categories (added alongside):**
+
+- Removable wallpaper and wall decals
+- Peel-and-stick tiles (bathroom/kitchen backsplash)
+- Plug-in pendant lights and sconces
+- Leaning art and mirrors (no drilling)
+- Command-strip-safe solutions
+- Large rugs (to cover landlord carpets, heavy-weighted default for renters)
+
+---
+
+##### Feature 2B.2: Shopping List Aggregation
+
+From any room's recommendations, users add items to a "Shopping List." The list aggregates across rooms, groups by retailer, shows total estimated cost, and provides direct "Buy" links per item.
+
+The Shopping List is accessible from the Home screen and from each room's detail view.
+
+---
+
+##### Feature 2B.3: Paint & Finish Recommender with Shopping List
+
+Finish recommendations based on Sowerby's guide (matt for living rooms/bedrooms, eggshell for woodwork, satin for bathrooms/kitchens).
+
+**Paint quantity calculator:**
+Standard formula: (perimeter x height - door/window area) / coverage rate per litre. Room dimensions captured in Phase 1E provide the inputs. Property type defaults used as fallback when dimensions not entered.
+
+Output: "Add 2.5L of Savage Ground Matt Emulsion to basket" with deep link to retailer.
+
+Shopping list aggregates all paint across rooms with brand, colour, code, finish, quantity, approximate price, and "Buy This Paint" deep links.
+
+---
+
+##### Feature 2B.4: Automated Product Sourcing (Scale)
+
+Transition from manual curation to automated sourcing via Awin product feeds. The scoring engine filters and ranks feed items using the same dimensions as manually curated items. Manual curation continues for "hero" recommendations; feed items fill the catalogue breadth.
+
+**Data pipeline:** Awin feed > parse product data > auto-classify colour (extract from image, map to Lab) > auto-classify undertone > auto-tag materials and style (from product description, using keyword matching or LLM classification) > human review queue for items scoring above a quality threshold > publish to catalogue.
+
+---
+
+##### Feature 2B.5: Seasonal Refresh Suggestions
 
 Quarterly prompts suggesting small changes within the existing palette:
 
@@ -863,17 +1375,31 @@ Quarterly prompts suggesting small changes within the existing palette:
 
 Each suggestion links to shoppable products. Drives repeat engagement and affiliate revenue.
 
----
-
-#### Feature 2.5: Partner Mode
-
-Partner invited via link or email. Partner completes their own Colour DNA (free, via web if no app). Shared Palette shows overlap and divergence. Both partners react to choices (love, like, unsure, not for me). Budget alignment indicator on product recommendations.
+**Content strategy:** Algorithmically generated from palette + season + available products, with human-written seasonal narrative templates. Template variables filled from user data + season logic. Example: "As the clocks go back, your [room name]'s [direction]-facing light shifts [warmer/cooler]. A [product type] in your [thread colour] brings [seasonal benefit]."
 
 ---
 
-### Phase 3: Visual Confidence
+#### Phase 2C: Recommendation Intelligence
 
-**Theme:** Show people how choices will look before they commit.
+---
+
+##### Feature 2C.1: Recommendation Feedback Loop
+
+Aggregate user feedback (save, dismiss with reason, buy) to refine scoring weights. This does not require ML; adjust weights based on aggregate engagement patterns.
+
+**Process:** Monthly review of aggregate data. If "too expensive" is the top dismiss reason for rugs, increase the budget fit weight for that category. If "wrong style" dominates lighting dismissals, increase style fit weight for lighting. Weight changes stored in versioned JSON configuration.
+
+---
+
+##### Feature 2C.2: Whole-Home Bundles
+
+Cross-room recommendations that strengthen the Red Thread. "Your living room and hallway share a warm neutral thread. Here's a rug and a lamp that connect the two spaces."
+
+---
+
+### Phase 3: Visual Confidence & Social
+
+**Theme:** Show people how choices will look before they commit, and add collaborative features.
 
 ---
 
@@ -900,6 +1426,18 @@ Conversational interface where users ask "What colour should I paint my hallway?
 
 ---
 
+#### Feature 3.3: Partner Mode
+
+Partner invited via link or email. Partner completes their own Colour DNA (free, via web quiz if no app installed). Shared Palette shows overlap and divergence.
+
+**v1 (Phase 3 launch):** Partner takes Colour DNA quiz (web-only, no install required). Results shared back to primary user. App shows overlap/divergence on a Venn diagram.
+
+**v2:** Partner reacts to primary user's choices (love, like, unsure, not for me). Budget alignment indicator on product recommendations.
+
+**v3:** Full collaborative editing with shared room plans.
+
+---
+
 ### Phase 4: Full Home Companion
 
 **Theme:** Extend beyond colour and furnishings into complete interior design.
@@ -907,27 +1445,25 @@ Conversational interface where users ask "What colour should I paint my hallway?
 - **Lighting Planner:** Three-layer lighting recommendations (ambient/task/accent) per room.
 - **Room Audit Checklist:** Watson-Smyth's design rules codified with visual scoring.
 - **Renovation Sequencing:** Lightweight guide adapted to property type.
-- **Seasonal Refresh Prompts:** Ongoing textile/accessory swap suggestions.
-- **Before & After Sharing:** Photo journey sharing for organic growth.
+- **Before & After Sharing:** Photo journey sharing for organic growth ("Design Diary").
 
 ---
 
 ## Screen Architecture (Updated)
 
 **Tab 1: Home ("Your Design Plan")**
-Next recommended action card, room progress cards with completion scores, whole-home coherence summary (Red Thread compact view), curated "Recommended for you" section (Phase 2, pulling from Colour DNA and rooms).
+Mini palette strip, next recommended action card, room progress cards with completion scores (hero colour fills progress), whole-home coherence summary (Red Thread compact view), curated "Recommended for you" section (Phase 2, pulling from Colour DNA and rooms).
 
 **Tab 2: Rooms**
-Room list with hero colours and completion indicators visible. Room profiles (direction, mood, 70/20/10, furniture lock, "Why This Room Works", room checklist, "Complete the Room" product recs). Red Thread accessible from top of list (premium, blurred preview for free).
+Room list with hero colours and completion indicators visible. Room profiles (direction, mood, dimensions, 70/20/10, Room Preview mockup, furniture lock, "Why This Room Works", room checklist, "What this room still needs" gaps, "Complete the Room" product recs). Red Thread accessible from top of list (premium, blurred preview for free).
 
-**Tab 3: Capture**
-Camera colour extraction. One-tap save to palette or moodboard. Recently captured colour history.
+**Tab 3: Explore** (4-tab layout until Capture ships)
+Three sections: Tools (Colour Wheel, White Finder, Paint Library with contextual notes), Learn (personalised educational content), Your Palette (Red Thread, Colour DNA summary).
 
-**Tab 4: Explore**
-Three sections: Tools (Colour Wheel, White Finder, Paint Library), Learn (educational content), Your Palette (Red Thread, Colour DNA summary).
+**Tab 4: Profile & Settings**
+Colour DNA summary with design identity guidance, account, preferences, subscription status, notification settings, Colour Blind Mode toggle, Renter/Owner toggle, sample order history.
 
-**Tab 5: Profile & Settings**
-Colour DNA summary with design identity guidance, account, preferences, partner management, subscription status, notification settings, Colour Blind Mode toggle, Renter/Owner toggle, sample order history.
+When Colour Capture ships (Phase 1D), restructure to 5 tabs: Home, Rooms, Capture, Explore, Profile.
 
 ---
 
@@ -947,10 +1483,10 @@ When users buy recommended products through in-app links, Palette earns commissi
 | Soft furnishings (curtains, cushions)       | 8-10%              | £30-200             | £2.40-20               |
 | Accessories                                 | 8-14%              | £20-100             | £1.60-14               |
 
-**Key principle:** Recommendation first, commission second. Commerce should feel like the result of good advice, not the reason for it.
+**Key principle:** Recommendation first, commission second. Commerce should feel like the result of good advice, not the reason for it. Commission rates must never influence recommendation sort order; this is architecturally enforced.
 
 **Secondary: Subscriptions (Plus, Pro, Project Pass)**
-The design tools tier (Plus) and the recommendation tier (Pro) create a clear value ladder. Project Pass captures high-intent users who prefer one-time purchase.
+The design tools tier (Plus) and the recommendation tier (Pro) create a clear value ladder. Project Pass captures high-intent users who prefer one-time purchase. Free trial drives initial conversion.
 
 **Tertiary: AI credit top-ups**
 Visualiser credits for Phase 3.
@@ -968,15 +1504,18 @@ First-time buyers spend over £15,500 furnishing a new home. The UK home decor m
 
 ### Affiliate Programmes
 
-| Brand         | Network               | Commission                 | Cookie  | Notes                       |
-| ------------- | --------------------- | -------------------------- | ------- | --------------------------- |
-| Farrow & Ball | Awin (UK: ID 20199)   | Up to 5% content, 3% base  | 30 days | Apply via Awin              |
-| Dulux         | Awin (ID 12009)       | 5% base                    | 30 days | UK-only, same Awin account  |
-| Little Greene | Sovrn Commerce        | Varies (auto-monetisation) | Varies  | Product mentions auto-link  |
-| Lick          | CJ Affiliate / direct | ~1%                        | Unknown | Low rate. Also sold via B&Q |
-| B&Q           | Impact                | 2% delivery + C&C          | Unknown | Sells Lick, Dulux, Crown    |
-| Freshlick     | Awin (ID 101923)      | 2% opening                 | 30 days | Multi-brand fallback        |
-| COAT          | Direct negotiation    | TBD                        | TBD     | Club COAT loyalty model     |
+| Brand         | Network               | Commission                 | Cookie  | Notes                            |
+| ------------- | --------------------- | -------------------------- | ------- | -------------------------------- |
+| Farrow & Ball | Awin (UK: ID 20199)   | Up to 5% content, 3% base  | 30 days | Apply via Awin                   |
+| Dulux         | Awin (ID 12009)       | 5% base                    | 30 days | UK-only, same Awin account       |
+| Little Greene | Sovrn Commerce        | Varies (auto-monetisation) | Varies  | Product mentions auto-link       |
+| Lick          | CJ Affiliate / direct | ~1%                        | Unknown | Low rate. Also sold via B&Q      |
+| B&Q           | Impact                | 2% delivery + C&C          | Unknown | Sells Lick, Dulux, Crown         |
+| Freshlick     | Awin (ID 101923)      | 2% opening                 | 30 days | Multi-brand fallback             |
+| COAT          | Direct negotiation    | TBD                        | TBD     | Club COAT loyalty model          |
+| John Lewis    | Awin                  | ~8%                        | 30 days | Rugs, lighting, soft furnishings |
+| Dunelm        | Awin                  | 5-8%                       | 30 days | Rugs, lighting, curtains         |
+| Wayfair       | Awin                  | Varies                     | 30 days | Large rug selection              |
 
 **Implementation:** Build deep-link fallback ladder and "Buy This Paint" flow with plain product links. Affiliate tracking is a pluggable config layer (link resolver + attribution params per brand). When Awin approves, prepend tracking URL to existing database URLs.
 
@@ -986,7 +1525,7 @@ First-time buyers spend over £15,500 furnishing a new home. The UK home decor m
 
 **Persona 1: "The Overwhelmed First-Timer" (Primary)**
 Mia, 31. Just bought a 1930s semi in Essex with partner Tom. 400+ Pinterest pins, no plan. Loves green but terrified of mistakes. Bringing a brown leather sofa and IKEA pieces from rented flat. Never heard of undertones or 70/20/10.
-_Needs:_ Confidence, education, framework, "what to buy next" for each room, furniture lock to work around what she's keeping. Likely Plus subscriber converting to Pro when product recs launch.
+_Needs:_ Confidence, education, framework, "what to buy next" for each room, furniture lock to work around what she's keeping. Likely Plus subscriber (via trial) converting to Pro when product recs launch.
 
 **Persona 2: "The Taste-Confident Upgrader" (Secondary)**
 Raj, 37. Moving from rented flat to Victorian terrace in south London. Strong style opinions (jewel tones, mid-century). Great individual purchases that don't cohere. Frustrated by rooms that look good in photos but feel "off."
@@ -998,7 +1537,7 @@ _Needs:_ Renter Mode as a first-class experience. 70/20/10 restructured around f
 
 **Persona 4: "The Reluctant Partner" (Tertiary)**
 Sam, 34. Partner of someone deep in decorating decisions. Does not care much about interiors but wants an opinion without studying colour theory. Defaults to "whatever you think" or vetoes without explanation.
-_Needs:_ Partner Mode. May never install the app; interacts via web links.
+_Needs:_ Partner Mode (Phase 3). May never install the app; interacts via web quiz.
 
 ---
 
@@ -1016,14 +1555,14 @@ _Needs:_ Partner Mode. May never install the app; interacts via web links.
 
 **Positioning:** Palette is the first interior design app that starts with who you are, knows your home, and tells you exactly what to buy for each room and why it works.
 
-**Moat:** Persistent whole-home data model (hard to retrofit). Red Thread requires whole-house context from day one. Brand-agnostic positioning (paint brands cannot replicate). Education-first approach builds trust that shopping apps cannot match. Curated paint colour database (5,000+ colours normalised to CIE Lab) has standalone value. Algorithmic Design Rules Engine creates defensible recommendation quality.
+**Moat:** Persistent whole-home data model (hard to retrofit). Red Thread requires whole-house context from day one. Brand-agnostic positioning (paint brands cannot replicate). Education-first approach builds trust that shopping apps cannot match. Curated paint colour database (5,000+ colours normalised to CIE Lab) has standalone value. Algorithmic Design Rules Engine creates defensible recommendation quality. "Why this works" explanations build compounding user trust.
 
 ---
 
 ## Design Principles (UX)
 
 **1. The app should feel like a well-designed room, not a tech product.**
-Warm whites, soft creams, muted earth tones as the base palette. A single warm accent (sage green) for interactive elements (blue alternative in Colour Blind Mode). Clean sans-serif body type with an editorial serif for headings. Full-bleed imagery. No neon gradients, no heavy shadows, no "startup" aesthetic.
+Warm whites, soft creams, muted earth tones as the base palette. A single warm accent (sage green) for primary interactive elements only (buttons, CTAs). A warm neutral (cream/gold tones) for secondary UI elements (tags, progress bars, badges). Blue alternative in Colour Blind Mode. Clean sans-serif body type with an editorial serif for headings. Full-bleed imagery. No neon gradients, no heavy shadows, no "startup" aesthetic.
 
 **2. Progressive disclosure, always.**
 Show summary views first. Reveal complexity gradually. Surface the 3 most relevant actions at any stage. Use bottom sheets and overlays, not new screens.
@@ -1032,32 +1571,45 @@ Show summary views first. Reveal complexity gradually. Surface the 3 most releva
 Every screen should answer at least one of: What suits my room? What should I buy next? Why does this work? How does this connect to the rest of my home? What can I do within my constraints? If a feature does not clearly answer one of these, it is secondary.
 
 **4. Every recommendation teaches.**
-No recommendation appears without a "why this works" explanation. The app is a trusted advisor, not a shopping catalogue.
+No recommendation appears without a "why this works" explanation that references the user's specific room context. The app is a trusted advisor, not a shopping catalogue. The explanation quality is the moat.
 
 **5. Image-first layouts.**
 Colour swatches, room photos, product images, and moodboards are the heroes. Text supports images.
 
 **6. Celebrate progress.**
-Small animations at milestones. Skeleton loading states. Spring physics for transitions. Room completion scores drive engagement.
+Small animations at milestones. Skeleton loading states. Spring physics for transitions. Room completion scores (filled with the room's hero colour) drive engagement.
 
-**7. Card-based UI with generous breathing room.**
-Status indicators use icons as primary signal (checkmark, clock, empty circle) with colour supplementary. Generous padding. State changes must be obvious. Buttons must feel tappable. Labels must be legible. Soft palette should not sacrifice clarity on key actions.
+**7. Card-based UI with generous breathing room and clear depth.**
+Three elevation levels (flush, subtle shadow, elevated). Status indicators use icons as primary signal (checkmark, clock, empty circle) with colour supplementary. Generous padding. State changes must be obvious. Buttons must feel tappable (pill shapes with chevrons for navigation actions). Labels must be legible. Soft palette should not sacrifice clarity on key actions.
 
 **8. Context-aware navigation.**
-Adapts emphasis based on journey stage: discovery, planning, acting, maintaining.
+Adapts emphasis based on journey stage: discovery, planning, acting, maintaining. Tools show personalised context headers when accessed from a room.
 
 **9. Accessible by default.**
-Dynamic Type (iOS) and font scaling (Android) from day one. Never rely on colour alone. Every swatch shows its name. WCAG AA contrast ratios throughout. Colour Blind Mode as settings toggle.
+Dynamic Type (iOS) and font scaling (Android) from day one. Never rely on colour alone. Every swatch shows its name. WCAG AA contrast ratios throughout (4.5:1 for normal text, 3:1 for large text and UI components). Colour Blind Mode as settings toggle. Badge legends and tooltips for abbreviated labels.
 
 **10. Colour disclaimer always visible.**
 "Colours on screens are approximations. Always test physical samples before committing." Present in onboarding, on swatch detail views, and in exports.
 
-**11. Branded terms have plain-English support.**
-Every branded term (Colour DNA, Red Thread, Hero colour) should have a plain-English subtitle underneath to aid mainstream understanding. Examples:
+**11. Branded terms always have plain-English support.**
+Every branded term has a persistent plain-English subtitle. Not just on first encounter; always visible.
 
-- Red Thread: "Keep your whole home feeling connected"
-- Colour DNA: "Your personal design identity"
-- Hero colour: "The main colour for this room"
+---
+
+## Error Handling and Edge Cases
+
+Define graceful degradation for each scenario:
+
+| Scenario                                              | Handling                                                                                                                                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| User's palette has 0 compatible products in catalogue | "We don't have a perfect match in your budget range yet. Here are close alternatives, or try adjusting your budget bracket." Show nearest matches with delta-E distances.      |
+| Room has conflicting furniture lock constraints       | "Your locked sofa and chosen hero colour have different undertones. Here are products that bridge the gap." Show the conflict visually with undertone indicators.              |
+| Recommendation engine has low confidence              | "We need more information about this room to give you great recommendations. Add your existing furniture to improve results." Show a clear path to improving data quality.     |
+| Camera colour extraction in poor lighting             | "For best results, capture in natural daylight." Show the captured colour with a "Nudge warmer/cooler" slider and manual correction option.                                    |
+| Empty room (no furniture locked)                      | Handle as default case, not edge case. Recommend foundational items (rug, main light, key furniture) rather than accessories.                                                  |
+| Affiliate link broken or product unavailable          | Fallback ladder: alternative retailer link > brand homepage with product code > "Copy product details to clipboard." Flag unavailable products in background checks (monthly). |
+| User creates rooms but never completes setup          | Next-action card on Home screen progressively nudges: gentle encouragement, then more specific ("Your living room just needs a hero colour to unlock recommendations").        |
+| Red Thread has no viable thread colours               | Suggest the 2-3 colours that appear most frequently across rooms, with explanation of why they connect.                                                                        |
 
 ---
 
@@ -1066,8 +1618,6 @@ Every branded term (Colour DNA, Red Thread, Hero colour) should have a plain-Eng
 ### 1. Paint Colour Database
 
 **Decision: Build our own local database. No paid API at launch.**
-
-Data sources, per-brand effort estimates, and pipeline approach unchanged from original spec. See original spec section for full detail.
 
 **Phase 1A shipped with:** ~500-1,500 colours across initial brands. Paint names display throughout the app. Delta-E matching and undertone classification operational.
 
@@ -1079,22 +1629,20 @@ Data sources, per-brand effort estimates, and pipeline approach unchanged from o
 
 **Decision: Decor8 AI at ~£0.16/image ($0.20), Phase 3 only. Credit-based pricing.**
 
-Privacy/data handling requires DPA negotiation before development. See original spec for full detail.
-
 ### 3. Light Simulation
 
 **Decision: Kelvin lookup + RGB blend overlay at 10-20% opacity. Local computation. Zero cost.**
 
 ### 4. Product Catalogue Scope
 
-**Decision: Phase 2 launch with paint, rugs, lighting. Expand to furniture and soft furnishings in Phase 2B. All affiliate-based, zero upfront cost.**
+**Decision: Phase 2A launches with manually curated 250 items across rugs, lighting, and soft furnishings. Paint recommendations use existing Paint Library. Automated sourcing via Awin feeds in Phase 2B.**
 
 ### 5. Offline Capability
 
 **Decision: Offline-first. Local database is source of truth.**
 
-Offline: Palette, rooms, wheel, moodboards (viewing), paint library, Red Thread, light simulation, Colour Capture.
-Online: AI Visualiser, product recommendations, web image saving, share/export, Partner Mode sync, sample ordering, web quiz result retrieval, "Complete the Room" product data.
+Offline: Palette, rooms, wheel, moodboards (viewing), paint library, Red Thread, light simulation, Colour Capture, Room Preview mockup, room gaps analysis.
+Online: AI Visualiser, product recommendations (requires catalogue sync), web image saving, share/export, Partner Mode sync, sample ordering, web quiz result retrieval, "Complete the Room" product data, affiliate link resolution.
 
 ### 6. Colour Blind Accessibility
 
@@ -1102,7 +1650,7 @@ Online: AI Visualiser, product recommendations, web image saving, share/export, 
 
 ### 7. Tech Stack
 
-**Decision: Flutter.** Impeller rendering for 60fps animations. CustomPainter for colour wheel and light overlays. Decor8 AI Dart SDK. Offline-first via SQLite/Hive. PowerSync for Supabase sync.
+**Decision: Flutter.** Impeller rendering for 60fps animations. CustomPainter for colour wheel, light overlays, and Red Thread flow diagram. Decor8 AI Dart SDK. Offline-first via SQLite/Hive. PowerSync for Supabase sync.
 
 ### 8. Backend
 
@@ -1110,60 +1658,66 @@ Online: AI Visualiser, product recommendations, web image saving, share/export, 
 
 ### 9. App Store Colour Accuracy
 
-**Decision: No specific policy exists. Ship the disclaimer.** See original spec.
+**Decision: No specific policy exists. Ship the disclaimer.**
 
 ### 10. Affiliate Programmes
 
-**Decision: Apply to Awin. Launch with plain links. Add tracking when approved.** See affiliate table above.
+**Decision: Apply to Awin. Launch with plain links. Add tracking when approved.**
 
 ### 11. Web Quiz Infrastructure
 
-**Decision: Astro + Supabase Edge Function + shared JSON config.** See Phase 1C.
+**Decision: Astro + Supabase Edge Function + shared JSON config.**
 
 ### 12. Web-to-App Handover
 
-**Decision: Build lightweight handoff. No paid deep link provider at MVP.** Campaign URL parameters (primary), email save (secondary), cookie (tertiary). See Phase 1C.
+**Decision: Build lightweight handoff. No paid deep link provider at MVP.** Campaign URL parameters (primary), email save (secondary), cookie (tertiary).
+
+### 13. Free Tier Room Limit
+
+**Decision: 2 rooms free, unlimited with Plus.** Two rooms provide enough to experience the product (and create data for upgrade prompts). The third room creation triggers an upgrade prompt. This balances engagement (enough to invest effort) with conversion urgency.
+
+### 14. Free Trial
+
+**Decision: 14-day free trial of Palette Plus, triggered after second room creation.** Longer trials (17+ days) convert significantly better than short trials. The user has invested effort at this point, creating switching cost.
+
+### 15. Analytics Tool
+
+**Decision: PostHog.** Self-hostable, privacy-respecting, generous free tier. Feature flags included for A/B testing.
 
 ---
 
 ## Implementation Status
 
-_Updated March 2026. Phase 1A + 1B complete._
+_Updated March 2026._
 
 ### Phase 1A: ~95% complete (native app)
 
-| Feature                         | Status | Notes                                                                                   |
-| ------------------------------- | ------ | --------------------------------------------------------------------------------------- |
-| 1.1 Colour DNA Onboarding (app) | Done   | 14 archetypes, system palette roles, DNA drift detection                                |
-| 1.2 My Palette                  | Done   | Palette Story, feedback engine, paint name display throughout                           |
-| 1.4 Room Profiles               | Done   | 70/20/10, furniture lock (placeholder), renter mode (basic), light sim, room psychology |
-| 1.5 Colour Wheel & White Finder | Done   | Zoomable wheel, undertone toggle, DNA overlay, context-aware whites                     |
-| 1.6 The Red Thread              | Done   | Templates, adjacency list, coherence check, PDF export                                  |
-
-**Phase 1A remaining gaps:**
-
-- Free user blurred preview for light direction recs (currently fully gated, should show blurred preview with upgrade CTA)
-- Red Thread flow visualisation (diagram showing colour flow through rooms)
-- Shareable Colour DNA card deep-linking to web quiz (depends on Phase 1C)
+| Feature                         | Status | Notes                                                                             |
+| ------------------------------- | ------ | --------------------------------------------------------------------------------- |
+| 1.1 Colour DNA Onboarding (app) | Done   | 14 archetypes, system palette roles, DNA drift detection                          |
+| 1.2 My Palette                  | Done   | Palette Story, feedback engine, paint name display throughout                     |
+| 1.4 Room Profiles               | Done   | 70/20/10, furniture lock (basic), renter mode (basic), light sim, room psychology |
+| 1.5 Colour Wheel & White Finder | Done   | Zoomable wheel, undertone toggle, DNA overlay, context-aware whites               |
+| 1.6 The Red Thread              | Done   | Templates, adjacency list, coherence check, PDF export                            |
 
 ### Phase 1B: Complete
 
-| Feature                            | Status | Notes                                                                                          |
-| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
-| 1B.1 Home Screen Redesign          | Done   | Next-action engine, progress cards, room quick-access, smart CTAs based on completion state     |
-| 1B.2 Room Detail Enhancement       | Done   | Room Story engine, decision checklist, config-driven 70/20/10 labels, wall context row          |
-| 1B.3 Explore Tab Reorganisation    | Done   | Card-based layout, "For Your Rooms" section, learn content carousel, category navigation        |
-| 1B.4 Paint Library Personalisation | Done   | DNA-matched paints, brand filtering, "Your Palette Match" badges, search                        |
-| 1B.5 Colour DNA Expansion          | Done   | Bold variant support, archetype engine with 14 personalities, system palette roles               |
-| 1B.6 Paywall Restructure           | Done   | Three-tier (Free/Plus/Pro), Project Pass, feature comparison, benefit-led design                 |
-| 1B.7 Renter Mode Enhancement       | Done   | RoomModeConfig strategy pattern, 5 renter constraints, Neutral Finder, textile-first canvas      |
+| Feature                            | Status | Notes                                                            |
+| ---------------------------------- | ------ | ---------------------------------------------------------------- |
+| 1B.1 Home Screen Redesign          | Done   | Next-action engine, progress cards, room quick-access            |
+| 1B.2 Room Detail Enhancement       | Done   | Room Story engine, decision checklist, config-driven labels      |
+| 1B.3 Explore Tab Reorganisation    | Done   | Card-based layout, learn content, category navigation            |
+| 1B.4 Paint Library Personalisation | Done   | DNA-matched paints, brand filtering, "Your Palette Match" badges |
+| 1B.5 Colour DNA Expansion          | Done   | Archetype engine with 14 personalities, practical guidance       |
+| 1B.6 Paywall Restructure           | Done   | Three-tier structure, Project Pass, feature comparison           |
+| 1B.7 Renter Mode Enhancement       | Done   | RoomModeConfig, 5 renter constraints, Neutral Finder             |
 
 ### Phase 1C: Not started (PARALLEL)
 
-| Feature                  | Status      | Notes                            |
-| ------------------------ | ----------- | -------------------------------- |
-| 1C.1 Web Colour DNA Quiz | Not started | Separate Astro project           |
-| 1C.2 Web-to-App Handover | Not started | Requires Supabase Edge Functions |
+| Feature                  | Status      | Notes                              |
+| ------------------------ | ----------- | ---------------------------------- |
+| 1C.1 Web Colour DNA Quiz | Not started | Separate Astro project. Ship ASAP. |
+| 1C.2 Web-to-App Handover | Not started | Requires Supabase Edge Functions   |
 
 ### Phase 1D: Not started (DEFERRED)
 
@@ -1174,22 +1728,56 @@ _Updated March 2026. Phase 1A + 1B complete._
 | 1D.3 Sample Ordering               | Not started      |                                                 |
 | 1D.4 Re-engagement & Notifications | Not started      |                                                 |
 
-### Phase 2: Not started
+### Phase 1E: Not started (NEW, NEXT PRIORITY)
 
-| Feature                              | Status      | Notes                          |
-| ------------------------------------ | ----------- | ------------------------------ |
-| 2.1 Expanded Furniture Lock          | Not started | Prerequisite for product recs  |
-| 2.2 "Complete the Room" Product Recs | Not started | Core commercial feature        |
-| 2.3 Paint & Finish Recommender       | Not started |                                |
-| 2.4 Seasonal Refresh                 | Not started |                                |
-| 2.5 Partner Mode                     | Not started | Enums exist, no implementation |
+| Feature                               | Status      | Priority | Notes                                          |
+| ------------------------------------- | ----------- | -------- | ---------------------------------------------- |
+| 1E.1 Analytics Instrumentation        | Not started | P0       | Must ship before anything else                 |
+| 1E.2 A/B Testing Infrastructure       | Not started | P1       | PostHog feature flags                          |
+| 1E.3 Blurred Premium Previews         | Not started | P0       | Primary conversion lever                       |
+| 1E.4 Paywall Visual Redesign          | Not started | P0       | Outcome-led, user's own data                   |
+| 1E.5 Visual Polish Pass               | Not started | P1       | Typography, contrast, depth, accent discipline |
+| 1E.6 Branded Term Consistency         | Not started | P1       | Systematic pass                                |
+| 1E.7 Capture Tab Resolution           | Not started | P1       | Remove tab or ship minimal MVP                 |
+| 1E.8 Red Thread Flow Visualisation    | Not started | P0       | Most impactful remaining gap                   |
+| 1E.9 Room Preview Colour-Block Mockup | Not started | P1       | Zero-cost visualisation                        |
+| 1E.10 Applied State System            | Not started | P2       | Prerequisite for Phase 2 density               |
+
+### Phase 2A: Not started
+
+| Feature                                    | Status      | Notes                            |
+| ------------------------------------------ | ----------- | -------------------------------- |
+| 2A.0 Paint Recommendations (existing data) | Not started | Quick win, 1-2 weeks             |
+| 2A.1 Expanded Furniture Lock               | Not started | Photo-first, progressive capture |
+| 2A.2 Room Gap Engine                       | Not started | Core diagnostic concept          |
+| 2A.3 Product Catalogue (manual curation)   | Not started | 250 items across 3 categories    |
+| 2A.4 "Complete the Room" Product Recs      | Not started | Core commercial feature          |
+| 2A.5 Recommendation Instrumentation        | Not started | Track everything from day one    |
+
+### Phase 2B: Not started
+
+| Feature                          | Status      | Notes                                |
+| -------------------------------- | ----------- | ------------------------------------ |
+| 2B.1 Expanded Product Categories | Not started | Curtains, artwork, mirrors, cushions |
+| 2B.2 Shopping List Aggregation   | Not started |                                      |
+| 2B.3 Paint & Finish Recommender  | Not started | With quantity calculator             |
+| 2B.4 Automated Product Sourcing  | Not started | Awin feed integration                |
+| 2B.5 Seasonal Refresh            | Not started | Algorithmic + template               |
+
+### Phase 2C: Not started
+
+| Feature                           | Status      | Notes                                    |
+| --------------------------------- | ----------- | ---------------------------------------- |
+| 2C.1 Recommendation Feedback Loop | Not started | Weight recalibration from aggregate data |
+| 2C.2 Whole-Home Bundles           | Not started | Cross-room recommendations               |
 
 ### Phase 3: Not started
 
-| Feature                 | Status      | Notes                                |
-| ----------------------- | ----------- | ------------------------------------ |
-| 3.1 AI Room Visualiser  | Not started | Decor8 AI integration, credit system |
-| 3.2 AI Design Assistant | Not started | Conversational interface             |
+| Feature                 | Status      | Notes                                                  |
+| ----------------------- | ----------- | ------------------------------------------------------ |
+| 3.1 AI Room Visualiser  | Not started | Decor8 AI, credit system                               |
+| 3.2 AI Design Assistant | Not started | Conversational interface                               |
+| 3.3 Partner Mode        | Not started | v1: web quiz overlap, v2: reactions, v3: collaborative |
 
 ### Features added beyond original spec
 
@@ -1202,7 +1790,7 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 - **Paint Name Display** (hex codes replaced with real paint names throughout)
 - **Room Colour Psychology** (mood-to-colour recommendation mapping)
 - **Locked Furniture Conflict Detection** (warns when constraints contradict)
-- **QA Mode** (debug-only developer tools at `/dev` route with renter constraint toggles)
+- **QA Mode** (debug-only developer tools at `/dev` route with renter constraint toggles. Must be hidden in production builds.)
 - **Room Story Engine** (narrative room descriptions combining mood, light, and colour choices)
 - **Next Action Logic** (smart home screen CTAs that adapt to user progress and completion state)
 - **RoomModeConfig Strategy Pattern** (single config object replaces scattered if/else renter branches)
@@ -1213,17 +1801,22 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 
 ## Success Metrics (Updated)
 
-### Phase 1A + 1B (Current + Connective Tissue):
+### Phase 1A + 1B + 1E (Foundation + Polish):
 
 - Quiz completion rate: 70%+
 - Quiz share rate: 15%+
-- Rooms per user: 3+
-- Room completion score: average 4+ of 6 steps per room
+- Quiz drop-off: track per stage, optimise weakest stage
+- Rooms per user: 2+ (free), 3+ (paid)
+- Room completion score: average 4+ of 7 steps per room
 - Home screen "Next action" tap-through rate: 30%+
-- Free-to-Plus conversion: 5%+
-- Free-to-Pro conversion: 2%+ (combined paid: 7%+)
+- Blurred preview to upgrade tap rate: 10%+
+- Free-to-Plus conversion: 3%+ (initial target), optimise toward 5% over 6 months
+- Trial start rate: 20%+ of users who create second room
+- Trial-to-paid conversion: 40%+
+- Free-to-Pro conversion: 1.5%+
+- Combined paid conversion: 5%+ (initial), 7%+ (6-month target)
 - Project Pass as % of paid: 15%+
-- "Buy This Paint" CTR (all users including free): 3%+
+- "Buy This Paint" CTR (all users): 2%+ (free), 4%+ (paid)
 - W4 retention: 25%+
 - App Store rating: 4.5+
 
@@ -1237,16 +1830,18 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 
 - "Complete the Room" engagement: 60%+ of Pro users interact
 - Product recommendation CTR: 8%+
+- Recommendation dismiss rate: track and segment by reason
 - Affiliate conversion: 2%+
 - "Buy This Paint" CTR: 5%+ (increase from Phase 1)
-- Partner Mode adoption: 20% of Pro users
 - Sample order conversion: 15% of users with 3+ rooms
 - Days from first room to first purchase: target under 14 days
+- Revenue target: 3%+ CTR on product recommendations for Pro users, 2%+ affiliate conversion, within 90 days of Phase 2A launch
 
-### Phase 3 (Visual Confidence):
+### Phase 3:
 
 - Visualiser usage: 4+ per month per credit holder
 - Credit top-up rate: 10% of visualiser users
+- Partner Mode adoption: 20% of Pro users
 
 ### Long-term:
 
@@ -1263,16 +1858,21 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 
 - Run tests before committing code
 - Follow naming conventions and code style
-- Handle errors with user-friendly messages
+- Handle errors with user-friendly messages (see Error Handling section)
 - Plain language only in UI text
 - Test colour displays on light and dark backgrounds
 - Validate colour calculations produce visually correct results
 - Support Dynamic Type (iOS) and font scaling (Android)
 - Include colour disclaimer on paint colour screens
 - Pair colour with icon/label/pattern (never colour alone)
-- Include "Why this works" explanation with every recommendation
+- Include "Why this works" explanation with every recommendation, referencing specific room context
 - Apply Renter Mode constraints to all recommendation logic
 - Use British English spellings throughout
+- Include branded term plain-English subtitle wherever the branded term appears
+- Track analytics events for all user-facing interactions (see event taxonomy)
+- Ensure WCAG AA contrast ratios on all interactive elements
+- Store scoring weights and feature flags in JSON configuration, not hardcoded
+- Ensure commission rates are architecturally separated from recommendation scoring
 
 **Ask first:**
 
@@ -1284,6 +1884,8 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 - Before implementing notification/push logic
 - Before adding a new product category to recommendations
 - Before changing the Design Rules Engine scoring weights
+- Before changing the paywall structure or pricing
+- Before modifying the free tier room limit or trial duration
 
 **Never do:**
 
@@ -1298,6 +1900,9 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 - Never show a product recommendation without a "why this works" explanation
 - Never present Renter Mode as a "limited" or stripped-down experience
 - Never show affiliate links without commission disclosure
+- Never let commission rates influence recommendation sort order
+- Never expose QA Mode or debug surfaces in production builds
+- Never ship a feature without corresponding analytics events
 
 ---
 
@@ -1315,34 +1920,39 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 
 **Action:** Clarify during colour data outreach. **Fallback:** Plain links without tracking.
 
-### 4. Product recommendation catalogue sourcing (NEW)
+### 4. Product recommendation catalogue sourcing
 
-**Action:** Determine initial product sourcing approach for Phase 2. Options: (a) manually curate 50-100 items per category from affiliate retailers, (b) use Awin product feeds for automated sourcing, (c) hybrid: manual curation for launch, API feeds for scale. **Deadline:** Before Phase 2 development begins. **Key decision:** Manual curation ensures quality but does not scale. API feeds scale but require filtering logic to maintain recommendation quality. Recommend hybrid: manual v1, API v2.
+**Decision made:** Hybrid. Manual curation for Phase 2A launch (250 items), automated Awin feed sourcing for Phase 2B scale. See Feature 2A.3 for details.
 
-### 5. Renter Mode depth (NEW)
+### 5. Renter Mode algorithmic restructuring validation
 
-**Action:** Validate whether the full algorithmic restructuring (shifting 70% Hero from walls to rug/sofa) resonates with renters through user testing. Simpler constraint toggling may be sufficient for v1. **Deadline:** During Phase 1B development. **Fallback:** Ship constraint toggling first, restructure algorithm based on feedback.
+**Action:** Validate through user testing whether the full algorithmic restructuring (shifting 70% Hero from walls to rug/sofa) resonates with renters. The restructuring is implemented; the question is whether it feels natural. **Deadline:** During Phase 1E. **Fallback:** Simpler constraint toggling with restructuring as opt-in.
 
-### 6. Seasonal refresh content cadence (NEW)
+### 6. Seasonal refresh content cadence
 
-**Action:** Determine who creates seasonal refresh content and product selections. Options: (a) manually curated quarterly by Jamie, (b) algorithmically generated from palette + season + available products, (c) sponsored collections from brand partners. **Deadline:** Before Phase 2.4 development.
+**Decision made:** Algorithmic generation from palette + season + available products, with human-written seasonal narrative templates. See Feature 2B.5.
+
+### 7. Educational content production pipeline
+
+**Action:** Determine format and production approach for the Learn section content. Options: (a) illustrated card-based walkthroughs (static, written by Jamie), (b) short video walkthroughs, (c) interactive tutorials. **Deadline:** Before Phase 1E ships (Learn content should be personalised by then). **Recommended:** Static illustrated cards for v1, personalised dynamically using room/palette data.
 
 ---
 
 ## Cost Summary
 
-| Item                 | Phase 1                                | Phase 2                | Phase 3         |
-| -------------------- | -------------------------------------- | ---------------------- | --------------- |
-| Paint database       | Zero (or $29.99/yr Encycolorpedia Pro) | Zero                   | Zero            |
-| Product catalogue    | Zero                                   | Zero (affiliate-based) | Zero            |
-| AI Visualiser        | Zero                                   | Zero                   | ~£0.16/vis      |
-| Light simulation     | Zero                                   | Zero                   | Zero            |
-| Offline storage      | Zero                                   | Zero                   | Zero            |
-| Accessibility        | Zero                                   | Zero                   | Zero            |
-| Web quiz hosting     | Minimal (free tier)                    | Minimal                | Minimal         |
-| Backend (Supabase)   | Free tier                              | Free tier              | Scale as needed |
-| Deep linking         | Zero (platform-native)                 | Zero                   | Zero            |
-| **Total fixed cost** | **~Zero**                              | **~Zero**              | **~Zero**       |
+| Item                 | Phase 1                                | Phase 1E  | Phase 2                | Phase 3         |
+| -------------------- | -------------------------------------- | --------- | ---------------------- | --------------- |
+| Paint database       | Zero (or $29.99/yr Encycolorpedia Pro) | Zero      | Zero                   | Zero            |
+| Product catalogue    | Zero                                   | Zero      | Zero (affiliate-based) | Zero            |
+| AI Visualiser        | Zero                                   | Zero      | Zero                   | ~£0.16/vis      |
+| Light simulation     | Zero                                   | Zero      | Zero                   | Zero            |
+| Offline storage      | Zero                                   | Zero      | Zero                   | Zero            |
+| Accessibility        | Zero                                   | Zero      | Zero                   | Zero            |
+| Web quiz hosting     | Minimal (free tier)                    | Minimal   | Minimal                | Minimal         |
+| Backend (Supabase)   | Free tier                              | Free tier | Free tier              | Scale as needed |
+| Deep linking         | Zero (platform-native)                 | Zero      | Zero                   | Zero            |
+| Analytics (PostHog)  | Zero                                   | Free tier | Free tier              | Scale as needed |
+| **Total fixed cost** | **~Zero**                              | **~Zero** | **~Zero**              | **~Zero**       |
 
 Variable cost from AI API only (Phase 3), offset by credit pricing.
 
