@@ -65,8 +65,7 @@ class QuizState {
   final String? systemPaletteJson;
 
   /// Total prompts answered across all stages.
-  int get totalAnswered =>
-      stage1CardWeights.length + selectedRoomIds.length;
+  int get totalAnswered => stage1CardWeights.length + selectedRoomIds.length;
 
   /// Whether the user has answered at least one question
   /// (minimum for generating a result).

@@ -22,11 +22,12 @@ import 'package:palette/core/constants/enums.dart';
 
   // Green
   if (temp <= 66) {
-    green =
-        (99.4708025861 * log(temp) - 161.1195681661).round().clamp(0, 255);
+    green = (99.4708025861 * log(temp) - 161.1195681661).round().clamp(0, 255);
   } else {
-    green =
-        (288.1221695283 * pow(temp - 60, -0.0755148492)).round().clamp(0, 255);
+    green = (288.1221695283 * pow(temp - 60, -0.0755148492)).round().clamp(
+      0,
+      255,
+    );
   }
 
   // Blue
@@ -35,9 +36,10 @@ import 'package:palette/core/constants/enums.dart';
   } else if (temp <= 19) {
     blue = 0;
   } else {
-    blue = (138.5177312231 * log(temp - 10) - 305.0447927307)
-        .round()
-        .clamp(0, 255);
+    blue = (138.5177312231 * log(temp - 10) - 305.0447927307).round().clamp(
+      0,
+      255,
+    );
   }
 
   return (r: red, g: green, b: blue);
@@ -47,11 +49,7 @@ import 'package:palette/core/constants/enums.dart';
 ///
 /// Blends the Kelvin tint with the base colour at the given opacity.
 /// Returns the result as a hex string.
-String simulateLightOnColour(
-  String hex,
-  int kelvin, {
-  double opacity = 0.15,
-}) {
+String simulateLightOnColour(String hex, int kelvin, {double opacity = 0.15}) {
   final base = hexToRgb(hex);
   final tint = kelvinToRgb(kelvin);
 

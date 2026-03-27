@@ -57,12 +57,12 @@ class HomeScreen extends ConsumerWidget {
                     onAction: () => context.push('/onboarding'),
                   );
                 }
-                final archetypeName = dna.archetype != null
-                    ? archetypeDefinitions[dna.archetype]?.name
-                    : null;
+                final archetypeName =
+                    dna.archetype != null
+                        ? archetypeDefinitions[dna.archetype]?.name
+                        : null;
                 return _ColourDnaCard(
-                  primaryFamily:
-                      archetypeName ?? dna.primaryFamily.displayName,
+                  primaryFamily: archetypeName ?? dna.primaryFamily.displayName,
                   colourCount: dna.colourHexes.length,
                   hexes: dna.colourHexes.take(6).toList(),
                   onTap: () => context.push('/palette'),
@@ -101,10 +101,11 @@ class HomeScreen extends ConsumerWidget {
             // My Rooms with progress
             SectionHeader(
               title: 'My Rooms',
-              actionLabel: roomsAsync.valueOrNull != null &&
-                      roomsAsync.valueOrNull!.length > 3
-                  ? 'See all'
-                  : null,
+              actionLabel:
+                  roomsAsync.valueOrNull != null &&
+                          roomsAsync.valueOrNull!.length > 3
+                      ? 'See all'
+                      : null,
               onAction: () => context.go('/rooms'),
             ),
             const SizedBox(height: 8),
@@ -116,12 +117,13 @@ class HomeScreen extends ConsumerWidget {
                     title: 'Create Your First Room',
                     subtitle: 'Get personalised colour recommendations',
                     actionLabel: 'Create Room',
-                    onAction: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        fullscreenDialog: true,
-                        builder: (context) => const CreateRoomScreen(),
-                      ),
-                    ),
+                    onAction:
+                        () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            fullscreenDialog: true,
+                            builder: (context) => const CreateRoomScreen(),
+                          ),
+                        ),
                   );
                 }
                 return _RoomProgressList(rooms: rooms);
@@ -139,10 +141,11 @@ class HomeScreen extends ConsumerWidget {
                   const SectionHeader(title: 'Whole-Home Coherence'),
                   const SizedBox(height: 4),
                   coherenceAsync.when(
-                    data: (report) => _CoherenceSummary(
-                      threadColours: threads,
-                      coherenceReport: report,
-                    ),
+                    data:
+                        (report) => _CoherenceSummary(
+                          threadColours: threads,
+                          coherenceReport: report,
+                        ),
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
                   ),
@@ -201,52 +204,56 @@ class _ColourDnaCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.auto_awesome,
-                      color: Colors.white, size: 20),
+                  const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
                   Text(
                     'Your Colour DNA',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const Spacer(),
-                  Icon(Icons.chevron_right,
-                      color: Colors.white.withValues(alpha: 0.7), size: 20),
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    size: 20,
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(
                 '$primaryFamily \u2022 $colourCount colours',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.85),
-                    ),
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  ...hexes.map((hex) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: _hexToColor(hex),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.4),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                  ...hexes.map(
+                    (hex) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: _hexToColor(hex),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.4),
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                   if (colourCount > hexes.length)
                     Container(
                       width: 40,
@@ -337,8 +344,11 @@ class _NextActionCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.check_circle,
-                size: 24, color: PaletteColours.sageGreenDark),
+            const Icon(
+              Icons.check_circle,
+              size: 24,
+              color: PaletteColours.sageGreenDark,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -347,16 +357,16 @@ class _NextActionCard extends StatelessWidget {
                   Text(
                     action.title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: PaletteColours.sageGreenDark,
-                        ),
+                      fontWeight: FontWeight.w600,
+                      color: PaletteColours.sageGreenDark,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     action.subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PaletteColours.sageGreenDark,
-                        ),
+                      color: PaletteColours.sageGreenDark,
+                    ),
                   ),
                 ],
               ),
@@ -392,8 +402,11 @@ class _NextActionCard extends StatelessWidget {
                   color: PaletteColours.sageGreenLight,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon,
-                    size: 22, color: PaletteColours.sageGreenDark),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: PaletteColours.sageGreenDark,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -403,15 +416,15 @@ class _NextActionCard extends StatelessWidget {
                     Text(
                       action.title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       action.subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: PaletteColours.textSecondary,
-                          ),
+                        color: PaletteColours.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -445,13 +458,15 @@ class _RoomProgressList extends ConsumerWidget {
 
     return Column(
       children: [
-        ...rooms.map((room) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _RoomProgressCard(
-                room: room,
-                coherenceReport: coherenceReport,
-              ),
-            )),
+        ...rooms.map(
+          (room) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _RoomProgressCard(
+              room: room,
+              coherenceReport: coherenceReport,
+            ),
+          ),
+        ),
         const _AddRoomButton(),
       ],
     );
@@ -459,10 +474,7 @@ class _RoomProgressList extends ConsumerWidget {
 }
 
 class _RoomProgressCard extends ConsumerWidget {
-  const _RoomProgressCard({
-    required this.room,
-    required this.coherenceReport,
-  });
+  const _RoomProgressCard({required this.room, required this.coherenceReport});
 
   final Room room;
   final CoherenceReport? coherenceReport;
@@ -477,8 +489,10 @@ class _RoomProgressCard extends ConsumerWidget {
       error: (_, __) => false,
     );
 
-    final isRedThreadConnected = coherenceReport?.results
-            .any((r) => r.roomId == room.id && r.isConnected) ??
+    final isRedThreadConnected =
+        coherenceReport?.results.any(
+          (r) => r.roomId == room.id && r.isConnected,
+        ) ??
         false;
 
     final progress = computeRoomProgress(
@@ -508,9 +522,10 @@ class _RoomProgressCard extends ConsumerWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: room.heroColourHex != null
-                          ? _hexToColor(room.heroColourHex!)
-                          : PaletteColours.warmGrey,
+                      color:
+                          room.heroColourHex != null
+                              ? _hexToColor(room.heroColourHex!)
+                              : PaletteColours.warmGrey,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -521,19 +536,14 @@ class _RoomProgressCard extends ConsumerWidget {
                       children: [
                         Text(
                           room.name,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           progress.summary,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                  color: PaletteColours.textSecondary),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: PaletteColours.textSecondary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -556,8 +566,8 @@ class _RoomProgressCard extends ConsumerWidget {
               Text(
                 '${progress.completed} of ${progress.total} steps complete',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: PaletteColours.textTertiary,
-                    ),
+                  color: PaletteColours.textTertiary,
+                ),
               ),
             ],
           ),
@@ -578,12 +588,13 @@ class _AddRoomButton extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              fullscreenDialog: true,
-              builder: (context) => const CreateRoomScreen(),
-            ),
-          ),
+          onTap:
+              () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  fullscreenDialog: true,
+                  builder: (context) => const CreateRoomScreen(),
+                ),
+              ),
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -596,15 +607,18 @@ class _AddRoomButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.add,
-                    size: 18, color: PaletteColours.sageGreenDark),
+                const Icon(
+                  Icons.add,
+                  size: 18,
+                  color: PaletteColours.sageGreenDark,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Add Room',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: PaletteColours.sageGreenDark,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: PaletteColours.sageGreenDark,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -631,17 +645,18 @@ class _CoherenceSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCoherent = coherenceReport.overallCoherent;
-    final bgColour = isCoherent
-        ? PaletteColours.sageGreenLight
-        : PaletteColours.softGoldLight;
-    final accentColour = isCoherent
-        ? PaletteColours.sageGreenDark
-        : PaletteColours.softGoldDark;
+    final bgColour =
+        isCoherent
+            ? PaletteColours.sageGreenLight
+            : PaletteColours.softGoldLight;
+    final accentColour =
+        isCoherent ? PaletteColours.sageGreenDark : PaletteColours.softGoldDark;
 
     final count = coherenceReport.disconnectedCount;
-    final verdict = isCoherent
-        ? 'All rooms connected'
-        : '$count room${count == 1 ? '' : 's'} not yet connected';
+    final verdict =
+        isCoherent
+            ? 'All rooms connected'
+            : '$count room${count == 1 ? '' : 's'} not yet connected';
 
     return Material(
       color: bgColour,
@@ -653,21 +668,25 @@ class _CoherenceSummary extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              ...threadColours.take(4).map((t) => Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: _hexToColor(t.hex),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          width: 1.5,
+              ...threadColours
+                  .take(4)
+                  .map(
+                    (t) => Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: _hexToColor(t.hex),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
-                  )),
+                  ),
               const SizedBox(width: 6),
               Expanded(
                 child: Column(
@@ -676,15 +695,15 @@ class _CoherenceSummary extends StatelessWidget {
                     Text(
                       'Red Thread',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: accentColour,
-                          ),
+                        fontWeight: FontWeight.w600,
+                        color: accentColour,
+                      ),
                     ),
                     Text(
                       verdict,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: accentColour,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: accentColour),
                     ),
                   ],
                 ),
@@ -738,24 +757,21 @@ class _ActionCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PaletteColours.textTertiary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: PaletteColours.textTertiary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          FilledButton(
-            onPressed: onAction,
-            child: Text(actionLabel),
-          ),
+          FilledButton(onPressed: onAction, child: Text(actionLabel)),
         ],
       ),
     );
@@ -821,13 +837,12 @@ class _DriftPromptCard extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Your style is evolving',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: PaletteColours.softGoldDark,
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: PaletteColours.softGoldDark,
+                          ),
                         ),
                       ],
                     ),
@@ -835,8 +850,8 @@ class _DriftPromptCard extends ConsumerWidget {
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: PaletteColours.softGoldDark,
-                          ),
+                        color: PaletteColours.softGoldDark,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -847,23 +862,27 @@ class _DriftPromptCard extends ConsumerWidget {
                             backgroundColor: PaletteColours.softGoldDark,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                           ),
                           child: const Text('Retake Quiz'),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
                           onPressed: () async {
-                            final profileRepo =
-                                ref.read(userProfileRepositoryProvider);
+                            final profileRepo = ref.read(
+                              userProfileRepositoryProvider,
+                            );
                             await profileRepo.dismissDriftPrompt();
                             ref.invalidate(shouldShowDriftPromptProvider);
                           },
                           child: Text(
                             'Dismiss',
                             style: TextStyle(
-                              color: PaletteColours.softGoldDark
-                                  .withValues(alpha: 0.7),
+                              color: PaletteColours.softGoldDark.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                           ),
                         ),

@@ -27,9 +27,10 @@ Future<void> main() async {
 
   // Load DNA result for tenure (renter vs owner).
   final dnaRepo = ColourDnaRepository(db);
-  final dna = profile.colourDnaResultId != null
-      ? await dnaRepo.getById(profile.colourDnaResultId!)
-      : null;
+  final dna =
+      profile.colourDnaResultId != null
+          ? await dnaRepo.getById(profile.colourDnaResultId!)
+          : null;
 
   final constraints = RenterConstraints(
     isRenter: dna?.tenure == Tenure.renter,
@@ -47,15 +48,9 @@ Future<void> main() async {
         hasCompletedOnboardingProvider.overrideWith(
           (_) => profile.hasCompletedOnboarding,
         ),
-        subscriptionTierProvider.overrideWith(
-          (_) => profile.subscriptionTier,
-        ),
-        colourBlindModeProvider.overrideWith(
-          (_) => profile.colourBlindMode,
-        ),
-        renterConstraintsProvider.overrideWith(
-          (_) => constraints,
-        ),
+        subscriptionTierProvider.overrideWith((_) => profile.subscriptionTier),
+        colourBlindModeProvider.overrideWith((_) => profile.colourBlindMode),
+        renterConstraintsProvider.overrideWith((_) => constraints),
       ],
       child: const PaletteApp(),
     ),

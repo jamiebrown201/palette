@@ -46,36 +46,43 @@ ColourPlanHarmony analyseColourPlanHarmony({
   final heroLab = hexToLab(heroHex);
 
   if (betaHex != null) {
-    pairs.add(_ColourPair(
-      labA: heroLab,
-      labB: hexToLab(betaHex),
-      labelA: 'hero',
-      labelB: 'supporting',
-    ));
+    pairs.add(
+      _ColourPair(
+        labA: heroLab,
+        labB: hexToLab(betaHex),
+        labelA: 'hero',
+        labelB: 'supporting',
+      ),
+    );
   }
 
   if (surpriseHex != null) {
-    pairs.add(_ColourPair(
-      labA: heroLab,
-      labB: hexToLab(surpriseHex),
-      labelA: 'hero',
-      labelB: 'accent',
-    ));
+    pairs.add(
+      _ColourPair(
+        labA: heroLab,
+        labB: hexToLab(surpriseHex),
+        labelA: 'hero',
+        labelB: 'accent',
+      ),
+    );
   }
 
   if (betaHex != null && surpriseHex != null) {
-    pairs.add(_ColourPair(
-      labA: hexToLab(betaHex),
-      labB: hexToLab(surpriseHex),
-      labelA: 'supporting',
-      labelB: 'accent',
-    ));
+    pairs.add(
+      _ColourPair(
+        labA: hexToLab(betaHex),
+        labB: hexToLab(surpriseHex),
+        labelA: 'supporting',
+        labelB: 'accent',
+      ),
+    );
   }
 
   if (pairs.isEmpty) {
     return const ColourPlanHarmony(
       verdict: 'Getting started',
-      explanation: 'Add a supporting or accent colour to see how they work '
+      explanation:
+          'Add a supporting or accent colour to see how they work '
           'together.',
       relationships: [],
     );
@@ -92,21 +99,21 @@ ColourPlanHarmony analyseColourPlanHarmony({
     // Check for problems
     final dE = deltaE2000(pair.labA, pair.labB);
     if (dE < 5) {
-      warning ??= 'Your ${pair.labelA} and ${pair.labelB} are very similar '
+      warning ??=
+          'Your ${pair.labelA} and ${pair.labelB} are very similar '
           '— the ${pair.labelB} may not stand out.';
     }
   }
 
   // Check for bold unrecognised combinations
   if (relationships.isEmpty && warning == null) {
-    final heroToBeta = betaHex != null
-        ? deltaE2000(heroLab, hexToLab(betaHex))
-        : 0.0;
-    final heroToSurprise = surpriseHex != null
-        ? deltaE2000(heroLab, hexToLab(surpriseHex))
-        : 0.0;
+    final heroToBeta =
+        betaHex != null ? deltaE2000(heroLab, hexToLab(betaHex)) : 0.0;
+    final heroToSurprise =
+        surpriseHex != null ? deltaE2000(heroLab, hexToLab(surpriseHex)) : 0.0;
     if (heroToBeta > 50 || heroToSurprise > 50) {
-      warning = 'These colours are bold together — a bridging tone could '
+      warning =
+          'These colours are bold together — a bridging tone could '
           'help them feel connected.';
     }
   }

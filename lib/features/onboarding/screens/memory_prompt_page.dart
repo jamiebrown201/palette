@@ -35,8 +35,8 @@ class MemoryPromptPage extends ConsumerWidget {
           Text(
             'Choose the one that resonates most',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PaletteColours.textTertiary,
-                ),
+              color: PaletteColours.textTertiary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -54,27 +54,30 @@ class MemoryPromptPage extends ConsumerWidget {
                 final card = cards[index];
                 final hex = card['hex'] as String;
                 final colour = _hexToColor(hex);
-                final familyWeights =
-                    (card['familyWeights'] as Map<String, dynamic>)
-                        .map((k, v) => MapEntry(k, (v as num).toInt()));
+                final familyWeights = (card['familyWeights']
+                        as Map<String, dynamic>)
+                    .map((k, v) => MapEntry(k, (v as num).toInt()));
                 final undertoneStr = card['undertoneTemp'] as String?;
-                final undertoneTemp = undertoneStr != null
-                    ? Undertone.values.byName(undertoneStr)
-                    : null;
+                final undertoneTemp =
+                    undertoneStr != null
+                        ? Undertone.values.byName(undertoneStr)
+                        : null;
                 final chromaBandStr = card['chromaBand'] as String?;
-                final chromaBand = chromaBandStr != null
-                    ? ChromaBand.values.byName(chromaBandStr)
-                    : null;
+                final chromaBand =
+                    chromaBandStr != null
+                        ? ChromaBand.values.byName(chromaBandStr)
+                        : null;
 
                 return _ColourMoodCard(
                   label: card['label'] as String,
                   colour: colour,
                   delayMs: index * 80,
-                  onTap: () => notifier.selectMemoryCard(
-                    familyWeights,
-                    undertoneTemp: undertoneTemp,
-                    chromaBand: chromaBand,
-                  ),
+                  onTap:
+                      () => notifier.selectMemoryCard(
+                        familyWeights,
+                        undertoneTemp: undertoneTemp,
+                        chromaBand: chromaBand,
+                      ),
                 );
               },
             ),
@@ -162,9 +165,10 @@ class _ColourMoodCardState extends State<_ColourMoodCard>
                 decoration: BoxDecoration(
                   color: widget.colour,
                   borderRadius: BorderRadius.circular(16),
-                  border: _selected
-                      ? Border.all(color: Colors.white, width: 3)
-                      : null,
+                  border:
+                      _selected
+                          ? Border.all(color: Colors.white, width: 3)
+                          : null,
                   boxShadow: [
                     BoxShadow(
                       color: widget.colour.withValues(alpha: 0.3),
@@ -181,11 +185,12 @@ class _ColourMoodCardState extends State<_ColourMoodCard>
                         alignment: Alignment.bottomLeft,
                         child: Text(
                           widget.label,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: textColour,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            color: textColour,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
@@ -206,9 +211,10 @@ class _ColourMoodCardState extends State<_ColourMoodCard>
                             child: Icon(
                               Icons.check_rounded,
                               size: 18,
-                              color: widget.colour.computeLuminance() > 0.5
-                                  ? Colors.black87
-                                  : widget.colour,
+                              color:
+                                  widget.colour.computeLuminance() > 0.5
+                                      ? Colors.black87
+                                      : widget.colour,
                             ),
                           ),
                         ),

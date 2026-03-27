@@ -14,10 +14,7 @@ import 'package:share_plus/share_plus.dart';
 
 /// The quiz result page showing the generated colour palette.
 class QuizResultPage extends ConsumerStatefulWidget {
-  const QuizResultPage({
-    required this.onComplete,
-    super.key,
-  });
+  const QuizResultPage({required this.onComplete, super.key});
 
   final VoidCallback onComplete;
 
@@ -98,8 +95,9 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
   Future<void> _shareColourDna() async {
     setState(() => _isSharing = true);
     try {
-      final boundary = _repaintKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
+      final boundary =
+          _repaintKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary == null) return;
 
       final image = await boundary.toImage(pixelRatio: 3.0);
@@ -109,7 +107,8 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
       final bytes = byteData.buffer.asUint8List();
       await Share.shareXFiles(
         [XFile.fromData(bytes, mimeType: 'image/png', name: 'colour-dna.png')],
-        text: 'I just discovered my Colour DNA! '
+        text:
+            'I just discovered my Colour DNA! '
             'Take the quiz to find yours: https://palette.app/quiz',
       );
     } finally {
@@ -136,10 +135,8 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
               tween: Tween(begin: 0.5, end: 1.0),
               duration: const Duration(milliseconds: 800),
               curve: Curves.easeInOut,
-              builder: (_, value, child) => Opacity(
-                opacity: value,
-                child: child,
-              ),
+              builder:
+                  (_, value, child) => Opacity(opacity: value, child: child),
               child: const Icon(
                 Icons.palette_outlined,
                 size: 48,
@@ -150,8 +147,8 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
             Text(
               'Analysing your choices...',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                color: PaletteColours.textSecondary,
+              ),
             ),
           ],
         ),
@@ -159,9 +156,8 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
     }
 
     final archetype = quizState.archetype;
-    final archetypeDef = archetype != null
-        ? archetypeDefinitions[archetype]
-        : null;
+    final archetypeDef =
+        archetype != null ? archetypeDefinitions[archetype] : null;
     final confidence = quizState.dnaConfidence;
 
     // Parse system palette for role display
@@ -176,277 +172,292 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
 
     return AnimatedBuilder(
       animation: _revealController,
-      builder: (context, _) => SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Section 1: Your Archetype ──
-            const SizedBox(height: 16),
-            RepaintBoundary(
-              key: _repaintKey,
-              child: Container(
-                color: PaletteColours.warmWhite,
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    FadeTransition(
-                      opacity: _headerFade,
-                      child: Text(
-                        'My Colour DNA',
-                        style: Theme.of(context).textTheme.displaySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+      builder:
+          (context, _) => SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Section 1: Your Archetype ──
+                const SizedBox(height: 16),
+                RepaintBoundary(
+                  key: _repaintKey,
+                  child: Container(
+                    color: PaletteColours.warmWhite,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        FadeTransition(
+                          opacity: _headerFade,
+                          child: Text(
+                            'My Colour DNA',
+                            style: Theme.of(context).textTheme.displaySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
 
-                    FadeTransition(
-                      opacity: _headerFade,
-                      child: Text(
-                        _confidenceIntro(confidence),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: PaletteColours.textSecondary,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                        FadeTransition(
+                          opacity: _headerFade,
+                          child: Text(
+                            _confidenceIntro(confidence),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: PaletteColours.textSecondary),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
 
-                    // Archetype name with slide + fade
-                    SlideTransition(
-                      position: _archetypeSlide,
-                      child: FadeTransition(
-                        opacity: _archetypeFade,
-                        child: archetypeDef != null
-                            ? Column(
-                                children: [
-                                  Text(
-                                    archetypeDef.name,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.w700),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    archetypeDef.headline,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: PaletteColours.sageGreenDark,
-                                          fontStyle: FontStyle.italic,
+                        // Archetype name with slide + fade
+                        SlideTransition(
+                          position: _archetypeSlide,
+                          child: FadeTransition(
+                            opacity: _archetypeFade,
+                            child:
+                                archetypeDef != null
+                                    ? Column(
+                                      children: [
+                                        Text(
+                                          archetypeDef.name,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.headlineSmall?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                          textAlign: TextAlign.center,
                                         ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              )
-                            : Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: PaletteColours.sageGreenLight,
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                child: Text(
-                                  palette.primaryFamily.displayName,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        color: PaletteColours.sageGreenDark,
-                                        fontWeight: FontWeight.w600,
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          archetypeDef.headline,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium?.copyWith(
+                                            color: PaletteColours.sageGreenDark,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    )
+                                    : Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
                                       ),
-                                ),
-                              ),
-                      ),
-                    ),
+                                      decoration: BoxDecoration(
+                                        color: PaletteColours.sageGreenLight,
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      child: Text(
+                                        palette.primaryFamily.displayName,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium?.copyWith(
+                                          color: PaletteColours.sageGreenDark,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                          ),
+                        ),
 
-                    if (palette.secondaryFamily != null) ...[
-                      const SizedBox(height: 8),
-                      FadeTransition(
-                        opacity: _archetypeFade,
-                        child: Text(
-                          'with ${palette.secondaryFamily!.displayName} accents',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: PaletteColours.textSecondary,
+                        if (palette.secondaryFamily != null) ...[
+                          const SizedBox(height: 8),
+                          FadeTransition(
+                            opacity: _archetypeFade,
+                            child: Text(
+                              'with ${palette.secondaryFamily!.displayName} accents',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        FadeTransition(
+                          opacity: _descriptionFade,
+                          child: Text(
+                            archetypeDef?.description ??
+                                palette.primaryFamily.description,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: PaletteColours.textSecondary),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+
+                        // Palette swatches with fade
+                        FadeTransition(
+                          opacity: _swatchesFade,
+                          child:
+                              systemPalette != null
+                                  ? _RoleLabelledSwatches(
+                                    systemPalette: systemPalette,
+                                  )
+                                  : _PaletteGrid(
+                                    colours:
+                                        palette.colours
+                                            .map((c) => c.hex)
+                                            .toList(),
+                                    surpriseIndices: [
+                                      for (
+                                        var i = 0;
+                                        i < palette.colours.length;
+                                        i++
+                                      )
+                                        if (palette.colours[i].isSurprise) i,
+                                    ],
                                   ),
                         ),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    FadeTransition(
-                      opacity: _descriptionFade,
-                      child: Text(
-                        archetypeDef?.description ??
-                            palette.primaryFamily.description,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: PaletteColours.textSecondary,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 28),
-
-                    // Palette swatches with fade
-                    FadeTransition(
-                      opacity: _swatchesFade,
-                      child: systemPalette != null
-                          ? _RoleLabelledSwatches(
-                              systemPalette: systemPalette)
-                          : _PaletteGrid(
-                              colours:
-                                  palette.colours.map((c) => c.hex).toList(),
-                              surpriseIndices: [
-                                for (var i = 0;
-                                    i < palette.colours.length;
-                                    i++)
-                                  if (palette.colours[i].isSurprise) i,
-                              ],
-                            ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // ── Section 2: Why These Colours Work Together ──
-            if (archetypeDef != null) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 8),
-              Text(
-                'Why These Colours Work',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                archetypeDef.whyItWorks,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                // ── Section 2: Why These Colours Work Together ──
+                if (archetypeDef != null) ...[
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Why These Colours Work',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    archetypeDef.whyItWorks,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: PaletteColours.textSecondary,
                     ),
-              ),
+                  ),
 
-              // Undertone harmony note
-              if (quizState.undertoneTally.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _undertoneHarmonyNote(quizState.undertoneTally),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  // Undertone harmony note
+                  if (quizState.undertoneTally.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _undertoneHarmonyNote(quizState.undertoneTally),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: PaletteColours.sageGreenDark,
                         fontStyle: FontStyle.italic,
                       ),
-                ),
-              ],
+                    ),
+                  ],
 
-              // Property context insight
-              if (quizState.propertyEra != null &&
-                  quizState.propertyEra != PropertyEra.notSure) ...[
-                const SizedBox(height: 12),
-                _PropertyContextInsight(
-                  propertyEra: quizState.propertyEra!,
-                  propertyType: quizState.propertyType,
-                  undertone: quizState.undertoneTally,
-                  archetypeName: archetypeDef.name,
-                ),
-              ],
+                  // Property context insight
+                  if (quizState.propertyEra != null &&
+                      quizState.propertyEra != PropertyEra.notSure) ...[
+                    const SizedBox(height: 12),
+                    _PropertyContextInsight(
+                      propertyEra: quizState.propertyEra!,
+                      propertyType: quizState.propertyType,
+                      undertone: quizState.undertoneTally,
+                      archetypeName: archetypeDef.name,
+                    ),
+                  ],
 
-              const SizedBox(height: 16),
-              Text(
-                'Style Tips',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              ...archetypeDef.styleTips.map((tip) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Style Tips',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  ...archetypeDef.styleTips.map(
+                    (tip) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6),
+                            child: Icon(
+                              Icons.check_circle_outline,
+                              size: 16,
+                              color: PaletteColours.sageGreen,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              tip,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: PaletteColours.softCream,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(top: 6),
-                          child: Icon(Icons.check_circle_outline,
-                              size: 16, color: PaletteColours.sageGreen),
+                        const Icon(
+                          Icons.lightbulb_outline,
+                          size: 18,
+                          color: PaletteColours.softGoldDark,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            tip,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: PaletteColours.textSecondary,
-                                ),
+                            archetypeDef.watchOutFor,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: PaletteColours.textSecondary),
                           ),
                         ),
                       ],
                     ),
-                  )),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: PaletteColours.softCream,
-                  borderRadius: BorderRadius.circular(12),
+                  ),
+                ],
+
+                // ── Section 3: Your Next Steps ──
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text(
+                  'Your Next Steps',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.lightbulb_outline,
-                        size: 18, color: PaletteColours.softGoldDark),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        archetypeDef.watchOutFor,
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: PaletteColours.textSecondary,
-                                ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 12),
+
+                // Share button
+                OutlinedButton.icon(
+                  onPressed: _isSharing ? null : _shareColourDna,
+                  icon:
+                      _isSharing
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.share_outlined),
+                  label: Text(
+                    _isSharing ? 'Preparing...' : 'Share My Colour DNA',
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
 
-            // ── Section 3: Your Next Steps ──
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
-            Text(
-              'Your Next Steps',
-              style: Theme.of(context).textTheme.titleMedium,
+                FilledButton(
+                  onPressed: widget.onComplete,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text('Explore My Palette'),
+                ),
+                const SizedBox(height: 40),
+              ],
             ),
-            const SizedBox(height: 12),
-
-            // Share button
-            OutlinedButton.icon(
-              onPressed: _isSharing ? null : _shareColourDna,
-              icon: _isSharing
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.share_outlined),
-              label:
-                  Text(_isSharing ? 'Preparing...' : 'Share My Colour DNA'),
-            ),
-            const SizedBox(height: 12),
-
-            FilledButton(
-              onPressed: widget.onComplete,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text('Explore My Palette'),
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -465,8 +476,7 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
 
   String _confidenceIntro(DnaConfidence? confidence) {
     return switch (confidence) {
-      DnaConfidence.high =>
-        'Your choices pointed clearly in one direction',
+      DnaConfidence.high => 'Your choices pointed clearly in one direction',
       DnaConfidence.medium =>
         'Your taste spans two worlds, and that is a strength',
       DnaConfidence.low =>
@@ -504,15 +514,18 @@ class _PropertyContextInsight extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.home_outlined,
-              size: 18, color: PaletteColours.sageGreenDark),
+          const Icon(
+            Icons.home_outlined,
+            size: 18,
+            color: PaletteColours.sageGreenDark,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               _buildInsight(eraAffinity),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                color: PaletteColours.textSecondary,
+              ),
             ),
           ),
         ],
@@ -524,10 +537,11 @@ class _PropertyContextInsight extends StatelessWidget {
     final eraName = propertyEra.displayName;
     final typeName = propertyType?.displayName;
 
-    final prefix = typeName != null
-        ? '$archetypeName palette is a natural fit for your '
-            '$eraName $typeName.'
-        : '$archetypeName palette suits $eraName properties well.';
+    final prefix =
+        typeName != null
+            ? '$archetypeName palette is a natural fit for your '
+                '$eraName $typeName.'
+            : '$archetypeName palette suits $eraName properties well.';
 
     return '$prefix ${affinity.description}';
   }
@@ -542,10 +556,8 @@ class _RoleLabelledSwatches extends StatelessWidget {
   Widget build(BuildContext context) {
     final roles = <(String hex, String label)>[
       (systemPalette.trimWhite.hex, 'Trim White'),
-      ...systemPalette.dominantWalls
-          .map((r) => (r.hex, 'Dominant Wall')),
-      ...systemPalette.supportingWalls
-          .map((r) => (r.hex, 'Supporting Wall')),
+      ...systemPalette.dominantWalls.map((r) => (r.hex, 'Dominant Wall')),
+      ...systemPalette.supportingWalls.map((r) => (r.hex, 'Supporting Wall')),
       (systemPalette.deepAnchor.hex, 'Deep Anchor'),
       ...systemPalette.accentPops.map((r) => (r.hex, 'Accent Pop')),
       (systemPalette.spineColour.hex, 'Spine'),
@@ -555,47 +567,45 @@ class _RoleLabelledSwatches extends StatelessWidget {
       spacing: 6,
       runSpacing: 10,
       alignment: WrapAlignment.center,
-      children: roles.map((r) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: _hexToColor(r.$1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: Colors.black.withValues(alpha: 0.08),
+      children:
+          roles.map((r) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: _hexToColor(r.$1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: 0.08),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            SizedBox(
-              width: 60,
-              child: Text(
-                r.$2,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: 60,
+                  child: Text(
+                    r.$2,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: PaletteColours.textTertiary,
                       fontSize: 9,
                     ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        );
-      }).toList(),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
     );
   }
 }
 
 class _PaletteGrid extends StatelessWidget {
-  const _PaletteGrid({
-    required this.colours,
-    required this.surpriseIndices,
-  });
+  const _PaletteGrid({required this.colours, required this.surpriseIndices});
 
   final List<String> colours;
   final List<int> surpriseIndices;
@@ -617,28 +627,27 @@ class _PaletteGrid extends StatelessWidget {
               decoration: BoxDecoration(
                 color: _hexToColor(colours[i]),
                 borderRadius: BorderRadius.circular(10),
-                border: surpriseIndices.contains(i)
-                    ? Border.all(
-                        color: PaletteColours.softGold,
-                        width: 2,
-                      )
-                    : Border.all(
-                        color: Colors.black.withValues(alpha: 0.05),
-                      ),
-              ),
-              child: surpriseIndices.contains(i)
-                  ? const Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: EdgeInsets.all(3),
-                        child: Icon(
-                          Icons.auto_awesome,
-                          size: 14,
-                          color: PaletteColours.softGold,
+                border:
+                    surpriseIndices.contains(i)
+                        ? Border.all(color: PaletteColours.softGold, width: 2)
+                        : Border.all(
+                          color: Colors.black.withValues(alpha: 0.05),
                         ),
-                      ),
-                    )
-                  : null,
+              ),
+              child:
+                  surpriseIndices.contains(i)
+                      ? const Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: EdgeInsets.all(3),
+                          child: Icon(
+                            Icons.auto_awesome,
+                            size: 14,
+                            color: PaletteColours.softGold,
+                          ),
+                        ),
+                      )
+                      : null,
             ),
           ),
       ],

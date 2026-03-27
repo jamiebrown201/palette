@@ -19,11 +19,7 @@ const double _zn = 108.883;
   final cleaned = hex.replaceAll('#', '').toUpperCase();
   assert(cleaned.length == 6, 'Hex string must be 6 characters: $hex');
   final value = int.parse(cleaned, radix: 16);
-  return (
-    r: (value >> 16) & 0xFF,
-    g: (value >> 8) & 0xFF,
-    b: value & 0xFF,
-  );
+  return (r: (value >> 16) & 0xFF, g: (value >> 8) & 0xFF, b: value & 0xFF);
 }
 
 /// Convert RGB components to a hex colour string with # prefix.
@@ -49,7 +45,9 @@ String rgbToHex(int r, int g, int b) {
   int compand(double v) {
     final clamped = v.clamp(0.0, 1.0);
     final srgb =
-        clamped <= 0.0031308 ? 12.92 * clamped : 1.055 * pow(clamped, 1 / 2.4) - 0.055;
+        clamped <= 0.0031308
+            ? 12.92 * clamped
+            : 1.055 * pow(clamped, 1 / 2.4) - 0.055;
     return (srgb * 255).round().clamp(0, 255);
   }
 
@@ -57,11 +55,7 @@ String rgbToHex(int r, int g, int b) {
 }
 
 /// Convert linear RGB to CIE XYZ using the sRGB/D65 matrix.
-({double x, double y, double z}) _linearRgbToXyz(
-  double r,
-  double g,
-  double b,
-) {
+({double x, double y, double z}) _linearRgbToXyz(double r, double g, double b) {
   return (
     x: r * 0.4124564 + g * 0.3575761 + b * 0.1804375,
     y: r * 0.2126729 + g * 0.7151522 + b * 0.0721750,
@@ -70,11 +64,7 @@ String rgbToHex(int r, int g, int b) {
 }
 
 /// Convert CIE XYZ to linear RGB using the inverse sRGB/D65 matrix.
-({double r, double g, double b}) _xyzToLinearRgb(
-  double x,
-  double y,
-  double z,
-) {
+({double r, double g, double b}) _xyzToLinearRgb(double x, double y, double z) {
   return (
     r: x * 3.2404542 + y * -1.5371385 + z * -0.4985314,
     g: x * -0.9692660 + y * 1.8760108 + z * 0.0415560,
@@ -86,7 +76,9 @@ String rgbToHex(int r, int g, int b) {
 double _labF(double t) {
   const delta = 6.0 / 29.0;
   const delta3 = delta * delta * delta;
-  return t > delta3 ? pow(t, 1.0 / 3.0).toDouble() : t / (3 * delta * delta) + 4.0 / 29.0;
+  return t > delta3
+      ? pow(t, 1.0 / 3.0).toDouble()
+      : t / (3 * delta * delta) + 4.0 / 29.0;
 }
 
 /// CIE Lab inverse transform helper function.
@@ -100,11 +92,7 @@ LabColour _xyzToLab(double x, double y, double z) {
   final fx = _labF(x / _xn);
   final fy = _labF(y / _yn);
   final fz = _labF(z / _zn);
-  return LabColour(
-    116 * fy - 16,
-    500 * (fx - fy),
-    200 * (fy - fz),
-  );
+  return LabColour(116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz));
 }
 
 /// Convert CIE L*a*b* to CIE XYZ using D65 reference white.

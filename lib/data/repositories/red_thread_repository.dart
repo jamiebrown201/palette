@@ -15,13 +15,11 @@ class RedThreadRepository {
 
   Future<List<RedThreadColour>> getThreadColours() =>
       (_db.select(_db.redThreadColours)
-            ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
-          .get();
+        ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).get();
 
   Stream<List<RedThreadColour>> watchThreadColours() =>
       (_db.select(_db.redThreadColours)
-            ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
-          .watch();
+        ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).watch();
 
   Future<void> insertThreadColour(RedThreadColoursCompanion colour) =>
       _db.into(_db.redThreadColours).insert(colour);
@@ -42,8 +40,7 @@ class RedThreadRepository {
   Future<void> deleteAdjacency(String id) =>
       (_db.delete(_db.roomAdjacencies)..where((t) => t.id.equals(id))).go();
 
-  Future<void> clearAdjacencies() =>
-      _db.delete(_db.roomAdjacencies).go();
+  Future<void> clearAdjacencies() => _db.delete(_db.roomAdjacencies).go();
 
   /// Check coherence: does every room share at least one thread colour?
   ///
@@ -53,9 +50,9 @@ class RedThreadRepository {
     final threadColours = await getThreadColours();
     if (threadColours.isEmpty) return [];
 
-    final rooms = await (_db.select(_db.rooms)
-          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
-        .get();
+    final rooms =
+        await (_db.select(_db.rooms)
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).get();
 
     final disconnected = <String>[];
 

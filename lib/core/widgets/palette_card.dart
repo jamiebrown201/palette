@@ -28,10 +28,7 @@ class PaletteCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (title != null) ...[
-                Text(
-                  title!,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
+                Text(title!, style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 12),
               ],
               child,

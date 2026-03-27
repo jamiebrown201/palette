@@ -35,8 +35,10 @@ class ProfileScreen extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.workspace_premium,
-                    color: PaletteColours.premiumGold),
+                const Icon(
+                  Icons.workspace_premium,
+                  color: PaletteColours.premiumGold,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -44,18 +46,15 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       Text(
                         tier.displayName,
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       if (tier == SubscriptionTier.free)
                         Text(
                           'Upgrade for full features',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: PaletteColours.textSecondary,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: PaletteColours.textSecondary),
                         ),
                     ],
                   ),
@@ -74,9 +73,9 @@ class ProfileScreen extends ConsumerWidget {
           Text(
             'Your Palette',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: PaletteColours.textSecondary,
-                ),
+              fontWeight: FontWeight.w600,
+              color: PaletteColours.textSecondary,
+            ),
           ),
           const SizedBox(height: 8),
           Container(
@@ -90,18 +89,21 @@ class ProfileScreen extends ConsumerWidget {
                 dnaAsync.when(
                   data: (dna) {
                     if (dna == null) return const SizedBox.shrink();
-                    final label = dna.archetype != null
-                        ? archetypeDefinitions[dna.archetype]?.name ??
-                            dna.primaryFamily.displayName
-                        : dna.primaryFamily.displayName;
+                    final label =
+                        dna.archetype != null
+                            ? archetypeDefinitions[dna.archetype]?.name ??
+                                dna.primaryFamily.displayName
+                            : dna.primaryFamily.displayName;
                     return _ProfileRow(
                       icon: Icons.auto_awesome,
                       iconColor: PaletteColours.softGold,
                       title: 'Colour DNA',
                       subtitle:
                           '$label \u2022 ${dna.colourHexes.length} colours',
-                      trailing: const Icon(Icons.chevron_right,
-                          color: PaletteColours.textTertiary),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: PaletteColours.textTertiary,
+                      ),
                       onTap: () => context.push('/palette'),
                     );
                   },
@@ -129,9 +131,9 @@ class ProfileScreen extends ConsumerWidget {
           Text(
             'Settings',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: PaletteColours.textSecondary,
-                ),
+              fontWeight: FontWeight.w600,
+              color: PaletteColours.textSecondary,
+            ),
           ),
           const SizedBox(height: 8),
           Container(
@@ -143,15 +145,18 @@ class ProfileScreen extends ConsumerWidget {
             child: Column(
               children: [
                 SwitchListTile(
-                  secondary: const Icon(Icons.visibility_outlined,
-                      color: PaletteColours.accessibleBlue),
+                  secondary: const Icon(
+                    Icons.visibility_outlined,
+                    color: PaletteColours.accessibleBlue,
+                  ),
                   title: const Text('Colour Blind Mode'),
                   subtitle: const Text(
                     'Uses shape markers and text badges instead of colour-only indicators',
                   ),
                   value: colourBlindMode,
-                  onChanged: (v) =>
-                      ref.read(colourBlindModeProvider.notifier).state = v,
+                  onChanged:
+                      (v) =>
+                          ref.read(colourBlindModeProvider.notifier).state = v,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -163,10 +168,13 @@ class ProfileScreen extends ConsumerWidget {
                     iconColor: PaletteColours.sageGreen,
                     title: 'Renter Settings',
                     subtitle: 'Update what you can change in your rental',
-                    trailing: const Icon(Icons.chevron_right,
-                        color: PaletteColours.textTertiary),
-                    onTap: () => _showRenterSettingsSheet(
-                        context, ref, constraints),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: PaletteColours.textTertiary,
+                    ),
+                    onTap:
+                        () =>
+                            _showRenterSettingsSheet(context, ref, constraints),
                   ),
                 ],
               ],
@@ -202,9 +210,9 @@ class ProfileScreen extends ConsumerWidget {
           Text(
             'Colours displayed on screens are approximations. '
             'Always test physical paint samples in your space.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PaletteColours.textTertiary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: PaletteColours.textTertiary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -224,27 +232,27 @@ void _showRenterSettingsSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (_) => _RenterSettingsSheet(
-      initial: current,
-      onSave: (updated) async {
-        await ref.read(userProfileRepositoryProvider).updateRenterConstraints(
-              canPaint: updated.canPaint,
-              canDrill: updated.canDrill,
-              keepingFlooring: updated.keepingFlooring,
-              isTemporaryHome: updated.isTemporaryHome,
-              reversibleOnly: updated.reversibleOnly,
-            );
-        ref.read(renterConstraintsProvider.notifier).state = updated;
-      },
-    ),
+    builder:
+        (_) => _RenterSettingsSheet(
+          initial: current,
+          onSave: (updated) async {
+            await ref
+                .read(userProfileRepositoryProvider)
+                .updateRenterConstraints(
+                  canPaint: updated.canPaint,
+                  canDrill: updated.canDrill,
+                  keepingFlooring: updated.keepingFlooring,
+                  isTemporaryHome: updated.isTemporaryHome,
+                  reversibleOnly: updated.reversibleOnly,
+                );
+            ref.read(renterConstraintsProvider.notifier).state = updated;
+          },
+        ),
   );
 }
 
 class _RenterSettingsSheet extends StatefulWidget {
-  const _RenterSettingsSheet({
-    required this.initial,
-    required this.onSave,
-  });
+  const _RenterSettingsSheet({required this.initial, required this.onSave});
 
   final RenterConstraints initial;
   final Future<void> Function(RenterConstraints) onSave;
@@ -286,16 +294,16 @@ class _RenterSettingsSheetState extends State<_RenterSettingsSheet> {
         children: [
           Text(
             'Renter Settings',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
             "We'll adapt recommendations to what you can actually change",
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PaletteColours.textTertiary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: PaletteColours.textTertiary),
           ),
           const SizedBox(height: 20),
           _SettingsToggle(
@@ -325,29 +333,31 @@ class _RenterSettingsSheetState extends State<_RenterSettingsSheet> {
           ),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: _saving
-                ? null
-                : () async {
-                    setState(() => _saving = true);
-                    await widget.onSave(
-                      RenterConstraints(
-                        isRenter: true,
-                        canPaint: _canPaint,
-                        canDrill: _canDrill,
-                        keepingFlooring: _keepingFlooring,
-                        isTemporaryHome: _isTemporaryHome,
-                        reversibleOnly: _reversibleOnly,
-                      ),
-                    );
-                    if (mounted) Navigator.of(context).pop();
-                  },
-            child: _saving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Save'),
+            onPressed:
+                _saving
+                    ? null
+                    : () async {
+                      setState(() => _saving = true);
+                      await widget.onSave(
+                        RenterConstraints(
+                          isRenter: true,
+                          canPaint: _canPaint,
+                          canDrill: _canDrill,
+                          keepingFlooring: _keepingFlooring,
+                          isTemporaryHome: _isTemporaryHome,
+                          reversibleOnly: _reversibleOnly,
+                        ),
+                      );
+                      if (mounted) Navigator.of(context).pop();
+                    },
+            child:
+                _saving
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Text('Save'),
           ),
         ],
       ),
@@ -422,9 +432,7 @@ class _ProfileRow extends StatelessWidget {
       subtitle: subtitle != null ? Text(subtitle!) : null,
       trailing: trailing,
       onTap: onTap,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }

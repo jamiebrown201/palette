@@ -51,9 +51,10 @@ DnaDrift computeDrift(
 ) {
   // Filter to only hex-bearing, colour-selection interactions
   // (exclude removals — they don't indicate preference *for* a colour)
-  final interactions = recentInteractions
-      .where((i) => i.interactionType != 'colourRemoved')
-      .toList();
+  final interactions =
+      recentInteractions
+          .where((i) => i.interactionType != 'colourRemoved')
+          .toList();
 
   if (interactions.isEmpty) {
     return const DnaDrift(
@@ -75,15 +76,18 @@ DnaDrift computeDrift(
   for (final f in families) {
     familyCounts[f] = (familyCounts[f] ?? 0) + 1;
   }
-  final topFamily = (familyCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value)))
-      .first
-      .key;
+  final topFamily =
+      (familyCounts.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value)))
+          .first
+          .key;
 
   // Drift = proportion of interactions NOT in the DNA primary or secondary family
-  final dnaFamilies = {dna.primaryFamily, if (dna.secondaryFamily != null) dna.secondaryFamily!};
-  final matchingCount =
-      families.where(dnaFamilies.contains).length;
+  final dnaFamilies = {
+    dna.primaryFamily,
+    if (dna.secondaryFamily != null) dna.secondaryFamily!,
+  };
+  final matchingCount = families.where(dnaFamilies.contains).length;
   final familyDrift = 1.0 - (matchingCount / families.length);
 
   // --- Chroma drift ---
@@ -91,10 +95,11 @@ DnaDrift computeDrift(
   for (final c in chromas) {
     chromaCounts[c] = (chromaCounts[c] ?? 0) + 1;
   }
-  final topChroma = (chromaCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value)))
-      .first
-      .key;
+  final topChroma =
+      (chromaCounts.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value)))
+          .first
+          .key;
 
   double chromaDrift = 0;
   if (dna.saturationPreference != null) {
@@ -110,10 +115,11 @@ DnaDrift computeDrift(
     undertoneCounts[u.classification] =
         (undertoneCounts[u.classification] ?? 0) + 1;
   }
-  final topUndertone = (undertoneCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value)))
-      .first
-      .key;
+  final topUndertone =
+      (undertoneCounts.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value)))
+          .first
+          .key;
 
   double undertoneDrift = 0;
   if (dna.undertoneTemperature != null) {

@@ -13,14 +13,16 @@ class UserProfileRepository {
 
   /// Get the user profile, creating a default one if it doesn't exist.
   Future<UserProfile> getOrCreate() async {
-    final existing = await (_db.select(_db.userProfiles)
-          ..where((t) => t.id.equals(_defaultId)))
-        .getSingleOrNull();
+    final existing =
+        await (_db.select(_db.userProfiles)
+          ..where((t) => t.id.equals(_defaultId))).getSingleOrNull();
 
     if (existing != null) return existing;
 
     final now = DateTime.now();
-    await _db.into(_db.userProfiles).insert(
+    await _db
+        .into(_db.userProfiles)
+        .insert(
           UserProfilesCompanion.insert(
             id: _defaultId,
             hasCompletedOnboarding: false,
@@ -32,13 +34,12 @@ class UserProfileRepository {
         );
 
     return (_db.select(_db.userProfiles)
-          ..where((t) => t.id.equals(_defaultId)))
-        .getSingle();
+      ..where((t) => t.id.equals(_defaultId))).getSingle();
   }
 
   Stream<UserProfile> watchProfile() =>
-      (_db.select(_db.userProfiles)..where((t) => t.id.equals(_defaultId)))
-          .watchSingle();
+      (_db.select(_db.userProfiles)
+        ..where((t) => t.id.equals(_defaultId))).watchSingle();
 
   Future<void> setOnboardingComplete({
     required String colourDnaResultId,

@@ -14,10 +14,11 @@ class AppShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
-        ),
+        onDestinationSelected:
+            (index) => navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
+            ),
         backgroundColor: PaletteColours.cardBackground,
         indicatorColor: PaletteColours.sageGreenLight.withValues(alpha: 0.4),
         destinations: const [
@@ -30,11 +31,6 @@ class AppShell extends StatelessWidget {
             icon: Icon(Icons.meeting_room_outlined),
             selectedIcon: Icon(Icons.meeting_room),
             label: 'Rooms',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.camera_alt_outlined),
-            selectedIcon: Icon(Icons.camera_alt),
-            label: 'Capture',
           ),
           NavigationDestination(
             icon: Icon(Icons.explore_outlined),

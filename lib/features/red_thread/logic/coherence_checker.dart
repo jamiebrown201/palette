@@ -22,10 +22,7 @@ class RoomCoherenceResult {
 
 /// Result of a full coherence check across all rooms.
 class CoherenceReport {
-  const CoherenceReport({
-    required this.results,
-    required this.overallCoherent,
-  });
+  const CoherenceReport({required this.results, required this.overallCoherent});
 
   final List<RoomCoherenceResult> results;
   final bool overallCoherent;
@@ -57,12 +54,14 @@ CoherenceReport checkCoherence({
     ];
 
     if (roomHexes.isEmpty) {
-      results.add(RoomCoherenceResult(
-        roomId: room.id,
-        roomName: room.name,
-        isConnected: false,
-        matchingThreadHex: null,
-      ));
+      results.add(
+        RoomCoherenceResult(
+          roomId: room.id,
+          roomName: room.name,
+          isConnected: false,
+          matchingThreadHex: null,
+        ),
+      );
       continue;
     }
 
@@ -79,12 +78,14 @@ CoherenceReport checkCoherence({
       if (matchHex != null) break;
     }
 
-    results.add(RoomCoherenceResult(
-      roomId: room.id,
-      roomName: room.name,
-      isConnected: matchHex != null,
-      matchingThreadHex: matchHex,
-    ));
+    results.add(
+      RoomCoherenceResult(
+        roomId: room.id,
+        roomName: room.name,
+        isConnected: matchHex != null,
+        matchingThreadHex: matchHex,
+      ),
+    );
   }
 
   return CoherenceReport(

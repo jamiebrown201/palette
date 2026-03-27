@@ -19,13 +19,15 @@ class FloorPlanTemplate {
       name: json['name'] as String,
       propertyType: json['propertyType'] as String,
       propertyEra: json['propertyEra'] as String,
-      zones: (json['zones'] as List<dynamic>)
-          .map((z) => FloorPlanZone.fromJson(z as Map<String, dynamic>))
-          .toList(),
-      adjacencies: (json['adjacencies'] as List<dynamic>)
-          .map((a) => (a as List<dynamic>).cast<String>())
-          .map((pair) => (pair[0], pair[1]))
-          .toList(),
+      zones:
+          (json['zones'] as List<dynamic>)
+              .map((z) => FloorPlanZone.fromJson(z as Map<String, dynamic>))
+              .toList(),
+      adjacencies:
+          (json['adjacencies'] as List<dynamic>)
+              .map((a) => (a as List<dynamic>).cast<String>())
+              .map((pair) => (pair[0], pair[1]))
+              .toList(),
     );
   }
 
@@ -69,8 +71,9 @@ class FloorPlanZone {
 
 /// Load floor plan templates from the bundled asset.
 Future<List<FloorPlanTemplate>> loadFloorPlanTemplates() async {
-  final jsonString =
-      await rootBundle.loadString('assets/data/floor_plan_templates.json');
+  final jsonString = await rootBundle.loadString(
+    'assets/data/floor_plan_templates.json',
+  );
   final data = json.decode(jsonString) as Map<String, dynamic>;
   final templates = data['templates'] as List<dynamic>;
   return templates

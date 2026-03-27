@@ -27,7 +27,8 @@ const learnArticles = <LearnArticle>[
     iconBg: PaletteColours.sageGreenLight,
     title: 'Why undertones matter',
     subtitle: 'The hidden colour beneath the surface',
-    body: 'Every paint colour has an undertone — a subtle base of warm, cool, '
+    body:
+        'Every paint colour has an undertone — a subtle base of warm, cool, '
         'or neutral that you might not notice on a swatch card but becomes '
         'obvious on a full wall. A "grey" can lean blue, green, or purple '
         'depending on its undertone.\n\n'
@@ -43,7 +44,8 @@ const learnArticles = <LearnArticle>[
     iconBg: PaletteColours.softGoldLight,
     title: 'How light changes colour',
     subtitle: 'Direction and time of day transform your room',
-    body: 'A north-facing room gets cool, indirect light that pushes colours '
+    body:
+        'A north-facing room gets cool, indirect light that pushes colours '
         'towards blue. The same paint in a south-facing room will look '
         'warmer and more saturated because of the direct sunlight.\n\n'
         'East-facing rooms get warm morning light but cool afternoon shadow, '
@@ -59,7 +61,8 @@ const learnArticles = <LearnArticle>[
     iconBg: PaletteColours.accessibleBlueLight,
     title: 'The 70/20/10 rule',
     subtitle: 'A simple formula for balanced rooms',
-    body: '70% of your room is the dominant colour — usually walls and large '
+    body:
+        '70% of your room is the dominant colour — usually walls and large '
         'surfaces. This sets the mood and should be a colour you can live '
         'with every day.\n\n'
         '20% is your secondary colour — think curtains, rugs, upholstery, '
@@ -74,7 +77,8 @@ const learnArticles = <LearnArticle>[
     iconBg: Color(0xFFF0E0E0),
     title: 'What is a Red Thread?',
     subtitle: 'The colour that ties your whole home together',
-    body: 'In Scandinavian design, the "red thread" is a unifying element '
+    body:
+        'In Scandinavian design, the "red thread" is a unifying element '
         'that runs through a whole space. In colour planning, it means '
         'choosing one or two colours that appear — even subtly — in every '
         'room.\n\n'
@@ -91,7 +95,8 @@ const learnArticles = <LearnArticle>[
     iconBg: PaletteColours.warmGrey,
     title: 'Choosing the right white',
     subtitle: 'Not all whites are equal',
-    body: "White paint is the most-bought and most-returned colour. That's "
+    body:
+        "White paint is the most-bought and most-returned colour. That's "
         'because "white" is really dozens of colours — some lean pink, '
         'some lean yellow, some lean blue.\n\n'
         "Sowerby's Paper Test: hold a sheet of plain white printer paper "

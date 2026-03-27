@@ -35,11 +35,8 @@ class LabColour {
           (b - other.b).abs() < 1e-10;
 
   @override
-  int get hashCode => Object.hash(
-        l.roundToDouble(),
-        a.roundToDouble(),
-        b.roundToDouble(),
-      );
+  int get hashCode =>
+      Object.hash(l.roundToDouble(), a.roundToDouble(), b.roundToDouble());
 
   @override
   String toString() =>

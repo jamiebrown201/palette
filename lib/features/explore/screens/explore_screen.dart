@@ -83,9 +83,10 @@ class ExploreScreen extends ConsumerWidget {
                   onTap: () => context.push('/onboarding'),
                 );
               }
-              final archetypeName = dna.archetype != null
-                  ? archetypeDefinitions[dna.archetype]?.name
-                  : null;
+              final archetypeName =
+                  dna.archetype != null
+                      ? archetypeDefinitions[dna.archetype]?.name
+                      : null;
               return _DnaMiniCard(
                 label: archetypeName ?? dna.primaryFamily.displayName,
                 hexes: dna.colourHexes.take(4).toList(),
@@ -154,18 +155,16 @@ class _ExploreCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: PaletteColours.textSecondary,
-                              ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: PaletteColours.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -239,19 +238,14 @@ class _LearnCardState extends State<_LearnCard> {
                         children: [
                           Text(
                             a.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
+                            style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             a.subtitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                    color: PaletteColours.textSecondary),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: PaletteColours.textSecondary),
                           ),
                         ],
                       ),
@@ -274,9 +268,9 @@ class _LearnCardState extends State<_LearnCard> {
                   Text(
                     a.body,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: PaletteColours.textSecondary,
-                          height: 1.5,
-                        ),
+                      color: PaletteColours.textSecondary,
+                      height: 1.5,
+                    ),
                   ),
                 ],
               ],
@@ -343,14 +337,14 @@ class _DnaMiniCard extends StatelessWidget {
                     Text(
                       'Colour DNA',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: PaletteColours.textSecondary,
-                          ),
+                        color: PaletteColours.textSecondary,
+                      ),
                     ),
                     Text(
                       label,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),

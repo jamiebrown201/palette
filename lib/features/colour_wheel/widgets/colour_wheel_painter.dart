@@ -46,14 +46,16 @@ class ColourWheelPainter extends CustomPainter {
         final lightness = 0.75 - (lIdx / lightnessSteps) * 0.45;
         final color = HSLColor.fromAHSL(1.0, hue, 0.7, lightness).toColor();
 
-        final segmentOuter = innerRadius + ringWidth * (1 - lIdx / lightnessSteps);
+        final segmentOuter =
+            innerRadius + ringWidth * (1 - lIdx / lightnessSteps);
         final segmentInner =
             innerRadius + ringWidth * (1 - (lIdx + 1) / lightnessSteps);
 
-        final paint = Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = segmentOuter - segmentInner;
+        final paint =
+            Paint()
+              ..color = color
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = segmentOuter - segmentInner;
 
         final radius = (segmentOuter + segmentInner) / 2;
 
@@ -75,19 +77,34 @@ class ColourWheelPainter extends CustomPainter {
 
         if (showDnaPalette) {
           // Prominent filled diamond
-          _drawDiamond(canvas, pos, 7, Paint()
-            ..color = _parseHex(hex)
-            ..style = PaintingStyle.fill);
-          _drawDiamond(canvas, pos, 7, Paint()
-            ..color = Colors.white
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 2);
+          _drawDiamond(
+            canvas,
+            pos,
+            7,
+            Paint()
+              ..color = _parseHex(hex)
+              ..style = PaintingStyle.fill,
+          );
+          _drawDiamond(
+            canvas,
+            pos,
+            7,
+            Paint()
+              ..color = Colors.white
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2,
+          );
         } else {
           // Subtle outline diamond
-          _drawDiamond(canvas, pos, 5, Paint()
-            ..color = Colors.white.withValues(alpha: 0.8)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.5);
+          _drawDiamond(
+            canvas,
+            pos,
+            5,
+            Paint()
+              ..color = Colors.white.withValues(alpha: 0.8)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1.5,
+          );
         }
       }
     }
@@ -123,18 +140,23 @@ class ColourWheelPainter extends CustomPainter {
   }
 
   void _drawDiamond(Canvas canvas, Offset center, double size, Paint paint) {
-    final path = Path()
-      ..moveTo(center.dx, center.dy - size) // top
-      ..lineTo(center.dx + size, center.dy) // right
-      ..lineTo(center.dx, center.dy + size) // bottom
-      ..lineTo(center.dx - size, center.dy) // left
-      ..close();
+    final path =
+        Path()
+          ..moveTo(center.dx, center.dy - size) // top
+          ..lineTo(center.dx + size, center.dy) // right
+          ..lineTo(center.dx, center.dy + size) // bottom
+          ..lineTo(center.dx - size, center.dy) // left
+          ..close();
     canvas.drawPath(path, paint);
   }
 
   /// Convert a hex colour to its position on the wheel.
   Offset? _hexToWheelPosition(
-      String hex, Offset centre, double outerRadius, double innerRadius) {
+    String hex,
+    Offset centre,
+    double outerRadius,
+    double innerRadius,
+  ) {
     final color = _parseHex(hex);
     final hsl = HSLColor.fromColor(color);
     final ringWidth = outerRadius - innerRadius;
