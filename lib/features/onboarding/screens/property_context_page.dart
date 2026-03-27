@@ -38,8 +38,8 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
           Text(
             'This helps us tailor recommendations to your space',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: PaletteColours.textTertiary,
-            ),
+                  color: PaletteColours.textTertiary,
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -50,14 +50,13 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children:
-                PropertyType.values.map((type) {
-                  return _SelectionChip(
-                    label: type.displayName,
-                    isSelected: quizState.propertyType == type,
-                    onTap: () => notifier.setPropertyType(type),
-                  );
-                }).toList(),
+            children: PropertyType.values.map((type) {
+              return _SelectionChip(
+                label: type.displayName,
+                isSelected: quizState.propertyType == type,
+                onTap: () => notifier.setPropertyType(type),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 24),
 
@@ -67,14 +66,13 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children:
-                PropertyEra.values.map((era) {
-                  return _SelectionChip(
-                    label: era.displayName,
-                    isSelected: quizState.propertyEra == era,
-                    onTap: () => notifier.setPropertyEra(era),
-                  );
-                }).toList(),
+            children: PropertyEra.values.map((era) {
+              return _SelectionChip(
+                label: era.displayName,
+                isSelected: quizState.propertyEra == era,
+                onTap: () => notifier.setPropertyEra(era),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 24),
 
@@ -84,14 +82,13 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children:
-                ProjectStage.values.map((stage) {
-                  return _SelectionChip(
-                    label: stage.displayName,
-                    isSelected: quizState.projectStage == stage,
-                    onTap: () => notifier.setProjectStage(stage),
-                  );
-                }).toList(),
+            children: ProjectStage.values.map((stage) {
+              return _SelectionChip(
+                label: stage.displayName,
+                isSelected: quizState.projectStage == stage,
+                onTap: () => notifier.setProjectStage(stage),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 24),
 
@@ -101,14 +98,13 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children:
-                Tenure.values.map((tenure) {
-                  return _SelectionChip(
-                    label: tenure.displayName,
-                    isSelected: quizState.tenure == tenure,
-                    onTap: () => notifier.setTenure(tenure),
-                  );
-                }).toList(),
+            children: Tenure.values.map((tenure) {
+              return _SelectionChip(
+                label: tenure.displayName,
+                isSelected: quizState.tenure == tenure,
+                onTap: () => notifier.setTenure(tenure),
+              );
+            }).toList(),
           ),
 
           // Renter constraint questions — revealed when tenure == renter
@@ -116,33 +112,30 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child:
-                quizState.tenure == Tenure.renter
-                    ? _RenterConstraintSection(
-                      quizState: quizState,
-                      notifier: notifier,
-                    )
-                    : const SizedBox.shrink(),
+            child: quizState.tenure == Tenure.renter
+                ? _RenterConstraintSection(
+                    quizState: quizState,
+                    notifier: notifier,
+                  )
+                : const SizedBox.shrink(),
           ),
           const SizedBox(height: 32),
 
           FilledButton(
-            onPressed:
-                _isGenerating
-                    ? null
-                    : () async {
-                      setState(() => _isGenerating = true);
-                      await notifier.generateAndSaveResult();
-                      if (mounted) setState(() => _isGenerating = false);
-                    },
-            child:
-                _isGenerating
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Text('See My Colour DNA'),
+            onPressed: _isGenerating
+                ? null
+                : () async {
+                    setState(() => _isGenerating = true);
+                    await notifier.generateAndSaveResult();
+                    if (mounted) setState(() => _isGenerating = false);
+                  },
+            child: _isGenerating
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('See My Colour DNA'),
           ),
           const SizedBox(height: 32),
         ],
@@ -170,9 +163,9 @@ class _RenterConstraintSection extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           "We'll adapt recommendations to what you can actually change",
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: PaletteColours.textTertiary),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: PaletteColours.textTertiary,
+              ),
         ),
         const SizedBox(height: 16),
         _YesNoRow(
@@ -223,7 +216,10 @@ class _YesNoRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
           const SizedBox(width: 12),
           _SelectionChip(
@@ -252,9 +248,9 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: Theme.of(
-        context,
-      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
     );
   }
 }

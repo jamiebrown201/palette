@@ -61,8 +61,8 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
                 _showDnaPalette ? Icons.palette : Icons.palette_outlined,
               ),
               tooltip: 'Show your DNA colours',
-              onPressed:
-                  () => setState(() => _showDnaPalette = !_showDnaPalette),
+              onPressed: () =>
+                  setState(() => _showDnaPalette = !_showDnaPalette),
             ),
           IconButton(
             icon: Icon(
@@ -84,17 +84,16 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
             Center(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final wheelSize = min(constraints.maxWidth - 16, 340.0);
+                  final wheelSize =
+                      min(constraints.maxWidth - 16, 340.0);
                   return InteractiveViewer(
                     minScale: 1.0,
                     maxScale: 3.0,
                     child: GestureDetector(
-                      onPanDown:
-                          (details) =>
-                              _handleTap(details.localPosition, wheelSize),
-                      onPanUpdate:
-                          (details) =>
-                              _handleTap(details.localPosition, wheelSize),
+                      onPanDown: (details) =>
+                          _handleTap(details.localPosition, wheelSize),
+                      onPanUpdate: (details) =>
+                          _handleTap(details.localPosition, wheelSize),
                       child: SizedBox(
                         width: wheelSize,
                         height: wheelSize,
@@ -126,10 +125,8 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
                   if (hsl.saturation > 0.05) {
                     setState(() {
                       _selectedHue = hsl.hue;
-                      _selectedRadial = ((0.75 - hsl.lightness) / 0.45).clamp(
-                        0.0,
-                        1.0,
-                      );
+                      _selectedRadial =
+                          ((0.75 - hsl.lightness) / 0.45).clamp(0.0, 1.0);
                     });
                   }
                 },
@@ -152,7 +149,8 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
               const SizedBox(height: 8),
               _RelationshipSelector(
                 selected: _selectedRelationship,
-                onChanged: (r) => setState(() => _selectedRelationship = r),
+                onChanged: (r) =>
+                    setState(() => _selectedRelationship = r),
               ),
               const SizedBox(height: 16),
 
@@ -167,9 +165,7 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
 
               // Paint matches
               _PaintMatchSection(
-                hue: _selectedHue!,
-                lightness: _selectedLightness,
-              ),
+                  hue: _selectedHue!, lightness: _selectedLightness),
               const SizedBox(height: 24),
               const ColourDisclaimer(),
             ] else ...[
@@ -177,9 +173,7 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
               Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 24,
-                  ),
+                      horizontal: 32, vertical: 24),
                   decoration: BoxDecoration(
                     color: PaletteColours.softCream,
                     borderRadius: BorderRadius.circular(16),
@@ -194,16 +188,18 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
                       const SizedBox(height: 12),
                       Text(
                         'Tap the wheel to explore',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Find paint matches and colour harmonies',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PaletteColours.textSecondary,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
                       ),
                     ],
                   ),
@@ -233,8 +229,8 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
     if (angle < 0) angle += 360;
 
     // How far from outer to inner (0 = outer, 1 = inner)
-    final radial = ((outerRadius - distance) / (outerRadius - innerRadius))
-        .clamp(0.0, 1.0);
+    final radial =
+        ((outerRadius - distance) / (outerRadius - innerRadius)).clamp(0.0, 1.0);
 
     setState(() {
       _selectedHue = angle;
@@ -252,12 +248,11 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
 
     await PaletteBottomSheet.show<void>(
       context: context,
-      builder:
-          (_) => ColourDetailSheet(
-            hex: hex,
-            matches: matches,
-            paintColourRepo: paintRepo,
-          ),
+      builder: (_) => ColourDetailSheet(
+        hex: hex,
+        matches: matches,
+        paintColourRepo: paintRepo,
+      ),
     );
   }
 }
@@ -278,10 +273,9 @@ class _SelectedColourPreview extends StatelessWidget {
     final color = HSLColor.fromAHSL(1.0, hue, 0.7, lightness).toColor();
     final hex = _colorToHex(color);
     final lab = hexToLab(hex);
-    final undertone =
-        lab.b > 5
-            ? 'Warm'
-            : lab.b < -5
+    final undertone = lab.b > 5
+        ? 'Warm'
+        : lab.b < -5
             ? 'Cool'
             : 'Neutral';
 
@@ -322,14 +316,17 @@ class _SelectedColourPreview extends StatelessWidget {
                     children: [
                       Text(
                         hex.toUpperCase(),
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                       ),
                       Text(
                         'Hue: ${hue.round()}\u00B0',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PaletteColours.textSecondary,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
                       ),
                     ],
                   ),
@@ -337,14 +334,11 @@ class _SelectedColourPreview extends StatelessWidget {
                 if (showUndertone)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
+                        horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color:
-                          undertone == 'Warm'
-                              ? PaletteColours.softGoldLight
-                              : undertone == 'Cool'
+                      color: undertone == 'Warm'
+                          ? PaletteColours.softGoldLight
+                          : undertone == 'Cool'
                               ? PaletteColours.accessibleBlueLight
                               : PaletteColours.warmGrey,
                       borderRadius: BorderRadius.circular(12),
@@ -352,8 +346,8 @@ class _SelectedColourPreview extends StatelessWidget {
                     child: Text(
                       undertone,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
               ],
@@ -380,19 +374,18 @@ class _RelationshipSelector extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children:
-            ColourRelationship.values.map((r) {
-              final isSelected = r == selected;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(r.displayName),
-                  selected: isSelected,
-                  onSelected: (_) => onChanged(r),
-                  selectedColor: PaletteColours.sageGreenLight,
-                ),
-              );
-            }).toList(),
+        children: ColourRelationship.values.map((r) {
+          final isSelected = r == selected;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(r.displayName),
+              selected: isSelected,
+              onSelected: (_) => onChanged(r),
+              selectedColor: PaletteColours.sageGreenLight,
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -424,9 +417,9 @@ class _RelationshipResults extends StatelessWidget {
       children: [
         Text(
           relationship.description,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: PaletteColours.textSecondary),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: PaletteColours.textSecondary,
+              ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -442,8 +435,9 @@ class _RelationshipResults extends StatelessWidget {
                 label: entry.label,
                 hex: entry.hex,
                 showUndertone: showUndertones,
-                onTap:
-                    onColourTap != null ? () => onColourTap!(entry.hex) : null,
+                onTap: onColourTap != null
+                    ? () => onColourTap!(entry.hex)
+                    : null,
               ),
             ),
           ],
@@ -452,7 +446,8 @@ class _RelationshipResults extends StatelessWidget {
           const SizedBox(height: 10),
           Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: PaletteColours.softCream,
                 borderRadius: BorderRadius.circular(12),
@@ -460,8 +455,8 @@ class _RelationshipResults extends StatelessWidget {
               child: Text(
                 'Tap a swatch to find paint matches',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textSecondary,
-                ),
+                      color: PaletteColours.textSecondary,
+                    ),
               ),
             ),
           ),
@@ -476,29 +471,29 @@ class _RelationshipResults extends StatelessWidget {
   ) {
     return switch (relationship) {
       ColourRelationship.complementary => [
-        (label: 'Complement', hex: labToHex(complementary(baseLab))),
-      ],
+          (label: 'Complement', hex: labToHex(complementary(baseLab))),
+        ],
       ColourRelationship.analogous => () {
-        final a = analogous(baseLab);
-        return [
-          (label: 'Left', hex: labToHex(a.left)),
-          (label: 'Right', hex: labToHex(a.right)),
-        ];
-      }(),
+          final a = analogous(baseLab);
+          return [
+            (label: 'Left', hex: labToHex(a.left)),
+            (label: 'Right', hex: labToHex(a.right)),
+          ];
+        }(),
       ColourRelationship.triadic => () {
-        final t = triadic(baseLab);
-        return [
-          (label: 'Second', hex: labToHex(t.second)),
-          (label: 'Third', hex: labToHex(t.third)),
-        ];
-      }(),
+          final t = triadic(baseLab);
+          return [
+            (label: 'Second', hex: labToHex(t.second)),
+            (label: 'Third', hex: labToHex(t.third)),
+          ];
+        }(),
       ColourRelationship.splitComplementary => () {
-        final sc = splitComplementary(baseLab);
-        return [
-          (label: 'Left', hex: labToHex(sc.left)),
-          (label: 'Right', hex: labToHex(sc.right)),
-        ];
-      }(),
+          final sc = splitComplementary(baseLab);
+          return [
+            (label: 'Left', hex: labToHex(sc.left)),
+            (label: 'Right', hex: labToHex(sc.right)),
+          ];
+        }(),
     };
   }
 }
@@ -520,10 +515,9 @@ class _ColourSwatchTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _hexToColor(hex);
     final lab = hexToLab(hex);
-    final undertone =
-        lab.b > 5
-            ? 'W'
-            : lab.b < -5
+    final undertone = lab.b > 5
+        ? 'W'
+        : lab.b < -5
             ? 'C'
             : 'N';
 
@@ -548,32 +542,28 @@ class _ColourSwatchTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                child:
-                    showUndertone
-                        ? Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            margin: const EdgeInsets.all(6),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              undertone,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.labelSmall?.copyWith(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                child: showUndertone
+                    ? Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                          margin: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                        )
-                        : null,
+                          child: Text(
+                            undertone,
+                            style:
+                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                          ),
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(height: 6),
               Text(
@@ -642,52 +632,47 @@ class _DnaPaletteRow extends StatelessWidget {
             child: Text(
               'Your DNA Palette',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: PaletteColours.textSecondary,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: PaletteColours.textSecondary,
+                  ),
             ),
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children:
-                  dnaHexes.map((hex) {
-                    final role = roleMap[hex.toUpperCase()];
-                    return GestureDetector(
-                      onTap:
-                          onColourTap != null ? () => onColourTap!(hex) : null,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: _hexToColor(hex),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: PaletteColours.divider,
-                                ),
-                              ),
-                            ),
-                            if (role != null) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                role,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.labelSmall?.copyWith(
-                                  fontSize: 9,
-                                  color: PaletteColours.textTertiary,
-                                ),
-                              ),
-                            ],
-                          ],
+              children: dnaHexes.map((hex) {
+                final role = roleMap[hex.toUpperCase()];
+                return GestureDetector(
+                  onTap: onColourTap != null ? () => onColourTap!(hex) : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: _hexToColor(hex),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: PaletteColours.divider),
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                        if (role != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            role,
+                            style:
+                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      fontSize: 9,
+                                      color: PaletteColours.textTertiary,
+                                    ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -721,128 +706,123 @@ class _PaintMatchSection extends ConsumerWidget {
             final baseHex = _colorToHex(baseColor);
             final baseLab = hexToLab(baseHex);
 
-            final scored =
-                allPaints.map((pc) {
-                    final lab = LabColour(pc.labL, pc.labA, pc.labB);
-                    final dE = _deltaE76(baseLab, lab);
-                    return (colour: pc, deltaE: dE);
-                  }).toList()
-                  ..sort((a, b) => a.deltaE.compareTo(b.deltaE));
+            final scored = allPaints.map((pc) {
+              final lab = LabColour(pc.labL, pc.labA, pc.labB);
+              final dE = _deltaE76(baseLab, lab);
+              return (colour: pc, deltaE: dE);
+            }).toList()
+              ..sort((a, b) => a.deltaE.compareTo(b.deltaE));
 
             final top5 = scored.take(5);
 
             return Column(
-              children:
-                  top5.map((match) {
-                    final percent = _deltaEToPercent(match.deltaE);
-                    final isDnaMatch = dnaHexSet.contains(
-                      match.colour.hex.toUpperCase(),
-                    );
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: PaletteColours.cardBackground,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: PaletteColours.divider),
+              children: top5.map((match) {
+                final percent = _deltaEToPercent(match.deltaE);
+                final isDnaMatch =
+                    dnaHexSet.contains(match.colour.hex.toUpperCase());
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.cardBackground,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: PaletteColours.divider),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _hexToColor(match.colour.hex),
+                          borderRadius: BorderRadius.circular(10),
+                          border:
+                              Border.all(color: PaletteColours.divider),
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: _hexToColor(match.colour.hex),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: PaletteColours.divider),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        match.colour.name,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium?.copyWith(
+                                Flexible(
+                                  child: Text(
+                                    match.colour.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
                                           fontWeight: FontWeight.w500,
                                         ),
-                                      ),
+                                  ),
+                                ),
+                                if (isDnaMatch) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: PaletteColours.softGoldLight,
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                    if (isDnaMatch) ...[
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: PaletteColours.softGoldLight,
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'DNA',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall?.copyWith(
+                                    child: Text(
+                                      'DNA',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
                                             fontSize: 9,
                                             fontWeight: FontWeight.w700,
                                             color: PaletteColours.softGold,
                                           ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${match.colour.brand}'
-                                  '${match.colour.approximatePricePerLitre != null ? ' \u2022 \u00A3${match.colour.approximatePricePerLitre!.toStringAsFixed(0)}/L' : ''}',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.bodySmall?.copyWith(
-                                    color: PaletteColours.textTertiary,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ],
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              _MatchBadge(percent: percent),
-                              const SizedBox(height: 6),
-                              BuyThisPaintButton(
-                                brand: match.colour.brand,
-                                colourCode: match.colour.code,
-                                colourName: match.colour.name,
-                              ),
-                            ],
+                            const SizedBox(height: 2),
+                            Text(
+                              '${match.colour.brand}'
+                              '${match.colour.approximatePricePerLitre != null ? ' \u2022 \u00A3${match.colour.approximatePricePerLitre!.toStringAsFixed(0)}/L' : ''}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: PaletteColours.textTertiary,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _MatchBadge(percent: percent),
+                          const SizedBox(height: 6),
+                          BuyThisPaintButton(
+                            brand: match.colour.brand,
+                            colourCode: match.colour.code,
+                            colourName: match.colour.name,
                           ),
                         ],
                       ),
-                    );
-                  }).toList(),
+                    ],
+                  ),
+                );
+              }).toList(),
             );
           },
-          loading:
-              () => const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-          error:
-              (e, _) => Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text('Could not load paint colours: $e'),
-              ),
+          loading: () => const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Could not load paint colours: $e'),
+          ),
         ),
       ],
     );
@@ -862,10 +842,9 @@ class _MatchBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colour =
-        percent >= 70
-            ? PaletteColours.sageGreen
-            : percent >= 40
+    final colour = percent >= 70
+        ? PaletteColours.sageGreen
+        : percent >= 40
             ? PaletteColours.softGold
             : PaletteColours.textTertiary;
 
@@ -878,9 +857,9 @@ class _MatchBadge extends StatelessWidget {
       child: Text(
         '${percent.round()}%',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: colour,
-          fontWeight: FontWeight.w600,
-        ),
+              color: colour,
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }
@@ -901,7 +880,7 @@ Color _hexToColor(String hex) {
 
 String _colorToHex(Color color) {
   return '#${(color.r * 255).round().toRadixString(16).padLeft(2, '0')}'
-          '${(color.g * 255).round().toRadixString(16).padLeft(2, '0')}'
-          '${(color.b * 255).round().toRadixString(16).padLeft(2, '0')}'
+      '${(color.g * 255).round().toRadixString(16).padLeft(2, '0')}'
+      '${(color.b * 255).round().toRadixString(16).padLeft(2, '0')}'
       .toUpperCase();
 }

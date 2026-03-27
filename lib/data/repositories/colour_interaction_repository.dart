@@ -16,20 +16,19 @@ class ColourInteractionRepository {
     String? paintId,
     String? contextRoomId,
     String? previousHex,
-  }) => _db
-      .into(_db.colourInteractions)
-      .insert(
-        ColourInteractionsCompanion.insert(
-          id: id,
-          interactionType: interactionType,
-          hex: hex,
-          contextScreen: contextScreen,
-          paintId: Value(paintId),
-          contextRoomId: Value(contextRoomId),
-          previousHex: Value(previousHex),
-          createdAt: DateTime.now(),
-        ),
-      );
+  }) =>
+      _db.into(_db.colourInteractions).insert(
+            ColourInteractionsCompanion.insert(
+              id: id,
+              interactionType: interactionType,
+              hex: hex,
+              contextScreen: contextScreen,
+              paintId: Value(paintId),
+              contextRoomId: Value(contextRoomId),
+              previousHex: Value(previousHex),
+              createdAt: DateTime.now(),
+            ),
+          );
 
   Future<List<ColourInteraction>> getRecentInteractions({int limit = 50}) =>
       (_db.select(_db.colourInteractions)

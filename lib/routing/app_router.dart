@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/features/capture/screens/capture_screen.dart';
 import 'package:palette/features/colour_wheel/screens/colour_wheel_screen.dart';
 import 'package:palette/features/colour_wheel/screens/white_finder_screen.dart';
 import 'package:palette/features/dev/screens/qa_mode_screen.dart';
@@ -21,6 +22,7 @@ import 'package:palette/routing/app_shell.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
 final _roomsNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rooms');
+final _captureNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'capture');
 final _exploreNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'explore');
 final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 
@@ -81,9 +83,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Tab-based navigation
       StatefulShellRoute.indexedStack(
         parentNavigatorKey: _rootNavigatorKey,
-        builder:
-            (context, state, navigationShell) =>
-                AppShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
         branches: [
           // Tab 0: Home
           StatefulShellBranch(
@@ -106,17 +107,27 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':roomId',
-                    builder:
-                        (context, state) => RoomDetailScreen(
-                          roomId: state.pathParameters['roomId']!,
-                        ),
+                    builder: (context, state) => RoomDetailScreen(
+                      roomId: state.pathParameters['roomId']!,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
 
-          // Tab 2: Explore
+          // Tab 2: Capture
+          StatefulShellBranch(
+            navigatorKey: _captureNavigatorKey,
+            routes: [
+              GoRoute(
+                path: '/capture',
+                builder: (context, state) => const CaptureScreen(),
+              ),
+            ],
+          ),
+
+          // Tab 3: Explore
           StatefulShellBranch(
             navigatorKey: _exploreNavigatorKey,
             routes: [
@@ -130,10 +141,9 @@ final routerProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'white-finder',
-                    builder:
-                        (context, state) => WhiteFinderScreen(
-                          roomId: state.uri.queryParameters['roomId'],
-                        ),
+                    builder: (context, state) => WhiteFinderScreen(
+                      roomId: state.uri.queryParameters['roomId'],
+                    ),
                   ),
                   GoRoute(
                     path: 'paint-library',
@@ -144,7 +154,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Tab 3: Profile
+          // Tab 4: Profile
           StatefulShellBranch(
             navigatorKey: _profileNavigatorKey,
             routes: [

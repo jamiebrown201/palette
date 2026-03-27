@@ -39,9 +39,8 @@ class SeedDataService {
   }
 
   Future<void> _loadPaintColours() async {
-    final jsonString = await rootBundle.loadString(
-      'assets/data/paint_colours.json',
-    );
+    final jsonString =
+        await rootBundle.loadString('assets/data/paint_colours.json');
     final data = json.decode(jsonString) as Map<String, dynamic>;
     final colours = data['colours'] as List<dynamic>;
 
@@ -92,9 +91,8 @@ class SeedDataService {
 
 /// Load retailer configuration from bundled JSON.
 Future<Map<String, RetailerConfig>> loadRetailerConfigs() async {
-  final jsonString = await rootBundle.loadString(
-    'assets/data/retailer_configs.json',
-  );
+  final jsonString =
+      await rootBundle.loadString('assets/data/retailer_configs.json');
   final data = json.decode(jsonString) as Map<String, dynamic>;
   final brands = data['brands'] as Map<String, dynamic>;
 
@@ -128,7 +126,10 @@ class RetailerConfig {
 
   /// Build the best available URL for a paint colour.
   /// Falls back through: product page -> search -> homepage.
-  String buildUrl({required String colourCode, required String colourName}) {
+  String buildUrl({
+    required String colourCode,
+    required String colourName,
+  }) {
     if (productUrlTemplate != null) {
       return _applyAffiliate(
         productUrlTemplate!

@@ -40,20 +40,20 @@ LabColour complementary(LabColour lab) => _rotateHue(lab, 180);
 /// Get analogous colours (hue +/- 30 degrees).
 /// Creates a harmonious, cohesive feel.
 ({LabColour left, LabColour right}) analogous(LabColour lab) => (
-  left: _rotateHue(lab, -30),
-  right: _rotateHue(lab, 30),
-);
+      left: _rotateHue(lab, -30),
+      right: _rotateHue(lab, 30),
+    );
 
 /// Get triadic colours (hue +/- 120 degrees).
 /// Creates a balanced, vibrant palette.
 ({LabColour second, LabColour third}) triadic(LabColour lab) => (
-  second: _rotateHue(lab, 120),
-  third: _rotateHue(lab, 240),
-);
+      second: _rotateHue(lab, 120),
+      third: _rotateHue(lab, 240),
+    );
 
 /// Get split-complementary colours (hue + 150 and + 210 degrees).
 /// A softer alternative to complementary.
 ({LabColour left, LabColour right}) splitComplementary(LabColour lab) => (
-  left: _rotateHue(lab, 150),
-  right: _rotateHue(lab, 210),
-);
+      left: _rotateHue(lab, 150),
+      right: _rotateHue(lab, 210),
+    );

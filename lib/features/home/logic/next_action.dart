@@ -77,9 +77,8 @@ NextAction computeNextAction({
   if (coherenceReport != null &&
       threadColours.isNotEmpty &&
       coherenceReport.disconnectedCount > 0) {
-    final disconnected = coherenceReport.results.firstWhere(
-      (r) => !r.isConnected,
-    );
+    final disconnected =
+        coherenceReport.results.firstWhere((r) => !r.isConnected);
     final count = coherenceReport.disconnectedCount;
     return NextAction(
       type: NextActionType.resolveCoherence,

@@ -21,15 +21,18 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           if (actionLabel != null)
             TextButton(
               onPressed: onAction,
               child: Text(
                 actionLabel!,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: PaletteColours.sageGreen,
-                ),
+                      color: PaletteColours.sageGreen,
+                    ),
               ),
             ),
         ],

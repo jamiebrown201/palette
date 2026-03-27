@@ -13,25 +13,28 @@ class RoomRepository {
 
   Future<List<Room>> getAllRooms() =>
       (_db.select(_db.rooms)
-        ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).get();
+            ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+          .get();
 
   Stream<List<Room>> watchAllRooms() =>
       (_db.select(_db.rooms)
-        ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).watch();
+            ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+          .watch();
 
   Future<Room?> getRoomById(String id) =>
-      (_db.select(_db.rooms)..where((t) => t.id.equals(id))).getSingleOrNull();
+      (_db.select(_db.rooms)..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
 
   Stream<Room?> watchRoomById(String id) =>
-      (_db.select(_db.rooms)
-        ..where((t) => t.id.equals(id))).watchSingleOrNull();
+      (_db.select(_db.rooms)..where((t) => t.id.equals(id)))
+          .watchSingleOrNull();
 
   Future<void> insertRoom(RoomsCompanion room) =>
       _db.into(_db.rooms).insert(room);
 
   Future<void> updateRoom(RoomsCompanion room) =>
-      (_db.update(_db.rooms)
-        ..where((t) => t.id.equals(room.id.value))).write(room);
+      (_db.update(_db.rooms)..where((t) => t.id.equals(room.id.value)))
+          .write(room);
 
   Future<void> deleteRoom(String id) =>
       (_db.delete(_db.rooms)..where((t) => t.id.equals(id))).go();
@@ -61,10 +64,11 @@ class RoomRepository {
       _db.into(_db.lockedFurnitureItems).insert(furniture);
 
   Future<void> deleteFurniture(String id) =>
-      (_db.delete(_db.lockedFurnitureItems)
-        ..where((t) => t.id.equals(id))).go();
+      (_db.delete(_db.lockedFurnitureItems)..where((t) => t.id.equals(id)))
+          .go();
 
   Future<void> deleteAllFurnitureForRoom(String roomId) =>
       (_db.delete(_db.lockedFurnitureItems)
-        ..where((t) => t.roomId.equals(roomId))).go();
+            ..where((t) => t.roomId.equals(roomId)))
+          .go();
 }

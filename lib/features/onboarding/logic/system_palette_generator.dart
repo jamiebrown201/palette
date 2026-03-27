@@ -24,12 +24,11 @@ SystemPalette? generateSystemPalette({
 
   final primaryPaints =
       allPaintColours.where((c) => c.paletteFamily == primaryFamily).toList();
-  final secondaryPaints =
-      secondaryFamily != null
-          ? allPaintColours
-              .where((c) => c.paletteFamily == secondaryFamily)
-              .toList()
-          : <PaintColour>[];
+  final secondaryPaints = secondaryFamily != null
+      ? allPaintColours
+          .where((c) => c.paletteFamily == secondaryFamily)
+          .toList()
+      : <PaintColour>[];
   final combinedPaints = [...primaryPaints, ...secondaryPaints];
 
   // Step 1: Trim White
@@ -66,15 +65,14 @@ SystemPalette? generateSystemPalette({
 
   // Step 5: Accent Pops (0-1)
   // Spec D5: muted users get 0 accent pops
-  final accentPops =
-      saturationPreference == ChromaBand.muted
-          ? <PaintColour>[]
-          : _selectAccentPops(
-            allPaintColours,
-            primaryFamily,
-            dominantWalls,
-            undertoneTemperature,
-          );
+  final accentPops = saturationPreference == ChromaBand.muted
+      ? <PaintColour>[]
+      : _selectAccentPops(
+          allPaintColours,
+          primaryFamily,
+          dominantWalls,
+          undertoneTemperature,
+        );
 
   // Step 6: Spine Colour (1)
   final spineColour = _selectSpineColour(
@@ -86,17 +84,16 @@ SystemPalette? generateSystemPalette({
 
   return SystemPalette(
     trimWhite: _toRef(trimWhite, 'trimWhite', 'Trim & Ceiling'),
-    dominantWalls:
-        dominantWalls
-            .map((p) => _toRef(p, 'dominantWall', 'Main Wall Colour'))
-            .toList(),
-    supportingWalls:
-        supportingWalls
-            .map((p) => _toRef(p, 'supportingWall', 'Supporting Wall'))
-            .toList(),
+    dominantWalls: dominantWalls
+        .map((p) => _toRef(p, 'dominantWall', 'Main Wall Colour'))
+        .toList(),
+    supportingWalls: supportingWalls
+        .map((p) => _toRef(p, 'supportingWall', 'Supporting Wall'))
+        .toList(),
     deepAnchor: _toRef(deepAnchor, 'deepAnchor', 'Deep Anchor'),
-    accentPops:
-        accentPops.map((p) => _toRef(p, 'accentPop', 'Accent Pop')).toList(),
+    accentPops: accentPops
+        .map((p) => _toRef(p, 'accentPop', 'Accent Pop'))
+        .toList(),
     spineColour: _toRef(spineColour, 'spineColour', 'Spine Colour'),
   );
 }
@@ -149,8 +146,7 @@ PaintColour? _selectTrimWhite(
 
     // Prefer matching undertone
     if (undertone != null && undertone != Undertone.neutral) {
-      final matched =
-          candidates.where((c) => _matchesUndertone(c, undertone)).toList();
+      final matched = candidates.where((c) => _matchesUndertone(c, undertone)).toList();
       if (matched.isNotEmpty) candidates = matched;
     }
 
@@ -177,13 +173,16 @@ List<PaintColour> _selectDominantWalls(
   Undertone? undertone, {
   (double, double)? eraLRange,
 }) {
-  for (final baseRange in [(55.0, 80.0), (45.0, 85.0), (35.0, 90.0)]) {
+  for (final baseRange in [
+    (55.0, 80.0),
+    (45.0, 85.0),
+    (35.0, 90.0),
+  ]) {
     // Soft blend with era's suggested L* range (80% user, 20% era)
     final range = _blendLRange(baseRange, eraLRange);
-    var candidates =
-        primaryPaints
-            .where((c) => c.labL >= range.$1 && c.labL <= range.$2)
-            .toList();
+    var candidates = primaryPaints
+        .where((c) => c.labL >= range.$1 && c.labL <= range.$2)
+        .toList();
     if (candidates.isEmpty) continue;
 
     // Prefer matching undertone
@@ -226,21 +225,17 @@ List<PaintColour> _selectSupportingWalls(
     (35.0, 85.0, 7.0),
     (25.0, 90.0, 5.0),
   ]) {
-    var candidates =
-        combined
-            .where(
-              (c) =>
-                  !usedIds.contains(c.id) &&
-                  c.labL >= range.$1 &&
-                  c.labL <= range.$2,
-            )
-            .toList();
+    var candidates = combined
+        .where((c) =>
+            !usedIds.contains(c.id) &&
+            c.labL >= range.$1 &&
+            c.labL <= range.$2)
+        .toList();
 
     // Filter by min delta-E from each dominant wall
-    candidates =
-        candidates.where((c) {
-          return dominantWalls.every((d) => _dE(c, d) >= range.$3);
-        }).toList();
+    candidates = candidates.where((c) {
+      return dominantWalls.every((d) => _dE(c, d) >= range.$3);
+    }).toList();
 
     if (candidates.isEmpty) continue;
 
@@ -320,13 +315,10 @@ List<PaintColour> _selectAccentPops(
   final compFamilies = _getAccentFamilies(primaryFamily);
 
   for (final minCab in [30.0, 20.0, 10.0]) {
-    var candidates =
-        all
-            .where(
-              (c) =>
-                  compFamilies.contains(c.paletteFamily) && c.cabStar > minCab,
-            )
-            .toList();
+    var candidates = all
+        .where((c) =>
+            compFamilies.contains(c.paletteFamily) && c.cabStar > minCab)
+        .toList();
 
     if (candidates.isEmpty) continue;
 
@@ -356,23 +348,11 @@ List<PaintColour> _selectAccentPops(
 
 Set<PaletteFamily> _getAccentFamilies(PaletteFamily primary) {
   return switch (primary) {
-    PaletteFamily.warmNeutrals => {
-      PaletteFamily.jewelTones,
-      PaletteFamily.brights,
-    },
-    PaletteFamily.coolNeutrals => {
-      PaletteFamily.earthTones,
-      PaletteFamily.brights,
-    },
-    PaletteFamily.earthTones => {
-      PaletteFamily.coolNeutrals,
-      PaletteFamily.jewelTones,
-    },
+    PaletteFamily.warmNeutrals => {PaletteFamily.jewelTones, PaletteFamily.brights},
+    PaletteFamily.coolNeutrals => {PaletteFamily.earthTones, PaletteFamily.brights},
+    PaletteFamily.earthTones => {PaletteFamily.coolNeutrals, PaletteFamily.jewelTones},
     PaletteFamily.pastels => {PaletteFamily.jewelTones, PaletteFamily.darks},
-    PaletteFamily.jewelTones => {
-      PaletteFamily.pastels,
-      PaletteFamily.warmNeutrals,
-    },
+    PaletteFamily.jewelTones => {PaletteFamily.pastels, PaletteFamily.warmNeutrals},
     PaletteFamily.darks => {PaletteFamily.pastels, PaletteFamily.brights},
     PaletteFamily.brights => {PaletteFamily.coolNeutrals, PaletteFamily.darks},
   };
@@ -394,15 +374,10 @@ PaintColour? _selectSpineColour(
     (50.0, 85.0, 40.0),
     (40.0, 90.0, 50.0),
   ]) {
-    var candidates =
-        all
-            .where(
-              (c) =>
-                  c.labL >= params.$1 &&
-                  c.labL <= params.$2 &&
-                  c.cabStar < params.$3,
-            )
-            .toList();
+    var candidates = all
+        .where((c) =>
+            c.labL >= params.$1 && c.labL <= params.$2 && c.cabStar < params.$3)
+        .toList();
 
     if (candidates.isEmpty) continue;
 
@@ -431,7 +406,10 @@ PaintColour? _selectSpineColour(
 
 /// Blend a base L* range with an era-suggested range (80% base, 20% era).
 /// Returns the base range if era range is null.
-(double, double) _blendLRange((double, double) base, (double, double)? era) {
+(double, double) _blendLRange(
+  (double, double) base,
+  (double, double)? era,
+) {
   if (era == null) return base;
   final minL = base.$1 * 0.8 + era.$1 * 0.2;
   final maxL = base.$2 * 0.8 + era.$2 * 0.2;

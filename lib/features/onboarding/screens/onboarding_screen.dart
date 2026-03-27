@@ -61,7 +61,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final quizState = ref.watch(quizNotifierProvider);
 
     if (!_contentLoaded) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
@@ -70,7 +72,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           children: [
             // Header with progress and skip
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               child: Column(
                 children: [
                   Row(
@@ -100,7 +103,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             TextButton(
                               onPressed: _skipQuiz,
                               style: TextButton.styleFrom(
-                                foregroundColor: PaletteColours.textTertiary,
+                                foregroundColor:
+                                    PaletteColours.textTertiary,
                               ),
                               child: const Text('Skip'),
                             ),
@@ -135,18 +139,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget _buildStage(QuizState state) {
     return switch (state.stage) {
       QuizStage.memoryPrompts => MemoryPromptPage(
-        key: ValueKey('prompt-${state.currentPromptIndex}'),
-      ),
+          key: ValueKey('prompt-${state.currentPromptIndex}'),
+        ),
       QuizStage.visualPreference => const VisualPreferencePage(
-        key: ValueKey('visual'),
-      ),
+          key: ValueKey('visual'),
+        ),
       QuizStage.propertyContext => const PropertyContextPage(
-        key: ValueKey('property'),
-      ),
+          key: ValueKey('property'),
+        ),
       QuizStage.result => QuizResultPage(
-        key: const ValueKey('result'),
-        onComplete: _onQuizComplete,
-      ),
+          key: const ValueKey('result'),
+          onComplete: _onQuizComplete,
+        ),
     };
   }
 

@@ -12,12 +12,11 @@ class ColourDisclaimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text =
-        prefix != null
-            ? '$prefix Colours on screens are approximations. '
-                'Always test physical samples before committing.'
-            : 'Colours on screens are approximations. '
-                'Always test physical samples before committing.';
+    final text = prefix != null
+        ? '$prefix Colours on screens are approximations. '
+            'Always test physical samples before committing.'
+        : 'Colours on screens are approximations. '
+            'Always test physical samples before committing.';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -34,9 +33,9 @@ class ColourDisclaimer extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: PaletteColours.textTertiary,
-                fontSize: 11,
-              ),
+                    color: PaletteColours.textTertiary,
+                    fontSize: 11,
+                  ),
             ),
           ),
         ],

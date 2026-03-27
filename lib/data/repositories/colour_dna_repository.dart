@@ -21,17 +21,19 @@ class ColourDnaRepository {
           .watchSingleOrNull();
 
   Future<ColourDnaResult?> getById(String id) =>
-      (_db.select(_db.colourDnaResults)
-        ..where((t) => t.id.equals(id))).getSingleOrNull();
+      (_db.select(_db.colourDnaResults)..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
 
   Future<void> insert(ColourDnaResultsCompanion result) =>
       _db.into(_db.colourDnaResults).insert(result);
 
   Future<void> update(ColourDnaResultsCompanion result) =>
       (_db.update(_db.colourDnaResults)
-        ..where((t) => t.id.equals(result.id.value))).write(result);
+            ..where((t) => t.id.equals(result.id.value)))
+          .write(result);
 
   Future<List<ColourDnaResult>> getAll() =>
       (_db.select(_db.colourDnaResults)
-        ..orderBy([(t) => OrderingTerm.desc(t.completedAt)])).get();
+            ..orderBy([(t) => OrderingTerm.desc(t.completedAt)]))
+          .get();
 }

@@ -28,13 +28,11 @@ class PaintColours extends Table {
   RealColumn get lrv => real()();
   TextColumn get undertone =>
       text().map(const EnumNameConverter<Undertone>(Undertone.values))();
-  TextColumn get paletteFamily =>
-      text().map(
-        const EnumNameConverter<PaletteFamily>(PaletteFamily.values),
-      )();
+  TextColumn get paletteFamily => text()
+      .map(const EnumNameConverter<PaletteFamily>(PaletteFamily.values))();
   RealColumn get cabStar => real()();
-  TextColumn get chromaBand =>
-      text().map(const EnumNameConverter<ChromaBand>(ChromaBand.values))();
+  TextColumn get chromaBand => text()
+      .map(const EnumNameConverter<ChromaBand>(ChromaBand.values))();
   TextColumn get collection => text().nullable()();
   RealColumn get approximatePricePerLitre => real().nullable()();
   DateTimeColumn get priceLastChecked => dateTime().nullable()();
@@ -50,45 +48,41 @@ class PaintColours extends Table {
 @UseRowClass(ColourDnaResult)
 class ColourDnaResults extends Table {
   TextColumn get id => text()();
-  TextColumn get primaryFamily =>
-      text().map(
-        const EnumNameConverter<PaletteFamily>(PaletteFamily.values),
-      )();
-  TextColumn get secondaryFamily =>
-      text().nullable().map(
-        const EnumNameConverter<PaletteFamily>(PaletteFamily.values),
-      )();
-  TextColumn get colourHexes => text().map(const StringListConverter())();
-  TextColumn get dnaConfidence =>
-      text().nullable().map(
+  TextColumn get primaryFamily => text()
+      .map(const EnumNameConverter<PaletteFamily>(PaletteFamily.values))();
+  TextColumn get secondaryFamily => text()
+      .nullable()
+      .map(const EnumNameConverter<PaletteFamily>(PaletteFamily.values))();
+  TextColumn get colourHexes =>
+      text().map(const StringListConverter())();
+  TextColumn get dnaConfidence => text()
+      .nullable()
+      .map(
         const EnumNameConverter<DnaConfidence>(DnaConfidence.values),
       )();
-  TextColumn get archetype =>
-      text().nullable().map(
+  TextColumn get archetype => text()
+      .nullable()
+      .map(
         const EnumNameConverter<ColourArchetype>(ColourArchetype.values),
       )();
-  TextColumn get propertyType =>
-      text().nullable().map(
-        const EnumNameConverter<PropertyType>(PropertyType.values),
-      )();
-  TextColumn get propertyEra =>
-      text().nullable().map(
-        const EnumNameConverter<PropertyEra>(PropertyEra.values),
-      )();
-  TextColumn get projectStage =>
-      text().nullable().map(
-        const EnumNameConverter<ProjectStage>(ProjectStage.values),
-      )();
-  TextColumn get tenure =>
-      text().nullable().map(const EnumNameConverter<Tenure>(Tenure.values))();
-  TextColumn get undertoneTemperature =>
-      text().nullable().map(
-        const EnumNameConverter<Undertone>(Undertone.values),
-      )();
-  TextColumn get saturationPreference =>
-      text().nullable().map(
-        const EnumNameConverter<ChromaBand>(ChromaBand.values),
-      )();
+  TextColumn get propertyType => text()
+      .nullable()
+      .map(const EnumNameConverter<PropertyType>(PropertyType.values))();
+  TextColumn get propertyEra => text()
+      .nullable()
+      .map(const EnumNameConverter<PropertyEra>(PropertyEra.values))();
+  TextColumn get projectStage => text()
+      .nullable()
+      .map(const EnumNameConverter<ProjectStage>(ProjectStage.values))();
+  TextColumn get tenure => text()
+      .nullable()
+      .map(const EnumNameConverter<Tenure>(Tenure.values))();
+  TextColumn get undertoneTemperature => text()
+      .nullable()
+      .map(const EnumNameConverter<Undertone>(Undertone.values))();
+  TextColumn get saturationPreference => text()
+      .nullable()
+      .map(const EnumNameConverter<ChromaBand>(ChromaBand.values))();
   TextColumn get systemPaletteJson => text().nullable()();
   DateTimeColumn get completedAt => dateTime()();
   BoolColumn get isComplete => boolean()();
@@ -125,17 +119,16 @@ class PaletteColours extends Table {
 class Rooms extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
-  TextColumn get direction =>
-      text().nullable().map(
+  TextColumn get direction => text()
+      .nullable()
+      .map(
         const EnumNameConverter<CompassDirection>(CompassDirection.values),
       )();
   TextColumn get usageTime =>
       text().map(const EnumNameConverter<UsageTime>(UsageTime.values))();
   TextColumn get moods => text().map(const RoomMoodListConverter())();
-  TextColumn get budget =>
-      text().map(
-        const EnumNameConverter<BudgetBracket>(BudgetBracket.values),
-      )();
+  TextColumn get budget => text()
+      .map(const EnumNameConverter<BudgetBracket>(BudgetBracket.values))();
   TextColumn get heroColourHex => text().nullable()();
   TextColumn get betaColourHex => text().nullable()();
   TextColumn get surpriseColourHex => text().nullable()();
@@ -159,10 +152,8 @@ class LockedFurnitureItems extends Table {
   TextColumn get roomId => text().references(Rooms, #id)();
   TextColumn get name => text()();
   TextColumn get colourHex => text()();
-  TextColumn get role =>
-      text().map(
-        const EnumNameConverter<FurnitureRole>(FurnitureRole.values),
-      )();
+  TextColumn get role => text()
+      .map(const EnumNameConverter<FurnitureRole>(FurnitureRole.values))();
   IntColumn get sortOrder => integer()();
 
   @override
@@ -210,8 +201,7 @@ class RoomAdjacencies extends Table {
 class UserProfiles extends Table {
   TextColumn get id => text()();
   BoolColumn get hasCompletedOnboarding => boolean()();
-  TextColumn get subscriptionTier =>
-      text().map(
+  TextColumn get subscriptionTier => text().map(
         const EnumNameConverter<SubscriptionTier>(SubscriptionTier.values),
       )();
   BoolColumn get colourBlindMode => boolean()();

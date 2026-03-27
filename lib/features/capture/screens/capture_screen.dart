@@ -31,24 +31,22 @@ class CaptureScreen extends StatelessWidget {
               Text(
                 'Colour Capture',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Point your camera at any surface to capture its colour '
                 'and find matching paints from our library.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PaletteColours.textSecondary,
-                ),
+                      color: PaletteColours.textSecondary,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: PaletteColours.warmGrey,
                   borderRadius: BorderRadius.circular(20),
@@ -56,9 +54,9 @@ class CaptureScreen extends StatelessWidget {
                 child: Text(
                   'Coming Soon',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: PaletteColours.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: PaletteColours.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
             ],

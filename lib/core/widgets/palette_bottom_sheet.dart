@@ -13,13 +13,12 @@ abstract final class PaletteBottomSheet {
       context: context,
       isScrollControlled: isScrollControlled,
       useSafeArea: useSafeArea,
-      builder:
-          (context) => Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: builder(context),
-          ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: builder(context),
+      ),
     );
   }
 }

@@ -17,10 +17,11 @@ class DnaAnchors {
 
   /// Extract key anchors from a system palette.
   factory DnaAnchors.fromSystemPalette(SystemPalette palette) => DnaAnchors(
-    dominantWall:
-        palette.dominantWalls.isNotEmpty ? palette.dominantWalls.first : null,
-    deepAnchor: palette.deepAnchor,
-    trimWhite: palette.trimWhite,
-    accentPop: palette.accentPops.isNotEmpty ? palette.accentPops.first : null,
-  );
+        dominantWall:
+            palette.dominantWalls.isNotEmpty ? palette.dominantWalls.first : null,
+        deepAnchor: palette.deepAnchor,
+        trimWhite: palette.trimWhite,
+        accentPop:
+            palette.accentPops.isNotEmpty ? palette.accentPops.first : null,
+      );
 }

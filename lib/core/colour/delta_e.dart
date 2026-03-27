@@ -78,8 +78,7 @@ double deltaE2000(LabColour lab1, LabColour lab2) {
     hMean = (h1Prime + h2Prime - 360) / 2.0;
   }
 
-  final t =
-      1 -
+  final t = 1 -
       0.17 * cos((hMean - 30) * pi / 180) +
       0.24 * cos(2 * hMean * pi / 180) +
       0.32 * cos((3 * hMean + 6) * pi / 180) -
@@ -93,7 +92,8 @@ double deltaE2000(LabColour lab1, LabColour lab2) {
 
   final cMean7 = pow(cMean, 7).toDouble();
   final rc = 2 * sqrt(cMean7 / (cMean7 + pow(25, 7).toDouble()));
-  final dTheta = 30 * exp(-pow((hMean - 275) / 25, 2));
+  final dTheta =
+      30 * exp(-pow((hMean - 275) / 25, 2));
   final rt = -sin(2 * dTheta * pi / 180) * rc;
 
   final dlTerm = deltaLPrime / (kL * sl);
@@ -101,7 +101,10 @@ double deltaE2000(LabColour lab1, LabColour lab2) {
   final dhTerm = deltaHHPrime / (kH * sh);
 
   return sqrt(
-    dlTerm * dlTerm + dcTerm * dcTerm + dhTerm * dhTerm + rt * dcTerm * dhTerm,
+    dlTerm * dlTerm +
+        dcTerm * dcTerm +
+        dhTerm * dhTerm +
+        rt * dcTerm * dhTerm,
   );
 }
 

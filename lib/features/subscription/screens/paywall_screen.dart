@@ -33,17 +33,17 @@ class PaywallScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               'Avoid expensive colour mistakes',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 6),
             Text(
               'Get personalised recommendations for every room in your home',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: PaletteColours.textSecondary,
-              ),
+                    color: PaletteColours.textSecondary,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
@@ -123,9 +123,9 @@ class PaywallScreen extends ConsumerWidget {
             Text(
               'Less than a Farrow & Ball sample pot per month.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: PaletteColours.softGoldDark,
-                fontStyle: FontStyle.italic,
-              ),
+                    color: PaletteColours.softGoldDark,
+                    fontStyle: FontStyle.italic,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -135,8 +135,8 @@ class PaywallScreen extends ConsumerWidget {
               'Subscriptions are managed through your app store. '
               'Cancel anytime.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: PaletteColours.textTertiary,
-              ),
+                    color: PaletteColours.textTertiary,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -173,10 +173,9 @@ class _TierCard extends StatelessWidget {
         color: PaletteColours.cardBackground,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-              isRecommended
-                  ? PaletteColours.premiumGold
-                  : PaletteColours.divider,
+          color: isRecommended
+              ? PaletteColours.premiumGold
+              : PaletteColours.divider,
           width: isRecommended ? 2 : 1,
         ),
       ),
@@ -189,16 +188,14 @@ class _TierCard extends StatelessWidget {
                 child: Text(
                   tier.displayName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ),
               if (isRecommended)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: PaletteColours.premiumGold,
                     borderRadius: BorderRadius.circular(12),
@@ -206,17 +203,15 @@ class _TierCard extends StatelessWidget {
                   child: Text(
                     'Recommended',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
               if (isCurrent)
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: PaletteColours.sageGreenLight,
                     borderRadius: BorderRadius.circular(12),
@@ -224,8 +219,8 @@ class _TierCard extends StatelessWidget {
                   child: Text(
                     'Current',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: PaletteColours.sageGreenDark,
-                    ),
+                          color: PaletteColours.sageGreenDark,
+                        ),
                   ),
                 ),
             ],
@@ -235,66 +230,64 @@ class _TierCard extends StatelessWidget {
             Text(
               price!,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: PaletteColours.premiumGold,
-              ),
+                    fontWeight: FontWeight.w700,
+                    color: PaletteColours.premiumGold,
+                  ),
             ),
             if (priceSubtext != null)
               Text(
                 priceSubtext!,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textTertiary,
-                ),
+                      color: PaletteColours.textTertiary,
+                    ),
               ),
           ],
           const SizedBox(height: 12),
-          ...features.map(
-            (f) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Icon(
-                      f.contains('coming soon') ? Icons.schedule : Icons.check,
-                      size: 16,
-                      color:
-                          f.contains('coming soon')
-                              ? PaletteColours.textTertiary
-                              : PaletteColours.sageGreen,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      f,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color:
-                            f.contains('coming soon')
-                                ? PaletteColours.textTertiary
-                                : null,
+          ...features.map((f) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Icon(
+                        f.contains('coming soon')
+                            ? Icons.schedule
+                            : Icons.check,
+                        size: 16,
+                        color: f.contains('coming soon')
+                            ? PaletteColours.textTertiary
+                            : PaletteColours.sageGreen,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        f,
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: f.contains('coming soon')
+                                      ? PaletteColours.textTertiary
+                                      : null,
+                                ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
           if (onSelect != null && !isCurrent) ...[
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              child:
-                  isRecommended
-                      ? FilledButton(
-                        onPressed: onSelect,
-                        child: Text('Upgrade to ${tier.displayName}'),
-                      )
-                      : OutlinedButton(
-                        onPressed: onSelect,
-                        child: Text('Choose ${tier.displayName}'),
-                      ),
+              child: isRecommended
+                  ? FilledButton(
+                      onPressed: onSelect,
+                      child: Text('Upgrade to ${tier.displayName}'),
+                    )
+                  : OutlinedButton(
+                      onPressed: onSelect,
+                      child: Text('Choose ${tier.displayName}'),
+                    ),
             ),
           ],
         ],
@@ -304,7 +297,10 @@ class _TierCard extends StatelessWidget {
 }
 
 class _ProjectPassCard extends StatelessWidget {
-  const _ProjectPassCard({required this.isCurrent, required this.onSelect});
+  const _ProjectPassCard({
+    required this.isCurrent,
+    required this.onSelect,
+  });
 
   final bool isCurrent;
   final VoidCallback onSelect;
@@ -328,25 +324,28 @@ class _ProjectPassCard extends StatelessWidget {
                   children: [
                     Text(
                       'Project Pass',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                     ),
                     if (isCurrent) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: PaletteColours.sageGreenLight,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           'Current',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(color: PaletteColours.sageGreenDark),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: PaletteColours.sageGreenDark,
+                              ),
                         ),
                       ),
                     ],
@@ -356,21 +355,24 @@ class _ProjectPassCard extends StatelessWidget {
                 Text(
                   '6 months of Palette Pro \u2022 \u00A324.99 one-time',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                        color: PaletteColours.textSecondary,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Perfect for a single decorating project',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: PaletteColours.textTertiary,
-                  ),
+                        color: PaletteColours.textTertiary,
+                      ),
                 ),
               ],
             ),
           ),
           if (!isCurrent)
-            OutlinedButton(onPressed: onSelect, child: const Text('Get')),
+            OutlinedButton(
+              onPressed: onSelect,
+              child: const Text('Get'),
+            ),
         ],
       ),
     );

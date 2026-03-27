@@ -52,8 +52,7 @@ List<PaintMatchResult> computePaintMatches({
       final label = archetypeName ?? 'your';
       reason = 'Harmonises with $label palette';
     } else if (dnaUndertone != null && paint.undertone == dnaUndertone) {
-      reason =
-          'Shares your ${dnaUndertone.displayName.toLowerCase()} undertone';
+      reason = 'Shares your ${dnaUndertone.displayName.toLowerCase()} undertone';
     }
 
     // Room direction badges.
@@ -79,9 +78,9 @@ List<PaintMatchResult> computePaintMatches({
 
 bool _undertoneSuitsDirection(Undertone undertone, CompassDirection direction) {
   return switch (direction) {
-    CompassDirection.north ||
-    CompassDirection.east => undertone == Undertone.cool,
-    CompassDirection.south ||
-    CompassDirection.west => undertone == Undertone.warm,
+    CompassDirection.north || CompassDirection.east =>
+      undertone == Undertone.cool,
+    CompassDirection.south || CompassDirection.west =>
+      undertone == Undertone.warm,
   };
 }

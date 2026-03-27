@@ -19,22 +19,22 @@ class PaintReference {
   final String? roleLabel;
 
   Map<String, dynamic> toMap() => {
-    'paintId': paintId,
-    'hex': hex,
-    'name': name,
-    'brand': brand,
-    'role': role,
-    if (roleLabel != null) 'roleLabel': roleLabel,
-  };
+        'paintId': paintId,
+        'hex': hex,
+        'name': name,
+        'brand': brand,
+        'role': role,
+        if (roleLabel != null) 'roleLabel': roleLabel,
+      };
 
   factory PaintReference.fromMap(Map<String, dynamic> map) => PaintReference(
-    paintId: map['paintId'] as String,
-    hex: map['hex'] as String,
-    name: map['name'] as String,
-    brand: map['brand'] as String,
-    role: map['role'] as String,
-    roleLabel: map['roleLabel'] as String?,
-  );
+        paintId: map['paintId'] as String,
+        hex: map['hex'] as String,
+        name: map['name'] as String,
+        brand: map['brand'] as String,
+        role: map['role'] as String,
+        roleLabel: map['roleLabel'] as String?,
+      );
 }
 
 /// A structured role-based palette generated from Colour DNA quiz results.
@@ -82,13 +82,13 @@ class SystemPalette {
   String toJson() => jsonEncode(toMap());
 
   Map<String, dynamic> toMap() => {
-    'trimWhite': trimWhite.toMap(),
-    'dominantWalls': dominantWalls.map((r) => r.toMap()).toList(),
-    'supportingWalls': supportingWalls.map((r) => r.toMap()).toList(),
-    'deepAnchor': deepAnchor.toMap(),
-    'accentPops': accentPops.map((r) => r.toMap()).toList(),
-    'spineColour': spineColour.toMap(),
-  };
+        'trimWhite': trimWhite.toMap(),
+        'dominantWalls': dominantWalls.map((r) => r.toMap()).toList(),
+        'supportingWalls': supportingWalls.map((r) => r.toMap()).toList(),
+        'deepAnchor': deepAnchor.toMap(),
+        'accentPops': accentPops.map((r) => r.toMap()).toList(),
+        'spineColour': spineColour.toMap(),
+      };
 
   /// Deserialize from JSON string.
   factory SystemPalette.fromJson(String jsonStr) {
@@ -97,24 +97,23 @@ class SystemPalette {
   }
 
   factory SystemPalette.fromMap(Map<String, dynamic> map) => SystemPalette(
-    trimWhite: PaintReference.fromMap(map['trimWhite'] as Map<String, dynamic>),
-    dominantWalls:
-        (map['dominantWalls'] as List<dynamic>)
+        trimWhite: PaintReference.fromMap(
+          map['trimWhite'] as Map<String, dynamic>,
+        ),
+        dominantWalls: (map['dominantWalls'] as List<dynamic>)
             .map((e) => PaintReference.fromMap(e as Map<String, dynamic>))
             .toList(),
-    supportingWalls:
-        (map['supportingWalls'] as List<dynamic>)
+        supportingWalls: (map['supportingWalls'] as List<dynamic>)
             .map((e) => PaintReference.fromMap(e as Map<String, dynamic>))
             .toList(),
-    deepAnchor: PaintReference.fromMap(
-      map['deepAnchor'] as Map<String, dynamic>,
-    ),
-    accentPops:
-        (map['accentPops'] as List<dynamic>)
+        deepAnchor: PaintReference.fromMap(
+          map['deepAnchor'] as Map<String, dynamic>,
+        ),
+        accentPops: (map['accentPops'] as List<dynamic>)
             .map((e) => PaintReference.fromMap(e as Map<String, dynamic>))
             .toList(),
-    spineColour: PaintReference.fromMap(
-      map['spineColour'] as Map<String, dynamic>,
-    ),
-  );
+        spineColour: PaintReference.fromMap(
+          map['spineColour'] as Map<String, dynamic>,
+        ),
+      );
 }

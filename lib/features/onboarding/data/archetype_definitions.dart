@@ -43,7 +43,7 @@ class ArchetypeDefinition {
 ///
 /// All 14 archetypes are reachable through this map.
 const Map<PaletteFamily, Map<ChromaBand, ColourArchetype>>
-familySaturationToArchetype = {
+    familySaturationToArchetype = {
   PaletteFamily.warmNeutrals: {
     ChromaBand.muted: ColourArchetype.theCocooner,
     ChromaBand.mid: ColourArchetype.theCocooner,
@@ -113,6 +113,7 @@ ColourArchetype mapToArchetype({
 /// when the saturation axis is introduced.
 const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   // ── Warm Neutrals ──────────────────────────────────────────────────────
+
   ColourArchetype.theCocooner: ArchetypeDefinition(
     archetype: ColourArchetype.theCocooner,
     name: 'The Cocooner',
@@ -175,7 +176,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Dining room', 'Living room', 'Study'],
     bestMaterials: ['Aged leather', 'raw plaster', 'terracotta'],
     bestMoods: ['Inviting', 'confident', 'warm'],
-    whatToAvoid: 'Cool greys, blue-toned whites, silver or chrome finishes',
+    whatToAvoid:
+        'Cool greys, blue-toned whites, silver or chrome finishes',
     bestWoodTones: ['Rich walnut', 'dark oak', 'teak'],
     bestMetalFinishes: ['Brass', 'aged gold'],
     bestFabrics: ['Velvet', 'raw silk', 'heavy linen'],
@@ -184,6 +186,7 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   ),
 
   // ── Cool Neutrals ─────────────────────────────────────────────────────
+
   ColourArchetype.theCurator: ArchetypeDefinition(
     archetype: ColourArchetype.theCurator,
     name: 'The Curator',
@@ -210,7 +213,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Home office', 'Bathroom', 'Open-plan living'],
     bestMaterials: ['Polished concrete', 'marble', 'pale timber'],
     bestMoods: ['Calm', 'curated', 'spacious'],
-    whatToAvoid: 'Warm yellowy whites, heavy ornate patterns, rustic textures',
+    whatToAvoid:
+        'Warm yellowy whites, heavy ornate patterns, rustic textures',
     bestWoodTones: ['Ash', 'bleached oak', 'pale birch'],
     bestMetalFinishes: ['Brushed nickel', 'matte chrome'],
     bestFabrics: ['Cotton', 'fine linen', 'cashmere'],
@@ -255,6 +259,7 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   ),
 
   // ── Pastels ────────────────────────────────────────────────────────────
+
   ColourArchetype.theRomantic: ArchetypeDefinition(
     archetype: ColourArchetype.theRomantic,
     name: 'The Romantic',
@@ -283,7 +288,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Bedroom', 'Nursery', 'Bathroom'],
     bestMaterials: ['Painted furniture', 'porcelain', 'rattan'],
     bestMoods: ['Calm', 'nurturing', 'airy'],
-    whatToAvoid: 'Dark heavy colours, industrial metals, high-contrast schemes',
+    whatToAvoid:
+        'Dark heavy colours, industrial metals, high-contrast schemes',
     bestWoodTones: ['Pale pine', 'whitewashed oak', 'light beech'],
     bestMetalFinishes: ['Rose gold', 'soft brass'],
     bestFabrics: ['Muslin', 'cotton voile', 'embroidered linen'],
@@ -318,7 +324,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Kitchen', 'Children\'s room', 'Living room'],
     bestMaterials: ['Painted wood', 'glazed ceramics', 'resin'],
     bestMoods: ['Joyful', 'playful', 'optimistic'],
-    whatToAvoid: 'Too many neutrals, dark moody tones, overly formal finishes',
+    whatToAvoid:
+        'Too many neutrals, dark moody tones, overly formal finishes',
     bestWoodTones: ['Birch', 'light maple', 'natural plywood'],
     bestMetalFinishes: ['Coloured enamel', 'brass'],
     bestFabrics: ['Cotton', 'printed linen', 'terry cloth'],
@@ -327,6 +334,7 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   ),
 
   // ── Earth Tones ────────────────────────────────────────────────────────
+
   ColourArchetype.theNatureLover: ArchetypeDefinition(
     archetype: ColourArchetype.theNatureLover,
     name: 'The Nature Lover',
@@ -354,7 +362,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Living room', 'Bedroom', 'Conservatory'],
     bestMaterials: ['Raw linen', 'unglazed ceramics', 'stone'],
     bestMoods: ['Restful', 'grounded', 'connected to nature'],
-    whatToAvoid: 'Bright synthetic colours, high-gloss finishes, chrome metals',
+    whatToAvoid:
+        'Bright synthetic colours, high-gloss finishes, chrome metals',
     bestWoodTones: ['Elm', 'reclaimed timber', 'driftwood'],
     bestMetalFinishes: ['Blackened iron', 'matte bronze'],
     bestFabrics: ['Hemp', 'jute', 'undyed wool'],
@@ -389,7 +398,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Dining room', 'Kitchen', 'Study'],
     bestMaterials: ['Terracotta', 'handmade tiles', 'woven baskets'],
     bestMoods: ['Characterful', 'spiced', 'storied'],
-    whatToAvoid: 'Cool minimalist schemes, pale pastels, shiny modern finishes',
+    whatToAvoid:
+        'Cool minimalist schemes, pale pastels, shiny modern finishes',
     bestWoodTones: ['Dark walnut', 'teak', 'burnt oak'],
     bestMetalFinishes: ['Hammered copper', 'antique brass'],
     bestFabrics: ['Kilim', 'woven cotton', 'raw silk'],
@@ -398,6 +408,7 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   ),
 
   // ── Jewel Tones ────────────────────────────────────────────────────────
+
   ColourArchetype.theVelvetWhisper: ArchetypeDefinition(
     archetype: ColourArchetype.theVelvetWhisper,
     name: 'The Velvet Whisper',
@@ -471,6 +482,7 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   ),
 
   // ── Brights ────────────────────────────────────────────────────────────
+
   ColourArchetype.theBrightener: ArchetypeDefinition(
     archetype: ColourArchetype.theBrightener,
     name: 'The Brightener',
@@ -508,6 +520,7 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   ),
 
   // ── Darks ──────────────────────────────────────────────────────────────
+
   ColourArchetype.theDramatist: ArchetypeDefinition(
     archetype: ColourArchetype.theDramatist,
     name: 'The Dramatist',
@@ -572,7 +585,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Hallway', 'Cloakroom', 'Dining room'],
     bestMaterials: ['Polished marble', 'lacquer', 'metal'],
     bestMoods: ['Architectural', 'dramatic', 'gallery-like'],
-    whatToAvoid: 'Warm rustic tones, soft pastels, cosy cottage textures',
+    whatToAvoid:
+        'Warm rustic tones, soft pastels, cosy cottage textures',
     bestWoodTones: ['Ebonised timber', 'charred wood', 'black veneer'],
     bestMetalFinishes: ['Black nickel', 'polished chrome'],
     bestFabrics: ['Leather', 'stiff cotton', 'silk satin'],
@@ -581,6 +595,7 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
   ),
 
   // ── Cross-family (Phase 2 activation) ──────────────────────────────────
+
   ColourArchetype.theMinimalist: ArchetypeDefinition(
     archetype: ColourArchetype.theMinimalist,
     name: 'The Minimalist',
@@ -608,7 +623,8 @@ const Map<ColourArchetype, ArchetypeDefinition> archetypeDefinitions = {
     suggestedRooms: ['Open-plan living', 'Bedroom', 'Bathroom'],
     bestMaterials: ['Pale stone', 'pale timber', 'white ceramics'],
     bestMoods: ['Calm', 'purposeful', 'effortless'],
-    whatToAvoid: 'Busy patterns, multiple competing colours, ornate details',
+    whatToAvoid:
+        'Busy patterns, multiple competing colours, ornate details',
     bestWoodTones: ['Pale ash', 'light oak', 'maple'],
     bestMetalFinishes: ['Brushed stainless', 'matte silver'],
     bestFabrics: ['Linen', 'cotton', 'fine merino'],

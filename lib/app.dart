@@ -16,9 +16,7 @@ class PaletteApp extends ConsumerWidget {
       title: 'Palette',
       debugShowCheckedModeBanner: false,
       theme:
-          isColourBlindMode
-              ? PaletteTheme.colourBlindLight
-              : PaletteTheme.light,
+          isColourBlindMode ? PaletteTheme.colourBlindLight : PaletteTheme.light,
       routerConfig: router,
     );
   }

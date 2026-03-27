@@ -39,7 +39,10 @@ const Map<PropertyEra, EraAffinity> eraAffinities = {
         'dramatic darks complement high ceilings and ornate mouldings.',
   ),
   PropertyEra.edwardian: EraAffinity(
-    affinityFamilies: [PaletteFamily.warmNeutrals, PaletteFamily.earthTones],
+    affinityFamilies: [
+      PaletteFamily.warmNeutrals,
+      PaletteFamily.earthTones,
+    ],
     chromaModifier: null,
     suggestedLRange: (45.0, 75.0),
     description:
@@ -57,7 +60,10 @@ const Map<PropertyEra, EraAffinity> eraAffinities = {
         'and mid-century lines.',
   ),
   PropertyEra.postWar: EraAffinity(
-    affinityFamilies: [PaletteFamily.warmNeutrals, PaletteFamily.coolNeutrals],
+    affinityFamilies: [
+      PaletteFamily.warmNeutrals,
+      PaletteFamily.coolNeutrals,
+    ],
     chromaModifier: null,
     suggestedLRange: (50.0, 80.0),
     description:

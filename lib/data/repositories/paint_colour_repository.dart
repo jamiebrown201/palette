@@ -10,8 +10,11 @@ import 'package:palette/data/models/paint_colour.dart';
 typedef PaintColourMatch = ({PaintColour colour, double deltaE});
 
 /// A cross-brand match with delta-E and match percentage.
-typedef CrossBrandMatch =
-    ({PaintColour colour, double deltaE, double matchPercent});
+typedef CrossBrandMatch = ({
+  PaintColour colour,
+  double deltaE,
+  double matchPercent,
+});
 
 /// Repository for paint colour data with delta-E matching.
 class PaintColourRepository {
@@ -22,25 +25,29 @@ class PaintColourRepository {
   Future<List<PaintColour>> getAll() => _db.select(_db.paintColours).get();
 
   Future<PaintColour?> getById(String id) =>
-      (_db.select(_db.paintColours)
-        ..where((t) => t.id.equals(id))).getSingleOrNull();
+      (_db.select(_db.paintColours)..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
 
   Future<List<PaintColour>> getByBrand(String brand) =>
-      (_db.select(_db.paintColours)..where((t) => t.brand.equals(brand))).get();
+      (_db.select(_db.paintColours)..where((t) => t.brand.equals(brand)))
+          .get();
 
   Future<List<PaintColour>> getByFamily(PaletteFamily family) =>
       (_db.select(_db.paintColours)
-        ..where((t) => t.paletteFamily.equalsValue(family))).get();
+            ..where((t) => t.paletteFamily.equalsValue(family)))
+          .get();
 
   Future<List<PaintColour>> getByUndertone(Undertone undertone) =>
       (_db.select(_db.paintColours)
-        ..where((t) => t.undertone.equalsValue(undertone))).get();
+            ..where((t) => t.undertone.equalsValue(undertone)))
+          .get();
 
   /// Search paint colours by name (case-insensitive partial match).
   /// SQLite LIKE is case-insensitive for ASCII by default.
   Future<List<PaintColour>> search(String query) =>
       (_db.select(_db.paintColours)
-        ..where((t) => t.name.like('%${query.toLowerCase()}%'))).get();
+            ..where((t) => t.name.like('%${query.toLowerCase()}%')))
+          .get();
 
   /// Find the closest paint colours to a given hex colour using CIEDE2000.
   Future<List<PaintColourMatch>> findClosestMatches(
@@ -52,9 +59,9 @@ class PaintColourRepository {
 
     final List<PaintColour> candidates;
     if (brandFilter != null) {
-      candidates =
-          await (_db.select(_db.paintColours)
-            ..where((t) => t.brand.equals(brandFilter))).get();
+      candidates = await (_db.select(_db.paintColours)
+            ..where((t) => t.brand.equals(brandFilter)))
+          .get();
     } else {
       candidates = await _db.select(_db.paintColours).get();
     }
@@ -103,7 +110,8 @@ class PaintColourRepository {
   /// Get the total count of paint colours in the database.
   Future<int> count() async {
     final countExpr = countAll();
-    final query = _db.selectOnly(_db.paintColours)..addColumns([countExpr]);
+    final query = _db.selectOnly(_db.paintColours)
+      ..addColumns([countExpr]);
     final row = await query.getSingle();
     return row.read(countExpr)!;
   }

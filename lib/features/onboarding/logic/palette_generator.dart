@@ -41,12 +41,12 @@ GeneratedPalette generatePalette({
   ChromaBand? saturationPreference,
 }) {
   // 1. Sort families by weight, determine primary and secondary
-  final sorted =
-      familyWeights.entries.toList()..sort((a, b) {
-        final cmp = b.value.compareTo(a.value);
-        // Deterministic tiebreaker: enum index
-        return cmp != 0 ? cmp : a.key.index.compareTo(b.key.index);
-      });
+  final sorted = familyWeights.entries.toList()
+    ..sort((a, b) {
+      final cmp = b.value.compareTo(a.value);
+      // Deterministic tiebreaker: enum index
+      return cmp != 0 ? cmp : a.key.index.compareTo(b.key.index);
+    });
 
   if (sorted.isEmpty) {
     return _fallbackPalette(allPaintColours, targetSize);
@@ -59,25 +59,27 @@ GeneratedPalette generatePalette({
   // 2. Collect candidate colours from primary and secondary families
   //    Sort by undertone preference then saturation preference (soft sorts)
   final primaryCandidates = _sortByPreferences(
-    allPaintColours.where((c) => c.paletteFamily == primaryFamily).toList(),
+    allPaintColours
+        .where((c) => c.paletteFamily == primaryFamily)
+        .toList(),
     undertoneTemperature,
     saturationPreference,
   );
-  final secondaryCandidates =
-      secondaryFamily != null
-          ? _sortByPreferences(
-            allPaintColours
-                .where((c) => c.paletteFamily == secondaryFamily)
-                .toList(),
-            undertoneTemperature,
-            saturationPreference,
-          )
-          : <PaintColour>[];
+  final secondaryCandidates = secondaryFamily != null
+      ? _sortByPreferences(
+          allPaintColours
+              .where((c) => c.paletteFamily == secondaryFamily)
+              .toList(),
+          undertoneTemperature,
+          saturationPreference,
+        )
+      : <PaintColour>[];
 
   // 3. Select colours with L* spread (deterministic)
   final mainCount = targetSize - 2; // Reserve 1-2 for surprise
-  final primaryCount =
-      secondaryFamily != null ? (mainCount * 0.6).ceil() : mainCount;
+  final primaryCount = secondaryFamily != null
+      ? (mainCount * 0.6).ceil()
+      : mainCount;
   final secondaryCount = mainCount - primaryCount;
 
   final selectedPrimary = _selectWithLightnessSpread(
@@ -93,8 +95,9 @@ GeneratedPalette generatePalette({
 
   // 4. Add surprise colours from complementary family
   final surpriseFamily = _getComplementaryFamily(primaryFamily);
-  final surpriseCandidates =
-      allPaintColours.where((c) => c.paletteFamily == surpriseFamily).toList();
+  final surpriseCandidates = allPaintColours
+      .where((c) => c.paletteFamily == surpriseFamily)
+      .toList();
   final surprises = _selectWithLightnessSpread(
     surpriseCandidates,
     targetSize - selectedPrimary.length - selectedSecondary.length,
@@ -130,10 +133,11 @@ List<PaintColour> _selectWithLightnessSpread(
   if (candidates.isEmpty || count <= 0) return [];
 
   // Sort deterministically by L* then hex
-  final sorted = List.of(candidates)..sort((a, b) {
-    final cmp = a.labL.compareTo(b.labL);
-    return cmp != 0 ? cmp : a.hex.compareTo(b.hex);
-  });
+  final sorted = List.of(candidates)
+    ..sort((a, b) {
+      final cmp = a.labL.compareTo(b.labL);
+      return cmp != 0 ? cmp : a.hex.compareTo(b.hex);
+    });
 
   if (sorted.length <= count) return sorted;
 
@@ -211,15 +215,14 @@ List<PaintColour> _sortByPreferences(
   Undertone? undertonePreference,
   ChromaBand? saturationPreference,
 ) {
-  if ((undertonePreference == null ||
-          undertonePreference == Undertone.neutral) &&
+  if ((undertonePreference == null || undertonePreference == Undertone.neutral) &&
       saturationPreference == null) {
     return candidates;
   }
 
   int undertoneScore(Undertone paintUndertone) {
-    if (undertonePreference == null || undertonePreference == Undertone.neutral)
-      return 0;
+    if (undertonePreference == null ||
+        undertonePreference == Undertone.neutral) return 0;
     if (paintUndertone == undertonePreference) return 3;
     if (paintUndertone == Undertone.neutral) return 2;
     return 1;
@@ -234,25 +237,26 @@ List<PaintColour> _sortByPreferences(
     };
   }
 
-  final sorted = List.of(candidates)..sort((a, b) {
-    // Primary: undertone preference
-    final uCmp = undertoneScore(
-      b.undertone,
-    ).compareTo(undertoneScore(a.undertone));
-    if (uCmp != 0) return uCmp;
+  final sorted = List.of(candidates)
+    ..sort((a, b) {
+      // Primary: undertone preference
+      final uCmp = undertoneScore(b.undertone).compareTo(
+        undertoneScore(a.undertone),
+      );
+      if (uCmp != 0) return uCmp;
 
-    // Secondary: saturation preference
-    if (saturationPreference != null) {
-      final sCmp = saturationSortKey(
-        a.cabStar,
-      ).compareTo(saturationSortKey(b.cabStar));
-      if (sCmp != 0) return sCmp;
-    }
+      // Secondary: saturation preference
+      if (saturationPreference != null) {
+        final sCmp = saturationSortKey(a.cabStar).compareTo(
+          saturationSortKey(b.cabStar),
+        );
+        if (sCmp != 0) return sCmp;
+      }
 
-    // Deterministic tiebreaker: L* then hex
-    final lCmp = a.labL.compareTo(b.labL);
-    return lCmp != 0 ? lCmp : a.hex.compareTo(b.hex);
-  });
+      // Deterministic tiebreaker: L* then hex
+      final lCmp = a.labL.compareTo(b.labL);
+      return lCmp != 0 ? lCmp : a.hex.compareTo(b.hex);
+    });
 
   return sorted;
 }
@@ -274,10 +278,9 @@ GeneratedPalette _fallbackPalette(
   List<PaintColour> allColours,
   int targetSize,
 ) {
-  final warmNeutrals =
-      allColours
-          .where((c) => c.paletteFamily == PaletteFamily.warmNeutrals)
-          .toList();
+  final warmNeutrals = allColours
+      .where((c) => c.paletteFamily == PaletteFamily.warmNeutrals)
+      .toList();
   final selected = _selectWithLightnessSpread(warmNeutrals, targetSize);
 
   return GeneratedPalette(

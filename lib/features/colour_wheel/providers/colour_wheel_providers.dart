@@ -16,16 +16,12 @@ Future<List<PaintColour>> allPaintColours(Ref ref) {
 @riverpod
 Future<List<PaintColour>> whitePaintColours(Ref ref) async {
   final all = await ref.watch(allPaintColoursProvider.future);
-  return all
-      .where((pc) => pc.lrv > 70 || pc.name.toLowerCase().contains('white'))
-      .toList();
+  return all.where((pc) => pc.lrv > 70 || pc.name.toLowerCase().contains('white')).toList();
 }
 
 /// White paint colours grouped by undertone family.
 @riverpod
-Future<Map<WhiteUndertone, List<PaintColour>>> whitesByUndertone(
-  Ref ref,
-) async {
+Future<Map<WhiteUndertone, List<PaintColour>>> whitesByUndertone(Ref ref) async {
   final whites = await ref.watch(whitePaintColoursProvider.future);
   final grouped = <WhiteUndertone, List<PaintColour>>{
     WhiteUndertone.blue: [],

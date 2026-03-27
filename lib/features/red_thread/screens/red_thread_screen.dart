@@ -44,19 +44,26 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
   Future<void> _exportAsImage() async {
     setState(() => _isExporting = true);
     try {
-      final boundary =
-          _repaintKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
+      final boundary = _repaintKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
       if (boundary == null) return;
 
       final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
 
       final bytes = byteData.buffer.asUint8List();
-      await Share.shareXFiles([
-        XFile.fromData(bytes, mimeType: 'image/png', name: 'red-thread.png'),
-      ], text: 'My Red Thread whole-house colour plan.');
+      await Share.shareXFiles(
+        [
+          XFile.fromData(
+            bytes,
+            mimeType: 'image/png',
+            name: 'red-thread.png',
+          ),
+        ],
+        text: 'My Red Thread whole-house colour plan.',
+      );
     } finally {
       if (mounted) setState(() => _isExporting = false);
     }
@@ -66,189 +73,183 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
     setState(() => _isExporting = true);
     try {
       final rooms = ref.read(allRoomsProvider).valueOrNull ?? [];
-      final threads = ref.read(threadColoursProvider).valueOrNull ?? [];
+      final threads =
+          ref.read(threadColoursProvider).valueOrNull ?? [];
 
-      final pdf =
-          pw.Document()..addPage(
-            pw.Page(
-              pageFormat: PdfPageFormat.a4,
-              margin: const pw.EdgeInsets.all(32),
-              build: (ctx) {
-                return pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      'Red Thread — Whole-House Colour Plan',
-                      style: pw.TextStyle(
-                        fontSize: 22,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
+      final pdf = pw.Document()
+        ..addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          build: (ctx) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'Red Thread — Whole-House Colour Plan',
+                  style: pw.TextStyle(
+                    fontSize: 22,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 16),
+
+                // Thread colours
+                if (threads.isNotEmpty) ...[
+                  pw.Text(
+                    'Thread Colours',
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
                     ),
-                    pw.SizedBox(height: 16),
-
-                    // Thread colours
-                    if (threads.isNotEmpty) ...[
-                      pw.Text(
-                        'Thread Colours',
-                        style: pw.TextStyle(
-                          fontSize: 14,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                      pw.SizedBox(height: 8),
-                      pw.Row(
-                        children:
-                            threads.map((t) {
-                              final c = _pdfColourFromHex(t.hex);
-                              return pw.Container(
-                                width: 40,
-                                height: 40,
-                                margin: const pw.EdgeInsets.only(right: 8),
-                                decoration: pw.BoxDecoration(
-                                  color: c,
-                                  border: pw.Border.all(
-                                    color: PdfColors.grey400,
-                                  ),
-                                ),
-                                child: pw.Center(
-                                  child: pw.Text(
-                                    t.hex.toUpperCase().replaceAll('#', ''),
-                                    style: pw.TextStyle(
-                                      fontSize: 6,
-                                      color:
-                                          _isLightColour(t.hex)
-                                              ? PdfColors.black
-                                              : PdfColors.white,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                      pw.SizedBox(height: 20),
-                    ],
-
-                    // Room breakdown
-                    pw.Text(
-                      'Room Colour Plans',
-                      style: pw.TextStyle(
-                        fontSize: 14,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.SizedBox(height: 8),
-                    ...rooms.map((room) {
-                      final hexes = [
-                        if (room.heroColourHex != null)
-                          ('Hero 70%', room.heroColourHex!),
-                        if (room.betaColourHex != null)
-                          ('Beta 20%', room.betaColourHex!),
-                        if (room.surpriseColourHex != null)
-                          ('Surprise 10%', room.surpriseColourHex!),
-                      ];
-
+                  ),
+                  pw.SizedBox(height: 8),
+                  pw.Row(
+                    children: threads.map((t) {
+                      final c = _pdfColourFromHex(t.hex);
                       return pw.Container(
-                        margin: const pw.EdgeInsets.only(bottom: 12),
-                        padding: const pw.EdgeInsets.all(12),
+                        width: 40,
+                        height: 40,
+                        margin: const pw.EdgeInsets.only(right: 8),
                         decoration: pw.BoxDecoration(
-                          border: pw.Border.all(color: PdfColors.grey300),
-                          borderRadius: pw.BorderRadius.circular(6),
+                          color: c,
+                          border: pw.Border.all(
+                            color: PdfColors.grey400,
+                          ),
                         ),
-                        child: pw.Column(
-                          crossAxisAlignment: pw.CrossAxisAlignment.start,
-                          children: [
-                            pw.Row(
-                              children: [
-                                pw.Expanded(
-                                  child: pw.Text(
-                                    room.name,
-                                    style: pw.TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: pw.FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                if (room.direction != null)
-                                  pw.Text(
-                                    '${room.direction!.displayName}-facing',
-                                    style: const pw.TextStyle(
-                                      fontSize: 9,
-                                      color: PdfColors.grey600,
-                                    ),
-                                  ),
-                              ],
+                        child: pw.Center(
+                          child: pw.Text(
+                            t.hex.toUpperCase().replaceAll('#', ''),
+                            style: pw.TextStyle(
+                              fontSize: 6,
+                              color: _isLightColour(t.hex)
+                                  ? PdfColors.black
+                                  : PdfColors.white,
                             ),
-                            if (hexes.isNotEmpty) ...[
-                              pw.SizedBox(height: 8),
-                              pw.Row(
-                                children:
-                                    hexes.map((entry) {
-                                      final c = _pdfColourFromHex(entry.$2);
-                                      return pw.Expanded(
-                                        child: pw.Column(
-                                          children: [
-                                            pw.Container(
-                                              height: 30,
-                                              margin:
-                                                  const pw.EdgeInsets.symmetric(
-                                                    horizontal: 2,
-                                                  ),
-                                              decoration: pw.BoxDecoration(
-                                                color: c,
-                                                border: pw.Border.all(
-                                                  color: PdfColors.grey300,
-                                                ),
-                                                borderRadius: pw
-                                                    .BorderRadius.circular(4),
-                                              ),
-                                            ),
-                                            pw.SizedBox(height: 2),
-                                            pw.Text(
-                                              entry.$1,
-                                              style: const pw.TextStyle(
-                                                fontSize: 7,
-                                              ),
-                                            ),
-                                            pw.Text(
-                                              entry.$2.toUpperCase(),
-                                              style: const pw.TextStyle(
-                                                fontSize: 7,
-                                                color: PdfColors.grey500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  pw.SizedBox(height: 20),
+                ],
+
+                // Room breakdown
+                pw.Text(
+                  'Room Colour Plans',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 8),
+                ...rooms.map((room) {
+                  final hexes = [
+                    if (room.heroColourHex != null)
+                      ('Hero 70%', room.heroColourHex!),
+                    if (room.betaColourHex != null)
+                      ('Beta 20%', room.betaColourHex!),
+                    if (room.surpriseColourHex != null)
+                      ('Surprise 10%', room.surpriseColourHex!),
+                  ];
+
+                  return pw.Container(
+                    margin: const pw.EdgeInsets.only(bottom: 12),
+                    padding: const pw.EdgeInsets.all(12),
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(color: PdfColors.grey300),
+                      borderRadius: pw.BorderRadius.circular(6),
+                    ),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Row(
+                          children: [
+                            pw.Expanded(
+                              child: pw.Text(
+                                room.name,
+                                style: pw.TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
                               ),
-                            ] else
+                            ),
+                            if (room.direction != null)
                               pw.Text(
-                                'No colour plan assigned yet',
+                                '${room.direction!.displayName}-facing',
                                 style: const pw.TextStyle(
                                   fontSize: 9,
-                                  color: PdfColors.grey500,
+                                  color: PdfColors.grey600,
                                 ),
                               ),
                           ],
                         ),
-                      );
-                    }),
-
-                    pw.Spacer(),
-                    pw.Divider(color: PdfColors.grey300),
-                    pw.SizedBox(height: 4),
-                    pw.Text(
-                      'Generated by Palette',
-                      style: const pw.TextStyle(
-                        fontSize: 8,
-                        color: PdfColors.grey400,
-                      ),
+                        if (hexes.isNotEmpty) ...[
+                          pw.SizedBox(height: 8),
+                          pw.Row(
+                            children: hexes.map((entry) {
+                              final c = _pdfColourFromHex(entry.$2);
+                              return pw.Expanded(
+                                child: pw.Column(
+                                  children: [
+                                    pw.Container(
+                                      height: 30,
+                                      margin: const pw.EdgeInsets.symmetric(
+                                          horizontal: 2),
+                                      decoration: pw.BoxDecoration(
+                                        color: c,
+                                        border: pw.Border.all(
+                                          color: PdfColors.grey300,
+                                        ),
+                                        borderRadius:
+                                            pw.BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    pw.SizedBox(height: 2),
+                                    pw.Text(
+                                      entry.$1,
+                                      style: const pw.TextStyle(fontSize: 7),
+                                    ),
+                                    pw.Text(
+                                      entry.$2.toUpperCase(),
+                                      style: const pw.TextStyle(
+                                        fontSize: 7,
+                                        color: PdfColors.grey500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ] else
+                          pw.Text(
+                            'No colour plan assigned yet',
+                            style: const pw.TextStyle(
+                              fontSize: 9,
+                              color: PdfColors.grey500,
+                            ),
+                          ),
+                      ],
                     ),
-                  ],
-                );
-              },
-            ),
-          );
+                  );
+                }),
+
+                pw.Spacer(),
+                pw.Divider(color: PdfColors.grey300),
+                pw.SizedBox(height: 4),
+                pw.Text(
+                  'Generated by Palette',
+                  style: const pw.TextStyle(
+                    fontSize: 8,
+                    color: PdfColors.grey400,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
 
       await Printing.sharePdf(
         bytes: await pdf.save(),
@@ -271,10 +272,8 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
         actions: [
           if (!(ref.watch(subscriptionTierProvider) >= SubscriptionTier.plus))
             IconButton(
-              icon: const Icon(
-                Icons.lock_outline,
-                color: PaletteColours.premiumGold,
-              ),
+              icon: const Icon(Icons.lock_outline,
+                  color: PaletteColours.premiumGold),
               tooltip: 'Upgrade to export',
               onPressed: () => context.push('/paywall'),
             )
@@ -298,27 +297,26 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
                   _exportAsPdf();
                 }
               },
-              itemBuilder:
-                  (_) => const [
-                    PopupMenuItem(
-                      value: 'image',
-                      child: ListTile(
-                        leading: Icon(Icons.image_outlined),
-                        title: Text('Export as image'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'pdf',
-                      child: ListTile(
-                        leading: Icon(Icons.picture_as_pdf_outlined),
-                        title: Text('Export as PDF'),
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ],
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'image',
+                  child: ListTile(
+                    leading: Icon(Icons.image_outlined),
+                    title: Text('Export as image'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'pdf',
+                  child: ListTile(
+                    leading: Icon(Icons.picture_as_pdf_outlined),
+                    title: Text('Export as PDF'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
             ),
         ],
       ),
@@ -328,30 +326,28 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
           // lock icon for free users with fewer rooms.
           return PremiumGate(
             requiredTier: SubscriptionTier.plus,
-            upgradeMessage:
-                rooms.length >= 3
-                    ? 'See how your rooms connect'
-                    : 'Create 3+ rooms, then upgrade to see your Red Thread',
+            upgradeMessage: rooms.length >= 3
+                ? 'See how your rooms connect'
+                : 'Create 3+ rooms, then upgrade to see your Red Thread',
             child: threadsAsync.when(
-              data:
-                  (threads) => templatesAsync.when(
-                    data:
-                        (templates) => RepaintBoundary(
-                          key: _repaintKey,
-                          child: _RedThreadContent(
-                            rooms: rooms,
-                            threadHexes: threads.map((t) => t.hex).toList(),
-                            templates: templates,
-                            selectedTemplate: _selectedTemplate,
-                            onTemplateChanged:
-                                (t) => setState(() => _selectedTemplate = t),
-                          ),
-                        ),
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(child: Text('Error: $e')),
+              data: (threads) => templatesAsync.when(
+                data: (templates) => RepaintBoundary(
+                  key: _repaintKey,
+                  child: _RedThreadContent(
+                    rooms: rooms,
+                    threadHexes: threads.map((t) => t.hex).toList(),
+                    templates: templates,
+                    selectedTemplate: _selectedTemplate,
+                    onTemplateChanged: (t) =>
+                        setState(() => _selectedTemplate = t),
                   ),
-              loading: () => const Center(child: CircularProgressIndicator()),
+                ),
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(child: Text('Error: $e')),
+              ),
+              loading: () =>
+                  const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
             ),
           );
@@ -402,8 +398,8 @@ class _RedThreadContent extends ConsumerWidget {
                 'The Red Thread works best when you have 3 or more rooms '
                 'with colour plans assigned.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PaletteColours.textSecondary,
-                ),
+                      color: PaletteColours.textSecondary,
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -420,22 +416,19 @@ class _RedThreadContent extends ConsumerWidget {
           // Thread colour selection
           const SectionHeader(title: 'Thread Colours'),
           const SizedBox(height: 4),
-          Builder(
-            builder: (context) {
-              final constraints = ref.watch(renterConstraintsProvider);
-              final medium =
-                  constraints.wallsAreLocked
-                      ? 'furnishings and textiles'
-                      : 'paint and furnishings';
-              return Text(
-                'Choose 2-4 unifying colours that will tie your rooms '
-                'together through $medium.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PaletteColours.textSecondary,
-                ),
-              );
-            },
-          ),
+          Builder(builder: (context) {
+            final constraints = ref.watch(renterConstraintsProvider);
+            final medium = constraints.wallsAreLocked
+                ? 'furnishings and textiles'
+                : 'paint and furnishings';
+            return Text(
+              'Choose 2-4 unifying colours that will tie your rooms '
+              'together through $medium.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+            );
+          }),
           const SizedBox(height: 12),
           _ThreadColourRow(threadHexes: threadHexes),
           const SizedBox(height: 24),
@@ -490,18 +483,16 @@ class _RedThreadContent extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder:
-          (ctx) => DraggableScrollableSheet(
-            expand: false,
-            initialChildSize: 0.65,
-            minChildSize: 0.4,
-            maxChildSize: 0.9,
-            builder:
-                (_, scrollController) => _AdjacencySheet(
-                  rooms: rooms,
-                  scrollController: scrollController,
-                ),
-          ),
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.65,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (_, scrollController) => _AdjacencySheet(
+          rooms: rooms,
+          scrollController: scrollController,
+        ),
+      ),
     );
   }
 }
@@ -511,7 +502,10 @@ class _RedThreadContent extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 
 class _AdjacencySheet extends ConsumerWidget {
-  const _AdjacencySheet({required this.rooms, required this.scrollController});
+  const _AdjacencySheet({
+    required this.rooms,
+    required this.scrollController,
+  });
 
   final List<Room> rooms;
   final ScrollController scrollController;
@@ -546,7 +540,11 @@ class _AdjacencySheet extends ConsumerWidget {
                 ),
               ),
               TextButton.icon(
-                onPressed: () => _showAddConnectionDialog(context, ref, rooms),
+                onPressed: () => _showAddConnectionDialog(
+                  context,
+                  ref,
+                  rooms,
+                ),
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add'),
               ),
@@ -560,8 +558,8 @@ class _AdjacencySheet extends ConsumerWidget {
             'Define which rooms connect to each other so transitions '
             'can be checked.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: PaletteColours.textSecondary,
-            ),
+                  color: PaletteColours.textSecondary,
+                ),
           ),
         ),
         const SizedBox(height: 12),
@@ -581,14 +579,18 @@ class _AdjacencySheet extends ConsumerWidget {
                       const SizedBox(height: 12),
                       Text(
                         'No connections defined yet',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: PaletteColours.textSecondary,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
                       ),
                       const SizedBox(height: 8),
                       FilledButton.icon(
-                        onPressed:
-                            () => _showAddConnectionDialog(context, ref, rooms),
+                        onPressed: () => _showAddConnectionDialog(
+                          context,
+                          ref,
+                          rooms,
+                        ),
                         icon: const Icon(Icons.add, size: 18),
                         label: const Text('Add connection'),
                       ),
@@ -609,18 +611,19 @@ class _AdjacencySheet extends ConsumerWidget {
                       Icons.compare_arrows,
                       color: PaletteColours.sageGreen,
                     ),
-                    title: Text('${pair.$1.name}  \u2194  ${pair.$2.name}'),
+                    title: Text(
+                      '${pair.$1.name}  \u2194  ${pair.$2.name}',
+                    ),
                     trailing: IconButton(
                       icon: const Icon(Icons.close, size: 18),
                       onPressed: () async {
                         final adjacencies = await repo.getAdjacencies();
-                        final match =
-                            adjacencies.where((a) {
-                              return (a.roomIdA == pair.$1.id &&
-                                      a.roomIdB == pair.$2.id) ||
-                                  (a.roomIdA == pair.$2.id &&
-                                      a.roomIdB == pair.$1.id);
-                            }).firstOrNull;
+                        final match = adjacencies.where((a) {
+                          return (a.roomIdA == pair.$1.id &&
+                                  a.roomIdB == pair.$2.id) ||
+                              (a.roomIdA == pair.$2.id &&
+                                  a.roomIdB == pair.$1.id);
+                        }).firstOrNull;
                         if (match != null) {
                           await repo.deleteAdjacency(match.id);
                           ref.invalidate(adjacentRoomPairsProvider);
@@ -651,99 +654,87 @@ class _AdjacencySheet extends ConsumerWidget {
 
     showDialog<void>(
       context: context,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder:
-                (ctx, setDialogState) => AlertDialog(
-                  title: const Text('Add Connection'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Room A',
-                          border: OutlineInputBorder(),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Room>(
-                            isExpanded: true,
-                            isDense: true,
-                            hint: const Text('Select room'),
-                            items:
-                                rooms
-                                    .map(
-                                      (r) => DropdownMenuItem(
-                                        value: r,
-                                        child: Text(r.name),
-                                      ),
-                                    )
-                                    .toList(),
-                            value: roomA,
-                            onChanged:
-                                (v) => setDialogState(() {
-                                  roomA = v;
-                                  // Reset Room B if it conflicts
-                                  if (roomB?.id == v?.id) roomB = null;
-                                }),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Room B',
-                          border: OutlineInputBorder(),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Room>(
-                            isExpanded: true,
-                            isDense: true,
-                            hint: const Text('Select room'),
-                            items:
-                                rooms
-                                    .where((r) => r.id != roomA?.id)
-                                    .map(
-                                      (r) => DropdownMenuItem(
-                                        value: r,
-                                        child: Text(r.name),
-                                      ),
-                                    )
-                                    .toList(),
-                            value: roomB,
-                            onChanged: (v) => setDialogState(() => roomB = v),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel'),
-                    ),
-                    FilledButton(
-                      onPressed:
-                          (roomA != null && roomB != null)
-                              ? () async {
-                                final repo = ref.read(
-                                  redThreadRepositoryProvider,
-                                );
-                                await repo.insertAdjacency(
-                                  RoomAdjacenciesCompanion.insert(
-                                    id: const Uuid().v4(),
-                                    roomIdA: roomA!.id,
-                                    roomIdB: roomB!.id,
-                                  ),
-                                );
-                                ref.invalidate(adjacentRoomPairsProvider);
-                                if (ctx.mounted) Navigator.pop(ctx);
-                              }
-                              : null,
-                      child: const Text('Add'),
-                    ),
-                  ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Add Connection'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Room A',
+                  border: OutlineInputBorder(),
                 ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<Room>(
+                    isExpanded: true,
+                    isDense: true,
+                    hint: const Text('Select room'),
+                    items: rooms
+                        .map((r) => DropdownMenuItem(
+                              value: r,
+                              child: Text(r.name),
+                            ))
+                        .toList(),
+                    value: roomA,
+                    onChanged: (v) => setDialogState(() {
+                      roomA = v;
+                      // Reset Room B if it conflicts
+                      if (roomB?.id == v?.id) roomB = null;
+                    }),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Room B',
+                  border: OutlineInputBorder(),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<Room>(
+                    isExpanded: true,
+                    isDense: true,
+                    hint: const Text('Select room'),
+                    items: rooms
+                        .where((r) => r.id != roomA?.id)
+                        .map((r) => DropdownMenuItem(
+                              value: r,
+                              child: Text(r.name),
+                            ))
+                        .toList(),
+                    value: roomB,
+                    onChanged: (v) => setDialogState(() => roomB = v),
+                  ),
+                ),
+              ),
+            ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: (roomA != null && roomB != null)
+                  ? () async {
+                      final repo = ref.read(redThreadRepositoryProvider);
+                      await repo.insertAdjacency(
+                        RoomAdjacenciesCompanion.insert(
+                          id: const Uuid().v4(),
+                          roomIdA: roomA!.id,
+                          roomIdB: roomB!.id,
+                        ),
+                      );
+                      ref.invalidate(adjacentRoomPairsProvider);
+                      if (ctx.mounted) Navigator.pop(ctx);
+                    }
+                  : null,
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -763,62 +754,62 @@ class _ThreadColourRow extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // DNA suggestions when no thread colours yet
-        if (threadHexes.isEmpty)
-          _DnaSuggestions(onUseSuggestion: (hex) => _addThreadColour(ref, hex)),
+        if (threadHexes.isEmpty) _DnaSuggestions(
+          onUseSuggestion: (hex) => _addThreadColour(ref, hex),
+        ),
         Wrap(
           spacing: 12,
           runSpacing: 12,
           children: [
-            ...threadHexes.map(
-              (hex) => _ThreadSwatch(
-                hex: hex,
-                onDelete: () async {
-                  final repo = ref.read(redThreadRepositoryProvider);
-                  final threads = await repo.getThreadColours();
-                  if (threads.length <= AppConstants.minRedThreadColours) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'You need at least ${AppConstants.minRedThreadColours} thread colours',
-                          ),
+            ...threadHexes.map((hex) => _ThreadSwatch(
+                  hex: hex,
+                  onDelete: () async {
+                final repo = ref.read(redThreadRepositoryProvider);
+                final threads = await repo.getThreadColours();
+                if (threads.length <= AppConstants.minRedThreadColours) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'You need at least ${AppConstants.minRedThreadColours} thread colours',
                         ),
-                      );
-                    }
-                    return;
+                      ),
+                    );
                   }
-                  if (!context.mounted) return;
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder:
-                        (ctx) => AlertDialog(
-                          title: const Text('Remove colour'),
-                          content: const Text(
-                            'Remove this colour from your thread?',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              child: const Text('Remove'),
-                            ),
-                          ],
-                        ),
-                  );
-                  if (confirmed != true) return;
-                  final match = threads.where((t) => t.hex == hex).firstOrNull;
-                  if (match != null) {
-                    await repo.deleteThreadColour(match.id);
-                  }
-                },
-              ),
-            ),
-            if (threadHexes.length < 4)
-              _AddThreadButton(onAdd: () => _showColourPicker(context, ref)),
-          ],
+                  return;
+                }
+                if (!context.mounted) return;
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Remove colour'),
+                    content: const Text(
+                      'Remove this colour from your thread?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Remove'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed != true) return;
+                final match = threads.where((t) => t.hex == hex).firstOrNull;
+                if (match != null) {
+                  await repo.deleteThreadColour(match.id);
+                }
+              },
+            )),
+        if (threadHexes.length < 4)
+          _AddThreadButton(
+            onAdd: () => _showColourPicker(context, ref),
+          ),
+        ],
         ),
       ],
     );
@@ -838,9 +829,7 @@ class _ThreadColourRow extends ConsumerWidget {
     );
 
     // Log interaction: DNA-suggested thread colour used
-    ref
-        .read(colourInteractionRepositoryProvider)
-        .logInteraction(
+    ref.read(colourInteractionRepositoryProvider).logInteraction(
           id: const Uuid().v4(),
           interactionType: 'colourFavourited',
           hex: hex,
@@ -849,7 +838,8 @@ class _ThreadColourRow extends ConsumerWidget {
   }
 
   Future<void> _showColourPicker(BuildContext context, WidgetRef ref) async {
-    final allPaints = await ref.read(allPaintColoursProvider.future);
+    final allPaints =
+        await ref.read(allPaintColoursProvider.future);
     final rooms = ref.read(allRoomsProvider).valueOrNull ?? [];
     final dna = ref.read(latestColourDnaProvider).valueOrNull;
 
@@ -883,12 +873,11 @@ class _ThreadColourRow extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder:
-          (_) => SmartPaintColourPicker(
-            title: 'Add Thread Colour',
-            paintColours: allPaints,
-            suggestions: suggestions,
-          ),
+      builder: (_) => SmartPaintColourPicker(
+        title: 'Add Thread Colour',
+        paintColours: allPaints,
+        suggestions: suggestions,
+      ),
     );
 
     if (selected != null) {
@@ -938,9 +927,7 @@ class _ThreadColourRow extends ConsumerWidget {
       );
 
       // Log interaction: thread colour selected
-      ref
-          .read(colourInteractionRepositoryProvider)
-          .logInteraction(
+      ref.read(colourInteractionRepositoryProvider).logInteraction(
             id: const Uuid().v4(),
             interactionType: 'colourFavourited',
             hex: selected.hex,
@@ -969,8 +956,7 @@ class _DnaSuggestions extends ConsumerWidget {
     }
 
     // Build up to 3 suggestion cards from system palette roles
-    final suggestions =
-        <({String hex, String name, String brand, String reason})>[];
+    final suggestions = <({String hex, String name, String brand, String reason})>[];
 
     suggestions.add((
       hex: systemPalette.spineColour.hex,
@@ -1001,62 +987,66 @@ class _DnaSuggestions extends ConsumerWidget {
           Text(
             'Suggested from your Colour DNA',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: PaletteColours.sageGreenDark,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: PaletteColours.sageGreenDark,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 8),
-          ...suggestions.map(
-            (s) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: PaletteColours.sageGreenLight,
-                  borderRadius: BorderRadius.circular(10),
+          ...suggestions.map((s) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.sageGreenLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: _hexToColor(s.hex),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: PaletteColours.divider),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '${s.brand} — ${s.reason}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: PaletteColours.textTertiary,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => onUseSuggestion(s.hex),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          minimumSize: const Size(0, 32),
+                        ),
+                        child: const Text('Use'),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: _hexToColor(s.hex),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: PaletteColours.divider),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            s.name,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            '${s.brand} — ${s.reason}',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(color: PaletteColours.textTertiary),
-                          ),
-                        ],
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => onUseSuggestion(s.hex),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        minimumSize: const Size(0, 32),
-                      ),
-                      child: const Text('Use'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+              )),
         ],
       ),
     );
@@ -1064,7 +1054,10 @@ class _DnaSuggestions extends ConsumerWidget {
 }
 
 class _ThreadSwatch extends StatelessWidget {
-  const _ThreadSwatch({required this.hex, required this.onDelete});
+  const _ThreadSwatch({
+    required this.hex,
+    required this.onDelete,
+  });
 
   final String hex;
   final VoidCallback onDelete;
@@ -1089,8 +1082,7 @@ class _ThreadSwatch extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.4),
               borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(6),
-              ),
+                  bottom: Radius.circular(6)),
             ),
             child: Text(
               hex.toUpperCase().replaceAll('#', ''),
@@ -1123,7 +1115,10 @@ class _AddThreadButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: PaletteColours.warmGrey,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: PaletteColours.divider, width: 2),
+          border: Border.all(
+            color: PaletteColours.divider,
+            width: 2,
+          ),
         ),
         child: const Icon(Icons.add, color: PaletteColours.textTertiary),
       ),
@@ -1147,16 +1142,15 @@ class _TemplatePicker extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children:
-          templates.map((t) {
-            final isSelected = selected?.id == t.id;
-            return ChoiceChip(
-              label: Text(t.name),
-              selected: isSelected,
-              onSelected: (_) => onChanged(isSelected ? null : t),
-              selectedColor: PaletteColours.sageGreenLight,
-            );
-          }).toList(),
+      children: templates.map((t) {
+        final isSelected = selected?.id == t.id;
+        return ChoiceChip(
+          label: Text(t.name),
+          selected: isSelected,
+          onSelected: (_) => onChanged(isSelected ? null : t),
+          selectedColor: PaletteColours.sageGreenLight,
+        );
+      }).toList(),
     );
   }
 }
@@ -1221,8 +1215,8 @@ class _CoherenceSection extends ConsumerWidget {
           return Text(
             'Add thread colours and assign room palettes to check coherence.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: PaletteColours.textSecondary,
-            ),
+                  color: PaletteColours.textSecondary,
+                ),
           );
         }
 
@@ -1233,10 +1227,9 @@ class _CoherenceSection extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color:
-                    report.overallCoherent
-                        ? PaletteColours.sageGreenLight
-                        : PaletteColours.softGoldLight,
+                color: report.overallCoherent
+                    ? PaletteColours.sageGreenLight
+                    : PaletteColours.softGoldLight,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -1245,10 +1238,9 @@ class _CoherenceSection extends ConsumerWidget {
                     report.overallCoherent
                         ? Icons.check_circle_outline
                         : Icons.warning_amber_outlined,
-                    color:
-                        report.overallCoherent
-                            ? PaletteColours.sageGreenDark
-                            : PaletteColours.softGoldDark,
+                    color: report.overallCoherent
+                        ? PaletteColours.sageGreenDark
+                        : PaletteColours.softGoldDark,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1257,9 +1249,10 @@ class _CoherenceSection extends ConsumerWidget {
                           ? 'All rooms are connected by your thread colours!'
                           : '${report.disconnectedCount} room${report.disconnectedCount == 1 ? '' : 's'} '
                               'not yet connected to the thread.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                     ),
                   ),
                 ],
@@ -1268,40 +1261,40 @@ class _CoherenceSection extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Per-room results
-            ...report.results.map(
-              (result) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(
-                      result.isConnected ? Icons.link : Icons.link_off,
-                      size: 16,
-                      color:
-                          result.isConnected
-                              ? PaletteColours.sageGreen
-                              : PaletteColours.textTertiary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        result.roomName,
-                        style: Theme.of(context).textTheme.bodySmall,
+            ...report.results.map((result) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        result.isConnected
+                            ? Icons.link
+                            : Icons.link_off,
+                        size: 16,
+                        color: result.isConnected
+                            ? PaletteColours.sageGreen
+                            : PaletteColours.textTertiary,
                       ),
-                    ),
-                    if (result.matchingThreadHex != null)
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: _hexToColor(result.matchingThreadHex!),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: PaletteColours.divider),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          result.roomName,
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
-                  ],
-                ),
-              ),
-            ),
+                      if (result.matchingThreadHex != null)
+                        Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: _hexToColor(result.matchingThreadHex!),
+                            shape: BoxShape.circle,
+                            border:
+                                Border.all(color: PaletteColours.divider),
+                          ),
+                        ),
+                    ],
+                  ),
+                )),
           ],
         );
       },
@@ -1329,9 +1322,9 @@ class _AdjacentRoomComparison extends ConsumerWidget {
     if (rooms.length < 2) {
       return Text(
         'Add more rooms to see how adjacent spaces relate.',
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: PaletteColours.textSecondary),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: PaletteColours.textSecondary,
+            ),
       );
     }
 
@@ -1360,8 +1353,8 @@ class _AdjacentRoomComparison extends ConsumerWidget {
                   'Tap "Define connections" above to get started.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                        color: PaletteColours.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -1369,17 +1362,16 @@ class _AdjacentRoomComparison extends ConsumerWidget {
         }
 
         return Column(
-          children:
-              pairs.map((pair) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _RoomPairCard(
-                    roomA: pair.$1,
-                    roomB: pair.$2,
-                    threadHexes: threadHexes,
-                  ),
-                );
-              }).toList(),
+          children: pairs.map((pair) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _RoomPairCard(
+                roomA: pair.$1,
+                roomB: pair.$2,
+                threadHexes: threadHexes,
+              ),
+            );
+          }).toList(),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -1433,52 +1425,49 @@ class _MiniRoomPalette extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hexes =
-        [
-          room.heroColourHex,
-          room.betaColourHex,
-          room.surpriseColourHex,
-        ].whereType<String>().toList();
+    final hexes = [
+      room.heroColourHex,
+      room.betaColourHex,
+      room.surpriseColourHex,
+    ].whereType<String>().toList();
 
     return Column(
       children: [
         Text(
           room.name,
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children:
-              hexes.isEmpty
-                  ? [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: PaletteColours.warmGrey,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+          children: hexes.isEmpty
+              ? [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: PaletteColours.warmGrey,
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                  ]
-                  : hexes
-                      .map(
-                        (hex) => Container(
-                          width: 24,
-                          height: 24,
-                          margin: const EdgeInsets.symmetric(horizontal: 2),
-                          decoration: BoxDecoration(
-                            color: _hexToColor(hex),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: PaletteColours.divider),
-                          ),
+                  ),
+                ]
+              : hexes
+                  .map((hex) => Container(
+                        width: 24,
+                        height: 24,
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          color: _hexToColor(hex),
+                          borderRadius: BorderRadius.circular(4),
+                          border:
+                              Border.all(color: PaletteColours.divider),
                         ),
-                      )
-                      .toList(),
+                      ))
+                  .toList(),
         ),
       ],
     );

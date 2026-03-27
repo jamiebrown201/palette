@@ -84,16 +84,16 @@ class ColourDetailSheet extends StatelessWidget {
                           ? matches.first.colour.name
                           : hex.toUpperCase(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     if (matches.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         matches.first.colour.brand,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PaletteColours.textSecondary,
-                        ),
+                              color: PaletteColours.textSecondary,
+                            ),
                       ),
                     ],
                   ],
@@ -121,8 +121,8 @@ class ColourDetailSheet extends StatelessWidget {
                 child: Text(
                   family.description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                        color: PaletteColours.textSecondary,
+                      ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -156,12 +156,14 @@ class ColourDetailSheet extends StatelessWidget {
               if (matches.isNotEmpty) ...[
                 Text(
                   'Closest paint matches',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 12),
-                ...matches.map((m) => _PaintMatchTile(match: m)),
+                ...matches.map(
+                  (m) => _PaintMatchTile(match: m),
+                ),
                 const SizedBox(height: 16),
 
                 // Cross-brand matches for the closest paint
@@ -179,7 +181,10 @@ class ColourDetailSheet extends StatelessWidget {
 }
 
 class _WhyItWorksSection extends StatelessWidget {
-  const _WhyItWorksSection({required this.hex, required this.paletteHexes});
+  const _WhyItWorksSection({
+    required this.hex,
+    required this.paletteHexes,
+  });
 
   final String hex;
   final List<String> paletteHexes;
@@ -199,18 +204,14 @@ class _WhyItWorksSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.auto_awesome,
-            size: 16,
-            color: PaletteColours.sageGreenDark,
-          ),
+          const Icon(Icons.auto_awesome, size: 16, color: PaletteColours.sageGreenDark),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               explanation,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: PaletteColours.sageGreenDark,
-              ),
+                    color: PaletteColours.sageGreenDark,
+                  ),
             ),
           ),
         ],
@@ -241,10 +242,9 @@ class _WhyItWorksSection extends StatelessWidget {
       }
     }
 
-    final undertone =
-        thisLab.b > 5
-            ? 'warm'
-            : thisLab.b < -5
+    final undertone = thisLab.b > 5
+        ? 'warm'
+        : thisLab.b < -5
             ? 'cool'
             : 'neutral';
     return 'This $undertone-toned colour adds depth and balance to your palette.';
@@ -252,7 +252,10 @@ class _WhyItWorksSection extends StatelessWidget {
 }
 
 class _PropertyChip extends StatelessWidget {
-  const _PropertyChip({required this.label, required this.icon});
+  const _PropertyChip({
+    required this.label,
+    required this.icon,
+  });
 
   final String label;
   final IconData icon;
@@ -273,8 +276,8 @@ class _PropertyChip extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: PaletteColours.textPrimary,
-            ),
+                  color: PaletteColours.textPrimary,
+                ),
           ),
         ],
       ),
@@ -315,14 +318,14 @@ class _PaintMatchTile extends StatelessWidget {
                     Text(
                       colour.name,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                            fontWeight: FontWeight.w500,
+                          ),
                     ),
                     Text(
                       colour.brand,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PaletteColours.textSecondary,
-                      ),
+                            color: PaletteColours.textSecondary,
+                          ),
                     ),
                   ],
                 ),
@@ -333,19 +336,18 @@ class _PaintMatchTile extends StatelessWidget {
                   Text(
                     '${matchPercent.toStringAsFixed(0)}% match',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color:
-                          matchPercent >= 90
+                          color: matchPercent >= 90
                               ? PaletteColours.sageGreenDark
                               : PaletteColours.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   if (colour.approximatePricePerLitre != null)
                     Text(
                       '\u00A3${colour.approximatePricePerLitre!.toStringAsFixed(0)}/L',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: PaletteColours.textTertiary,
-                      ),
+                            color: PaletteColours.textTertiary,
+                          ),
                     ),
                 ],
               ),
@@ -358,9 +360,9 @@ class _PaintMatchTile extends StatelessWidget {
               child: Text(
                 'Prices approximate, last checked ${DateFormat.yMMMd().format(colour.priceLastChecked!)}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textTertiary,
-                  fontStyle: FontStyle.italic,
-                ),
+                      color: PaletteColours.textTertiary,
+                      fontStyle: FontStyle.italic,
+                    ),
               ),
             ),
           const SizedBox(height: 6),
@@ -482,16 +484,16 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
       children: [
         Text(
           'Cross-brand equivalents',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 4),
         Text(
           'Similar colours from other brands',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: PaletteColours.textSecondary),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: PaletteColours.textSecondary,
+              ),
         ),
         const SizedBox(height: 12),
         ..._crossBrandMatches!.take(3).map((m) {
@@ -518,13 +520,17 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
                         children: [
                           Text(
                             m.colour.name,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(fontWeight: FontWeight.w500),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
                           ),
                           Text(
                             '${m.colour.brand} \u2022 ${m.matchPercent.toStringAsFixed(0)}% match',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(color: PaletteColours.textSecondary),
+                            style:
+                                Theme.of(context).textTheme.labelSmall?.copyWith(
+                                      color: PaletteColours.textSecondary,
+                                    ),
                           ),
                         ],
                       ),
@@ -533,8 +539,8 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
                       Text(
                         '\u00A3${m.colour.approximatePricePerLitre!.toStringAsFixed(0)}/L',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: PaletteColours.textTertiary,
-                        ),
+                              color: PaletteColours.textTertiary,
+                            ),
                       ),
                   ],
                 ),
@@ -553,9 +559,9 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
           'Paint finishes and pigments vary between brands. A close colour '
           'match is not identical. Always compare physical samples side by side.',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: PaletteColours.textTertiary,
-            fontStyle: FontStyle.italic,
-          ),
+                color: PaletteColours.textTertiary,
+                fontStyle: FontStyle.italic,
+              ),
         ),
       ],
     );

@@ -43,12 +43,10 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // === STATE CONTROLS ===
-          Text(
-            'State Controls',
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-          ),
+          Text('State Controls',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )),
           const SizedBox(height: 8),
           Card(
             child: Padding(
@@ -63,15 +61,12 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
                         child: DropdownButton<SubscriptionTier>(
                           value: tier,
                           isExpanded: true,
-                          items:
-                              SubscriptionTier.values
-                                  .map(
-                                    (t) => DropdownMenuItem(
-                                      value: t,
-                                      child: Text(t.displayName),
-                                    ),
-                                  )
-                                  .toList(),
+                          items: SubscriptionTier.values
+                              .map((t) => DropdownMenuItem(
+                                    value: t,
+                                    child: Text(t.displayName),
+                                  ))
+                              .toList(),
                           onChanged: (t) {
                             if (t != null) {
                               ref
@@ -87,20 +82,16 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
                     title: const Text('Onboarding completed'),
                     value: onboarded,
                     contentPadding: EdgeInsets.zero,
-                    onChanged:
-                        (v) =>
-                            ref
-                                .read(hasCompletedOnboardingProvider.notifier)
-                                .state = v,
+                    onChanged: (v) => ref
+                        .read(hasCompletedOnboardingProvider.notifier)
+                        .state = v,
                   ),
                   SwitchListTile(
                     title: const Text('Colour blind mode'),
                     value: colourBlind,
                     contentPadding: EdgeInsets.zero,
-                    onChanged:
-                        (v) =>
-                            ref.read(colourBlindModeProvider.notifier).state =
-                                v,
+                    onChanged: (v) =>
+                        ref.read(colourBlindModeProvider.notifier).state = v,
                   ),
                 ],
               ),
@@ -109,23 +100,19 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
           const SizedBox(height: 16),
 
           // === RENTER CONSTRAINTS ===
-          Text(
-            'Renter Constraints',
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-          ),
+          Text('Renter Constraints',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )),
           const SizedBox(height: 8),
           _RenterConstraintControls(),
           const SizedBox(height: 16),
 
           // === DATA STATUS ===
-          Text(
-            'Data',
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-          ),
+          Text('Data',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )),
           const SizedBox(height: 8),
           Card(
             child: Padding(
@@ -134,12 +121,9 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   dnaAsync.when(
-                    data:
-                        (dna) => Text(
-                          dna != null
-                              ? 'Colour DNA: ${dna.primaryFamily.displayName} (${dna.colourHexes.length} colours)'
-                              : 'Colour DNA: none',
-                        ),
+                    data: (dna) => Text(dna != null
+                        ? 'Colour DNA: ${dna.primaryFamily.displayName} (${dna.colourHexes.length} colours)'
+                        : 'Colour DNA: none'),
                     loading: () => const Text('Colour DNA: loading...'),
                     error: (_, __) => const Text('Colour DNA: error'),
                   ),
@@ -154,53 +138,45 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
                     children: [
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed:
-                              _seeding
-                                  ? null
-                                  : () async {
-                                    setState(() => _seeding = true);
-                                    await QaSeedService.seedDemoData(ref);
-                                    if (mounted) {
-                                      setState(() => _seeding = false);
-                                    }
-                                  },
-                          icon:
-                              _seeding
-                                  ? const SizedBox.square(
-                                    dimension: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                  : const Icon(Icons.dataset),
+                          onPressed: _seeding
+                              ? null
+                              : () async {
+                                  setState(() => _seeding = true);
+                                  await QaSeedService.seedDemoData(ref);
+                                  if (mounted) {
+                                    setState(() => _seeding = false);
+                                  }
+                                },
+                          icon: _seeding
+                              ? const SizedBox.square(
+                                  dimension: 16,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.dataset),
                           label: const Text('Seed Demo Data'),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed:
-                              _clearing
-                                  ? null
-                                  : () async {
-                                    setState(() => _clearing = true);
-                                    await QaSeedService.clearAllData(ref);
-                                    if (mounted) {
-                                      setState(() {
-                                        _clearing = false;
-                                        _selectedRoomId = null;
-                                      });
-                                    }
-                                  },
-                          icon:
-                              _clearing
-                                  ? const SizedBox.square(
-                                    dimension: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                  : const Icon(Icons.delete_sweep),
+                          onPressed: _clearing
+                              ? null
+                              : () async {
+                                  setState(() => _clearing = true);
+                                  await QaSeedService.clearAllData(ref);
+                                  if (mounted) {
+                                    setState(() {
+                                      _clearing = false;
+                                      _selectedRoomId = null;
+                                    });
+                                  }
+                                },
+                          icon: _clearing
+                              ? const SizedBox.square(
+                                  dimension: 16,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.delete_sweep),
                           label: const Text('Clear All'),
                         ),
                       ),
@@ -223,33 +199,28 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Room for Detail View',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text('Room for Detail View',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          )),
                   const SizedBox(height: 8),
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: DropdownButton<String>(
-                        value:
-                            rooms.any((r) => r.id == _selectedRoomId)
-                                ? _selectedRoomId
-                                : rooms.first.id,
+                        value: rooms.any((r) => r.id == _selectedRoomId)
+                            ? _selectedRoomId
+                            : rooms.first.id,
                         isExpanded: true,
                         underline: const SizedBox.shrink(),
-                        items:
-                            rooms
-                                .map(
-                                  (r) => DropdownMenuItem(
-                                    value: r.id,
-                                    child: Text(r.name),
-                                  ),
-                                )
-                                .toList(),
-                        onChanged: (id) => setState(() => _selectedRoomId = id),
+                        items: rooms
+                            .map((r) => DropdownMenuItem(
+                                  value: r.id,
+                                  child: Text(r.name),
+                                ))
+                            .toList(),
+                        onChanged: (id) =>
+                            setState(() => _selectedRoomId = id),
                       ),
                     ),
                   ),
@@ -262,12 +233,10 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
           ),
 
           // === SCREEN NAVIGATOR ===
-          Text(
-            'Screens',
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-          ),
+          Text('Screens',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )),
           const SizedBox(height: 8),
           _buildScreenGrid(context, roomsAsync),
         ],
@@ -276,9 +245,7 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
   }
 
   Widget _buildScreenGrid(
-    BuildContext context,
-    AsyncValue<List<dynamic>> roomsAsync,
-  ) {
+      BuildContext context, AsyncValue<List<dynamic>> roomsAsync) {
     final screens = [
       _ScreenEntry(
         label: 'Onboarding',
@@ -321,6 +288,11 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
         },
       ),
       _ScreenEntry(
+        label: 'Capture',
+        icon: Icons.camera_alt,
+        onTap: () => context.go('/capture'),
+      ),
+      _ScreenEntry(
         label: 'Explore',
         icon: Icons.explore,
         onTap: () => context.go('/explore'),
@@ -334,10 +306,9 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
         label: 'White Finder',
         icon: Icons.format_paint,
         onTap: () {
-          final path =
-              _selectedRoomId != null
-                  ? '/explore/white-finder?roomId=$_selectedRoomId'
-                  : '/explore/white-finder';
+          final path = _selectedRoomId != null
+              ? '/explore/white-finder?roomId=$_selectedRoomId'
+              : '/explore/white-finder';
           context.go(path);
         },
       ),
@@ -404,29 +375,26 @@ class _RenterConstraintControls extends ConsumerWidget {
               children: [
                 ActionChip(
                   label: const Text('Owner'),
-                  avatar:
-                      !constraints.isRenter
-                          ? const Icon(Icons.check, size: 16)
-                          : null,
+                  avatar: !constraints.isRenter
+                      ? const Icon(Icons.check, size: 16)
+                      : null,
                   onPressed: () => _setPreset(ref, isRenter: false),
                 ),
                 ActionChip(
                   label: const Text('Renter (can paint)'),
-                  avatar:
-                      constraints.isRenter && !constraints.wallsAreLocked
-                          ? const Icon(Icons.check, size: 16)
-                          : null,
-                  onPressed:
-                      () => _setPreset(ref, isRenter: true, canPaint: true),
+                  avatar: constraints.isRenter && !constraints.wallsAreLocked
+                      ? const Icon(Icons.check, size: 16)
+                      : null,
+                  onPressed: () => _setPreset(ref,
+                      isRenter: true, canPaint: true),
                 ),
                 ActionChip(
                   label: const Text("Renter (can't paint)"),
-                  avatar:
-                      constraints.wallsAreLocked
-                          ? const Icon(Icons.check, size: 16)
-                          : null,
-                  onPressed:
-                      () => _setPreset(ref, isRenter: true, canPaint: false),
+                  avatar: constraints.wallsAreLocked
+                      ? const Icon(Icons.check, size: 16)
+                      : null,
+                  onPressed: () => _setPreset(ref,
+                      isRenter: true, canPaint: false),
                 ),
               ],
             ),
@@ -435,35 +403,30 @@ class _RenterConstraintControls extends ConsumerWidget {
               _ConstraintToggle(
                 label: 'Can paint',
                 value: constraints.canPaint,
-                onChanged:
-                    (v) => _update(ref, constraints.copyWith(canPaint: v)),
+                onChanged: (v) => _update(ref, constraints.copyWith(canPaint: v)),
               ),
               _ConstraintToggle(
                 label: 'Can drill',
                 value: constraints.canDrill,
-                onChanged:
-                    (v) => _update(ref, constraints.copyWith(canDrill: v)),
+                onChanged: (v) => _update(ref, constraints.copyWith(canDrill: v)),
               ),
               _ConstraintToggle(
                 label: 'Keeping flooring',
                 value: constraints.keepingFlooring,
-                onChanged:
-                    (v) =>
-                        _update(ref, constraints.copyWith(keepingFlooring: v)),
+                onChanged: (v) =>
+                    _update(ref, constraints.copyWith(keepingFlooring: v)),
               ),
               _ConstraintToggle(
                 label: 'Temporary home',
                 value: constraints.isTemporaryHome,
-                onChanged:
-                    (v) =>
-                        _update(ref, constraints.copyWith(isTemporaryHome: v)),
+                onChanged: (v) =>
+                    _update(ref, constraints.copyWith(isTemporaryHome: v)),
               ),
               _ConstraintToggle(
                 label: 'Reversible only',
                 value: constraints.reversibleOnly,
-                onChanged:
-                    (v) =>
-                        _update(ref, constraints.copyWith(reversibleOnly: v)),
+                onChanged: (v) =>
+                    _update(ref, constraints.copyWith(reversibleOnly: v)),
               ),
             ],
           ],
@@ -472,7 +435,10 @@ class _RenterConstraintControls extends ConsumerWidget {
     );
   }
 
-  void _setPreset(WidgetRef ref, {required bool isRenter, bool? canPaint}) {
+  void _setPreset(WidgetRef ref, {
+    required bool isRenter,
+    bool? canPaint,
+  }) {
     final updated = RenterConstraints(
       isRenter: isRenter,
       canPaint: canPaint,
@@ -486,15 +452,13 @@ class _RenterConstraintControls extends ConsumerWidget {
 
   void _update(WidgetRef ref, RenterConstraints updated) {
     ref.read(renterConstraintsProvider.notifier).state = updated;
-    ref
-        .read(userProfileRepositoryProvider)
-        .updateRenterConstraints(
-          canPaint: updated.canPaint,
-          canDrill: updated.canDrill,
-          keepingFlooring: updated.keepingFlooring,
-          isTemporaryHome: updated.isTemporaryHome,
-          reversibleOnly: updated.reversibleOnly,
-        );
+    ref.read(userProfileRepositoryProvider).updateRenterConstraints(
+      canPaint: updated.canPaint,
+      canDrill: updated.canDrill,
+      keepingFlooring: updated.keepingFlooring,
+      isTemporaryHome: updated.isTemporaryHome,
+      reversibleOnly: updated.reversibleOnly,
+    );
   }
 }
 

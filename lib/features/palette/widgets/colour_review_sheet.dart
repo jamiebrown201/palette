@@ -63,32 +63,27 @@ List<ColourFinding> deriveStructuredFindings(
       if (dE < 5) {
         final nameA = _display(hexes[i], nameMap);
         final nameB = _display(hexes[j], nameMap);
-        findings.add(
-          ColourFinding(
-            title:
-                nameA == nameB ? 'Very similar colours' : '$nameA and $nameB',
-            description:
-                'These two are very close — swapping one '
-                'could add contrast and interest',
-            hexes: [hexes[i], hexes[j]],
-            type: FindingType.clash,
-          ),
-        );
+        findings.add(ColourFinding(
+          title: nameA == nameB
+              ? 'Very similar colours'
+              : '$nameA and $nameB',
+          description: 'These two are very close — swapping one '
+              'could add contrast and interest',
+          hexes: [hexes[i], hexes[j]],
+          type: FindingType.clash,
+        ));
       }
       // Bold disconnected clash
       else if (dE > 50 && rel == null && hd > 120) {
         final nameA = _display(hexes[i], nameMap);
         final nameB = _display(hexes[j], nameMap);
-        findings.add(
-          ColourFinding(
-            title: '$nameA and $nameB',
-            description:
-                'Bold together — a bridging tone could '
-                'help connect them in a room',
-            hexes: [hexes[i], hexes[j]],
-            type: FindingType.clash,
-          ),
-        );
+        findings.add(ColourFinding(
+          title: '$nameA and $nameB',
+          description: 'Bold together — a bridging tone could '
+              'help connect them in a room',
+          hexes: [hexes[i], hexes[j]],
+          type: FindingType.clash,
+        ));
       }
 
       // Track relationship — keep the most visually distinct pair
@@ -118,15 +113,13 @@ List<ColourFinding> deriveStructuredFindings(
         'Softer contrast than direct opposites — dynamic yet approachable',
     };
     final countNote = count > 1 ? ' ($count pairs)' : '';
-    findings.add(
-      ColourFinding(
-        title: '${rel.displayName}$countNote',
-        description: desc,
-        hexes: [hexes[i], hexes[j]],
-        type: FindingType.strength,
-        relationship: rel,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: '${rel.displayName}$countNote',
+      description: desc,
+      hexes: [hexes[i], hexes[j]],
+      type: FindingType.strength,
+      relationship: rel,
+    ));
   }
 
   // ── Lightness spread ───────────────────────────────────────────────────
@@ -140,33 +133,26 @@ List<ColourFinding> deriveStructuredFindings(
 
   if (lightnessRange < 15) {
     final avgL = lightnesses.reduce((a, b) => a + b) / lightnesses.length;
-    final zone =
-        avgL > 65
-            ? 'light tones'
-            : avgL < 35
+    final zone = avgL > 65
+        ? 'light tones'
+        : avgL < 35
             ? 'dark tones'
             : 'mid-tones';
-    findings.add(
-      ColourFinding(
-        title: 'Narrow tonal range',
-        description:
-            'Your colours cluster around $zone — a lighter or '
-            'darker accent would add depth',
-        hexes: hexesByLightness,
-        type: FindingType.clash,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'Narrow tonal range',
+      description: 'Your colours cluster around $zone — a lighter or '
+          'darker accent would add depth',
+      hexes: hexesByLightness,
+      type: FindingType.clash,
+    ));
   } else if (lightnessRange > 50) {
-    findings.add(
-      ColourFinding(
-        title: 'Good tonal range',
-        description:
-            'Dark to light spread creates depth and '
-            'visual layering in a room',
-        hexes: hexesByLightness,
-        type: FindingType.strength,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'Good tonal range',
+      description: 'Dark to light spread creates depth and '
+          'visual layering in a room',
+      hexes: hexesByLightness,
+      type: FindingType.strength,
+    ));
   }
 
   // ── Chroma diversity ───────────────────────────────────────────────────
@@ -177,39 +163,30 @@ List<ColourFinding> deriveStructuredFindings(
 
   if (allSameBand && hexes.length >= 3) {
     if (chromaBands.first == ChromaBand.muted) {
-      findings.add(
-        ColourFinding(
-          title: 'All muted tones',
-          description:
-              'A bolder colour could be a focal point '
-              'and bring the palette to life',
-          hexes: hexes,
-          type: FindingType.clash,
-        ),
-      );
+      findings.add(ColourFinding(
+        title: 'All muted tones',
+        description: 'A bolder colour could be a focal point '
+            'and bring the palette to life',
+        hexes: hexes,
+        type: FindingType.clash,
+      ));
     } else if (chromaBands.first == ChromaBand.bold) {
-      findings.add(
-        ColourFinding(
-          title: 'All bold tones',
-          description:
-              'A quieter colour would let your '
-              'statement pieces breathe',
-          hexes: hexes,
-          type: FindingType.clash,
-        ),
-      );
+      findings.add(ColourFinding(
+        title: 'All bold tones',
+        description: 'A quieter colour would let your '
+            'statement pieces breathe',
+        hexes: hexes,
+        type: FindingType.clash,
+      ));
     }
   } else if (mutedCount > 0 && boldCount > 0) {
-    findings.add(
-      ColourFinding(
-        title: 'Muted and bold balance',
-        description:
-            'Rhythm between quiet and statement pieces '
-            'creates visual interest',
-        hexes: hexes,
-        type: FindingType.strength,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'Muted and bold balance',
+      description: 'Rhythm between quiet and statement pieces '
+          'creates visual interest',
+      hexes: hexes,
+      type: FindingType.strength,
+    ));
   }
 
   // ── Palette family coherence ───────────────────────────────────────────
@@ -218,33 +195,26 @@ List<ColourFinding> deriveStructuredFindings(
   for (final f in families) {
     familyCounts[f] = (familyCounts[f] ?? 0) + 1;
   }
-  final dominantEntry = familyCounts.entries.reduce(
-    (a, b) => a.value >= b.value ? a : b,
-  );
+  final dominantEntry =
+      familyCounts.entries.reduce((a, b) => a.value >= b.value ? a : b);
   final dominantFraction = dominantEntry.value / hexes.length;
 
   if (dominantFraction >= 0.6) {
-    findings.add(
-      ColourFinding(
-        title: 'Rooted in ${_familyLabel(dominantEntry.key)}',
-        description:
-            'A cohesive family identity that makes the '
-            'palette feel intentional',
-        hexes: hexes,
-        type: FindingType.strength,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'Rooted in ${_familyLabel(dominantEntry.key)}',
+      description: 'A cohesive family identity that makes the '
+          'palette feel intentional',
+      hexes: hexes,
+      type: FindingType.strength,
+    ));
   } else if (familyCounts.length >= hexes.length && hexes.length >= 3) {
-    findings.add(
-      ColourFinding(
-        title: 'Eclectic colour families',
-        description:
-            'A diverse mix — bold choices that need a '
-            'unifying element to connect them',
-        hexes: hexes,
-        type: FindingType.insight,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'Eclectic colour families',
+      description: 'A diverse mix — bold choices that need a '
+          'unifying element to connect them',
+      hexes: hexes,
+      type: FindingType.insight,
+    ));
   }
 
   // ── Undertone balance ──────────────────────────────────────────────────
@@ -254,34 +224,27 @@ List<ColourFinding> deriveStructuredFindings(
   final total = hexes.length;
 
   if (warmCount > 0 && coolCount > 0) {
-    findings.add(
-      ColourFinding(
-        title: 'Warm and cool balance',
-        description:
-            'Temperature contrast adds dimension and prevents '
-            'the palette from feeling one-note',
-        hexes: hexes,
-        type: FindingType.strength,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'Warm and cool balance',
+      description: 'Temperature contrast adds dimension and prevents '
+          'the palette from feeling one-note',
+      hexes: hexes,
+      type: FindingType.strength,
+    ));
   } else if (warmCount == total) {
-    findings.add(
-      ColourFinding(
-        title: 'All warm-toned',
-        description: 'Cohesive warmth — cosy and inviting',
-        hexes: hexes,
-        type: FindingType.insight,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'All warm-toned',
+      description: 'Cohesive warmth — cosy and inviting',
+      hexes: hexes,
+      type: FindingType.insight,
+    ));
   } else if (coolCount == total) {
-    findings.add(
-      ColourFinding(
-        title: 'All cool-toned',
-        description: 'Serene and calming — fresh and contemporary',
-        hexes: hexes,
-        type: FindingType.insight,
-      ),
-    );
+    findings.add(ColourFinding(
+      title: 'All cool-toned',
+      description: 'Serene and calming — fresh and contemporary',
+      hexes: hexes,
+      type: FindingType.insight,
+    ));
   }
 
   return findings;
@@ -294,14 +257,14 @@ double _hueDiff(LabColour a, LabColour b) {
 }
 
 String _familyLabel(PaletteFamily f) => switch (f) {
-  PaletteFamily.pastels => 'pastels',
-  PaletteFamily.brights => 'brights',
-  PaletteFamily.jewelTones => 'jewel tones',
-  PaletteFamily.earthTones => 'earth tones',
-  PaletteFamily.darks => 'darks',
-  PaletteFamily.warmNeutrals => 'warm neutrals',
-  PaletteFamily.coolNeutrals => 'cool neutrals',
-};
+      PaletteFamily.pastels => 'pastels',
+      PaletteFamily.brights => 'brights',
+      PaletteFamily.jewelTones => 'jewel tones',
+      PaletteFamily.earthTones => 'earth tones',
+      PaletteFamily.darks => 'darks',
+      PaletteFamily.warmNeutrals => 'warm neutrals',
+      PaletteFamily.coolNeutrals => 'cool neutrals',
+    };
 
 String _display(String hex, Map<String, String>? nameMap) {
   if (nameMap == null) return hex.toUpperCase();
@@ -364,12 +327,10 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
     _headerSlide = Tween<Offset>(
       begin: const Offset(0, 0.15),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
-      ),
-    );
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
+    ));
 
     _strengthsOpacity = CurvedAnimation(
       parent: _controller,
@@ -378,12 +339,10 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
     _strengthsSlide = Tween<Offset>(
       begin: const Offset(0, 0.15),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.2, 0.5, curve: Curves.easeOut),
-      ),
-    );
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.2, 0.5, curve: Curves.easeOut),
+    ));
 
     _clashesOpacity = CurvedAnimation(
       parent: _controller,
@@ -392,12 +351,10 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
     _clashesSlide = Tween<Offset>(
       begin: const Offset(0, 0.15),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.4, 0.7, curve: Curves.easeOut),
-      ),
-    );
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.4, 0.7, curve: Curves.easeOut),
+    ));
 
     _suggestionOpacity = CurvedAnimation(
       parent: _controller,
@@ -406,12 +363,10 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
     _suggestionSlide = Tween<Offset>(
       begin: const Offset(0, 0.15),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.6, 0.9, curve: Curves.easeOut),
-      ),
-    );
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.6, 0.9, curve: Curves.easeOut),
+    ));
 
     _exploreOpacity = CurvedAnimation(
       parent: _controller,
@@ -531,12 +486,12 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
 
   Widget _buildHeader(BuildContext context) {
     final hasIssues = widget.health.hasIssues;
-    final chipBg =
-        hasIssues
-            ? PaletteColours.softGold.withValues(alpha: 0.2)
-            : PaletteColours.sageGreen.withValues(alpha: 0.2);
-    final chipFg =
-        hasIssues ? PaletteColours.softGoldDark : PaletteColours.sageGreenDark;
+    final chipBg = hasIssues
+        ? PaletteColours.softGold.withValues(alpha: 0.2)
+        : PaletteColours.sageGreen.withValues(alpha: 0.2);
+    final chipFg = hasIssues
+        ? PaletteColours.softGoldDark
+        : PaletteColours.sageGreenDark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,17 +510,17 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
           child: Text(
             widget.health.verdict,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: chipFg,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: chipFg,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ),
         const SizedBox(height: 12),
         Text(
           widget.health.explanation,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: PaletteColours.textSecondary),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: PaletteColours.textSecondary,
+              ),
         ),
       ],
     );
@@ -580,17 +535,14 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
       children: [
         Row(
           children: [
-            const Icon(
-              Icons.auto_awesome,
-              size: 18,
-              color: PaletteColours.sageGreen,
-            ),
+            const Icon(Icons.auto_awesome,
+                size: 18, color: PaletteColours.sageGreen),
             const SizedBox(width: 8),
             Text(
               'What works',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),
@@ -612,17 +564,14 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
       children: [
         Row(
           children: [
-            const Icon(
-              Icons.lightbulb_outline,
-              size: 18,
-              color: PaletteColours.softGold,
-            ),
+            const Icon(Icons.lightbulb_outline,
+                size: 18, color: PaletteColours.softGold),
             const SizedBox(width: 8),
             Text(
               'Worth knowing',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),
@@ -631,13 +580,12 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
           _ClashCard(
             finding: finding,
             nameMap: widget.nameMap,
-            onSwap:
-                finding.hexes.length == 2
-                    ? () {
-                      Navigator.pop(context);
-                      widget.onSwapColour?.call(finding.hexes.first);
-                    }
-                    : null,
+            onSwap: finding.hexes.length == 2
+                ? () {
+                    Navigator.pop(context);
+                    widget.onSwapColour?.call(finding.hexes.first);
+                  }
+                : null,
           ),
           const SizedBox(height: 8),
         ],
@@ -654,12 +602,13 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
       children: [
         Text(
           'Good to know',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 8),
-        for (final finding in insights) _InsightRow(finding: finding),
+        for (final finding in insights)
+          _InsightRow(finding: finding),
       ],
     );
   }
@@ -677,18 +626,15 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.auto_fix_high,
-                size: 18,
-                color: PaletteColours.sageGreenDark,
-              ),
+              const Icon(Icons.auto_fix_high,
+                  size: 18, color: PaletteColours.sageGreenDark),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   widget.health.suggestion!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: PaletteColours.textPrimary,
-                  ),
+                        color: PaletteColours.textPrimary,
+                      ),
                 ),
               ),
             ],
@@ -718,9 +664,9 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
       children: [
         Text(
           'Explore your colours',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -782,7 +728,10 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
 // ---------------------------------------------------------------------------
 
 class _StrengthCard extends StatelessWidget {
-  const _StrengthCard({required this.finding, required this.nameMap});
+  const _StrengthCard({
+    required this.finding,
+    required this.nameMap,
+  });
 
   final ColourFinding finding;
   final Map<String, String> nameMap;
@@ -797,7 +746,10 @@ class _StrengthCard extends StatelessWidget {
         color: PaletteColours.softCream,
         borderRadius: BorderRadius.circular(12),
         border: const Border(
-          left: BorderSide(color: PaletteColours.sageGreen, width: 3),
+          left: BorderSide(
+            color: PaletteColours.sageGreen,
+            width: 3,
+          ),
         ),
       ),
       child: Column(
@@ -810,7 +762,8 @@ class _StrengthCard extends StatelessWidget {
           if (finding.hexes.isNotEmpty) const SizedBox(height: 12),
           if (finding.relationship != null)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: PaletteColours.sageGreenLight,
                 borderRadius: BorderRadius.circular(12),
@@ -818,19 +771,22 @@ class _StrengthCard extends StatelessWidget {
               child: Text(
                 finding.title,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.sageGreenDark,
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: PaletteColours.sageGreenDark,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             )
           else
-            Text(finding.title, style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              finding.title,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           const SizedBox(height: 6),
           Text(
             finding.description,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: PaletteColours.textSecondary,
-            ),
+                  color: PaletteColours.textSecondary,
+                ),
           ),
         ],
       ),
@@ -839,7 +795,11 @@ class _StrengthCard extends StatelessWidget {
 }
 
 class _ClashCard extends StatelessWidget {
-  const _ClashCard({required this.finding, required this.nameMap, this.onSwap});
+  const _ClashCard({
+    required this.finding,
+    required this.nameMap,
+    this.onSwap,
+  });
 
   final ColourFinding finding;
   final Map<String, String> nameMap;
@@ -855,22 +815,26 @@ class _ClashCard extends StatelessWidget {
         color: PaletteColours.softGoldLight.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
         border: const Border(
-          left: BorderSide(color: PaletteColours.softGold, width: 3),
+          left: BorderSide(
+            color: PaletteColours.softGold,
+            width: 3,
+          ),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isPair)
-            _LargeComparisonSwatches(hexes: finding.hexes, nameMap: nameMap)
+            _LargeComparisonSwatches(
+                hexes: finding.hexes, nameMap: nameMap)
           else if (finding.hexes.length > 2)
             _PaletteStrip(hexes: finding.hexes),
           if (finding.hexes.isNotEmpty) const SizedBox(height: 12),
           Text(
             finding.description,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: PaletteColours.textSecondary,
-            ),
+                  color: PaletteColours.textSecondary,
+                ),
           ),
           if (onSwap != null && isPair) ...[
             const SizedBox(height: 12),
@@ -938,7 +902,10 @@ class _PairSwatches extends StatelessWidget {
 }
 
 class _LargeComparisonSwatches extends StatelessWidget {
-  const _LargeComparisonSwatches({required this.hexes, required this.nameMap});
+  const _LargeComparisonSwatches({
+    required this.hexes,
+    required this.nameMap,
+  });
 
   final List<String> hexes;
   final Map<String, String> nameMap;
@@ -955,10 +922,14 @@ class _LargeComparisonSwatches extends StatelessWidget {
               decoration: BoxDecoration(
                 color: _hexToColor(hexes[i]),
                 borderRadius: BorderRadius.only(
-                  topLeft: i == 0 ? const Radius.circular(10) : Radius.zero,
-                  bottomLeft: i == 0 ? const Radius.circular(10) : Radius.zero,
-                  topRight: i == 1 ? const Radius.circular(10) : Radius.zero,
-                  bottomRight: i == 1 ? const Radius.circular(10) : Radius.zero,
+                  topLeft:
+                      i == 0 ? const Radius.circular(10) : Radius.zero,
+                  bottomLeft:
+                      i == 0 ? const Radius.circular(10) : Radius.zero,
+                  topRight:
+                      i == 1 ? const Radius.circular(10) : Radius.zero,
+                  bottomRight:
+                      i == 1 ? const Radius.circular(10) : Radius.zero,
                 ),
               ),
               alignment: Alignment.bottomLeft,
@@ -966,8 +937,8 @@ class _LargeComparisonSwatches extends StatelessWidget {
               child: Text(
                 _display(hexes[i], nameMap),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: _textColorForBackground(hexes[i]),
-                ),
+                      color: _textColorForBackground(hexes[i]),
+                    ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -1029,25 +1000,21 @@ class _InsightRow extends StatelessWidget {
             child: Text(
               '${finding.title} — ${finding.description}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: PaletteColours.textSecondary,
-              ),
+                    color: PaletteColours.textSecondary,
+                  ),
             ),
           ),
-          ...finding.hexes
-              .take(5)
-              .map(
-                (hex) => Padding(
-                  padding: const EdgeInsets.only(left: 3),
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: _hexToColor(hex),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+          ...finding.hexes.take(5).map((hex) => Padding(
+                padding: const EdgeInsets.only(left: 3),
+                child: Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: _hexToColor(hex),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
-              ),
+              )),
         ],
       ),
     );

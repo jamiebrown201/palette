@@ -26,8 +26,7 @@ class ColourSwatchWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label:
-          '$name colour swatch'
+      label: '$name colour swatch'
           '${undertoneLabel != null ? ', $undertoneLabel undertone' : ''}',
       button: onTap != null,
       child: GestureDetector(
@@ -43,37 +42,35 @@ class ColourSwatchWidget extends StatelessWidget {
                 color: colour,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color:
-                      isSelected
-                          ? PaletteColours.sageGreen
-                          : PaletteColours.divider,
+                  color: isSelected
+                      ? PaletteColours.sageGreen
+                      : PaletteColours.divider,
                   width: isSelected ? 3 : 1,
                 ),
               ),
-              child:
-                  undertoneLabel != null
-                      ? Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          margin: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: PaletteColours.cardBackground.withValues(
-                              alpha: 0.9,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
+              child: undertoneLabel != null
+                  ? Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        margin: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: PaletteColours.cardBackground.withValues(
+                            alpha: 0.9,
                           ),
-                          child: Text(
-                            undertoneLabel!,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: PaletteColours.textPrimary,
-                            ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          undertoneLabel!,
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: PaletteColours.textPrimary,
                           ),
                         ),
-                      )
-                      : null,
+                      ),
+                    )
+                  : null,
             ),
             if (showName) ...[
               const SizedBox(height: 4),

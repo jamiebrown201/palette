@@ -7,8 +7,8 @@ import 'package:palette/core/constants/enums.dart';
 Undertone deriveUndertoneTemperature(Map<Undertone, int> tally) {
   if (tally.isEmpty) return Undertone.neutral;
 
-  final sorted =
-      tally.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  final sorted = tally.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
 
   final top = sorted.first;
 
@@ -29,12 +29,12 @@ Undertone deriveUndertoneTemperature(Map<Undertone, int> tally) {
 ChromaBand deriveSaturationPreference(Map<ChromaBand, int> tally) {
   if (tally.isEmpty) return ChromaBand.mid;
 
-  final sorted =
-      tally.entries.toList()..sort((a, b) {
-        final cmp = b.value.compareTo(a.value);
-        // Deterministic tiebreaker: enum index
-        return cmp != 0 ? cmp : a.key.index.compareTo(b.key.index);
-      });
+  final sorted = tally.entries.toList()
+    ..sort((a, b) {
+      final cmp = b.value.compareTo(a.value);
+      // Deterministic tiebreaker: enum index
+      return cmp != 0 ? cmp : a.key.index.compareTo(b.key.index);
+    });
 
   final top = sorted.first;
 

@@ -20,11 +20,10 @@ class FloorPlanPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final borderPaint =
-        Paint()
-          ..color = PaletteColours.textSecondary
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5;
+    final borderPaint = Paint()
+      ..color = PaletteColours.textSecondary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
 
     const textStyle = TextStyle(
       color: PaletteColours.textPrimary,
@@ -41,10 +40,9 @@ class FloorPlanPainter extends CustomPainter {
 
       // Fill with room hero colour
       final hex = roomColours[zone.id];
-      final fillColour =
-          hex != null
-              ? _hexToColor(hex)
-              : PaletteColours.warmGrey.withValues(alpha: 0.3);
+      final fillColour = hex != null
+          ? _hexToColor(hex)
+          : PaletteColours.warmGrey.withValues(alpha: 0.3);
 
       canvas
         ..drawRRect(

@@ -35,16 +35,15 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
     if (_query.isEmpty) return widget.paintColours;
     final q = _query.toLowerCase();
     return widget.paintColours
-        .where(
-          (p) =>
-              p.name.toLowerCase().contains(q) ||
-              p.brand.toLowerCase().contains(q) ||
-              p.hex.toLowerCase().contains(q),
-        )
+        .where((p) =>
+            p.name.toLowerCase().contains(q) ||
+            p.brand.toLowerCase().contains(q) ||
+            p.hex.toLowerCase().contains(q))
         .toList();
   }
 
-  bool get _showSuggestions => _query.isEmpty && widget.suggestions.isNotEmpty;
+  bool get _showSuggestions =>
+      _query.isEmpty && widget.suggestions.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +75,8 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
                   Text(
                     widget.title,
                     style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
@@ -111,11 +110,12 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
                           Expanded(
                             child: Text(
                               widget.contextBanner!,
-                              style: Theme.of(
-                                ctx,
-                              ).textTheme.bodySmall?.copyWith(
-                                color: PaletteColours.sageGreenDark,
-                              ),
+                              style: Theme.of(ctx)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: PaletteColours.sageGreenDark,
+                                  ),
                             ),
                           ),
                         ],
@@ -158,18 +158,15 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
         padding: const EdgeInsets.only(top: 8, bottom: 4),
         child: Row(
           children: [
-            const Icon(
-              Icons.auto_awesome,
-              size: 16,
-              color: PaletteColours.sageGreen,
-            ),
+            const Icon(Icons.auto_awesome,
+                size: 16, color: PaletteColours.sageGreen),
             const SizedBox(width: 6),
             Text(
               'Suggested for you',
               style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: PaletteColours.sageGreenDark,
-              ),
+                    fontWeight: FontWeight.w600,
+                    color: PaletteColours.sageGreenDark,
+                  ),
             ),
           ],
         ),
@@ -195,8 +192,8 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
               child: Text(
                 'All paints',
                 style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textTertiary,
-                ),
+                      color: PaletteColours.textTertiary,
+                    ),
               ),
             ),
             const Expanded(child: Divider()),
@@ -234,21 +231,21 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
         ),
         title: Text(
           pc.name,
-          style: Theme.of(
-            ctx,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+          style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
         ),
         subtitle: Text(
           suggestion.reason,
-          style: Theme.of(
-            ctx,
-          ).textTheme.bodySmall?.copyWith(color: PaletteColours.sageGreenDark),
+          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                color: PaletteColours.sageGreenDark,
+              ),
         ),
         trailing: Text(
           pc.brand,
-          style: Theme.of(
-            ctx,
-          ).textTheme.labelSmall?.copyWith(color: PaletteColours.textTertiary),
+          style: Theme.of(ctx).textTheme.labelSmall?.copyWith(
+                color: PaletteColours.textTertiary,
+              ),
         ),
         onTap: () => Navigator.pop(ctx, pc),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12),

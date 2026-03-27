@@ -28,7 +28,10 @@ Future<CoherenceReport> coherenceReport(Ref ref) async {
   final threadRepo = ref.watch(redThreadRepositoryProvider);
   final threads = await threadRepo.getThreadColours();
 
-  return checkCoherence(rooms: rooms, threadColours: threads);
+  return checkCoherence(
+    rooms: rooms,
+    threadColours: threads,
+  );
 }
 
 /// Thread colour hex strings for convenience.
