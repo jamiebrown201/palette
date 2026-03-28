@@ -263,6 +263,13 @@ class _AddColourSheetState extends ConsumerState<AddColourSheet> {
   }
 
   void _addImage(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid http/https URL')),
+      );
+      return;
+    }
     Navigator.pop(context, AddItemResult(type: 'image', imageUrl: url));
   }
 }

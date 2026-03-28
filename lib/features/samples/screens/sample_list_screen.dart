@@ -155,6 +155,20 @@ class _SampleListBody extends ConsumerWidget {
     final hasOrdered = items.any((i) => i.isOrdered);
     final hasArrived = items.any((i) => i.hasArrived);
 
+    // Only show arrival prompt after 3+ days since earliest order (spec 1D.3)
+    final orderedItems = items.where((i) => i.isOrdered && !i.hasArrived);
+    final earliestOrderedAt =
+        orderedItems.isEmpty
+            ? null
+            : orderedItems
+                .map((i) => i.orderedAt!)
+                .reduce((a, b) => a.isBefore(b) ? a : b);
+    final showArrivalPrompt =
+        hasOrdered &&
+        !hasArrived &&
+        earliestOrderedAt != null &&
+        DateTime.now().difference(earliestOrderedAt) >= const Duration(days: 3);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       child: Column(
@@ -197,8 +211,8 @@ class _SampleListBody extends ConsumerWidget {
               ),
             ),
 
-          // Samples arrived prompt
-          if (hasOrdered && !hasArrived)
+          // Samples arrived prompt (3-5 day follow-up per spec 1D.3)
+          if (showArrivalPrompt)
             _ArrivedPromptCard(
               onConfirm: () {
                 ref.read(sampleListRepositoryProvider).markAllArrived();
@@ -312,7 +326,7 @@ class _SummaryCard extends StatelessWidget {
           BoxShadow(
             offset: Offset(0, 1),
             blurRadius: 4,
-            color: Color(0x0A000000),
+            color: Color(0x0A2C2C2C),
           ),
         ],
       ),
@@ -478,7 +492,7 @@ class _SampleItemCard extends ConsumerWidget {
             BoxShadow(
               offset: Offset(0, 1),
               blurRadius: 4,
-              color: Color(0x0A000000),
+              color: Color(0x0A2C2C2C),
             ),
           ],
         ),

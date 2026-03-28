@@ -232,7 +232,7 @@ class _GuideStep extends StatelessWidget {
               child: Text(
                 number,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: PaletteColours.textOnAccent,
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),

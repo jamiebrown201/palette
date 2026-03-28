@@ -445,7 +445,8 @@ class _BuyThisPaintButtonState extends ConsumerState<BuyThisPaintButton> {
       colourCode: widget.colourCode,
       colourName: widget.colourName,
     );
-    final uri = Uri.parse(url);
+    final uri = Uri.tryParse(url);
+    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) return;
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }

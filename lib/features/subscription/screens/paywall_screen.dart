@@ -37,6 +37,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     ref.read(analyticsProvider).track(AnalyticsEvents.paywallViewed, {
       if (widget.triggerSource != null) 'trigger_source': widget.triggerSource,
     });
+    // Track A/B experiment exposure once on mount (not in build)
+    final flags = ref.read(featureFlagProvider);
+    flags.trackExposure(Experiments.paywallCopy);
+    flags.trackExposure(Experiments.defaultBillingPeriod);
     _revealController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -81,10 +85,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     });
 
     // A/B test: paywall copy variant (spec 1E.2)
-    final flags = ref.read(featureFlagProvider);
-    final copyVariant = flags.variant(Experiments.paywallCopy);
-    flags.trackExposure(Experiments.paywallCopy);
-    flags.trackExposure(Experiments.defaultBillingPeriod);
+    final copyVariant = ref
+        .read(featureFlagProvider)
+        .variant(Experiments.paywallCopy);
 
     final (headline, subtitle) = _paywallCopyForVariant(copyVariant);
 

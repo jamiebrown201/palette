@@ -41,16 +41,16 @@ class MoodboardItemTile extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.6),
+                        PaletteColours.textOnAccent.withValues(alpha: 0),
+                        PaletteColours.textPrimary.withValues(alpha: 0.6),
                       ],
                     ),
                   ),
                   child: Text(
                     item.label!,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.white),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.textOnAccent,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -58,20 +58,29 @@ class MoodboardItemTile extends StatelessWidget {
               ),
             if (onDelete != null)
               Positioned(
-                top: 4,
-                right: 4,
+                top: 0,
+                right: 0,
                 child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: onDelete,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      size: 16,
-                      color: Colors.white,
+                  child: SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: PaletteColours.textPrimary.withValues(
+                            alpha: 0.4,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: PaletteColours.textOnAccent,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -117,8 +126,8 @@ class MoodboardItemTile extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.5),
+                        PaletteColours.textOnAccent.withValues(alpha: 0),
+                        PaletteColours.textPrimary.withValues(alpha: 0.5),
                       ],
                     ),
                   ),
@@ -130,7 +139,7 @@ class MoodboardItemTile extends StatelessWidget {
                       Text(
                         item.colourName!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
+                          color: PaletteColours.textOnAccent,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -139,7 +148,9 @@ class MoodboardItemTile extends StatelessWidget {
                       Text(
                         '#$cleaned'.toUpperCase(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
+                          color: PaletteColours.textOnAccent.withValues(
+                            alpha: 0.7,
+                          ),
                           fontSize: 10,
                         ),
                       ),

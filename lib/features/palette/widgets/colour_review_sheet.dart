@@ -354,7 +354,7 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 250),
       vsync: this,
     );
 

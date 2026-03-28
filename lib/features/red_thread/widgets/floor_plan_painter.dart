@@ -169,7 +169,7 @@ class FloorPlanPainter extends CustomPainter {
           text: const TextSpan(
             text: '!',
             style: TextStyle(
-              color: Colors.white,
+              color: PaletteColours.textOnAccent,
               fontSize: 9,
               fontWeight: FontWeight.bold,
             ),

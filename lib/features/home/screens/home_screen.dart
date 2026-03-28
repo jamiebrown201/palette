@@ -349,7 +349,7 @@ class _ColourDnaCard extends StatelessWidget {
 // Next Recommended Action
 // ---------------------------------------------------------------------------
 
-class _NextActionSection extends ConsumerWidget {
+class _NextActionSection extends ConsumerStatefulWidget {
   const _NextActionSection({
     required this.rooms,
     required this.coherenceReport,
@@ -361,11 +361,18 @@ class _NextActionSection extends ConsumerWidget {
   final List<RedThreadColour> threadColours;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_NextActionSection> createState() => _NextActionSectionState();
+}
+
+class _NextActionSectionState extends ConsumerState<_NextActionSection> {
+  bool _exposureTracked = false;
+
+  @override
+  Widget build(BuildContext context) {
     final furnitureMap = <String, bool>{};
     var anyLoading = false;
 
-    for (final room in rooms) {
+    for (final room in widget.rooms) {
       final furnitureAsync = ref.watch(furnitureForRoomProvider(room.id));
       furnitureAsync.when(
         data: (items) => furnitureMap[room.id] = items.isNotEmpty,
@@ -380,12 +387,17 @@ class _NextActionSection extends ConsumerWidget {
     final copyVariant = ref
         .read(featureFlagProvider)
         .variant(Experiments.nextActionCopy);
-    ref.read(featureFlagProvider).trackExposure(Experiments.nextActionCopy);
+
+    // Track exposure once per widget lifecycle, not on every rebuild
+    if (!_exposureTracked) {
+      _exposureTracked = true;
+      ref.read(featureFlagProvider).trackExposure(Experiments.nextActionCopy);
+    }
 
     final action = computeNextAction(
-      rooms: rooms,
-      coherenceReport: coherenceReport,
-      threadColours: threadColours,
+      rooms: widget.rooms,
+      coherenceReport: widget.coherenceReport,
+      threadColours: widget.threadColours,
       roomHasFurniture: furnitureMap,
       copyVariant: copyVariant,
     );

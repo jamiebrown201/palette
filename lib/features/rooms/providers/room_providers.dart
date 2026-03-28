@@ -16,15 +16,15 @@ final allRoomsProvider = StreamProvider<List<Room>>((ref) {
   return ref.watch(roomRepositoryProvider).watchAllRooms();
 });
 
-/// Stream of a single room by ID.
-final roomByIdProvider = FutureProvider.family<Room?, String>((ref, roomId) {
-  return ref.watch(roomRepositoryProvider).getRoomById(roomId);
+/// Reactive stream of a single room by ID.
+final roomByIdProvider = StreamProvider.family<Room?, String>((ref, roomId) {
+  return ref.watch(roomRepositoryProvider).watchRoomById(roomId);
 });
 
-/// Stream of furniture items for a room.
+/// Reactive stream of furniture items for a room.
 final furnitureForRoomProvider =
-    FutureProvider.family<List<LockedFurniture>, String>((ref, roomId) {
-      return ref.watch(roomRepositoryProvider).getFurnitureForRoom(roomId);
+    StreamProvider.family<List<LockedFurniture>, String>((ref, roomId) {
+      return ref.watch(roomRepositoryProvider).watchFurnitureForRoom(roomId);
     });
 
 /// Paint recommendations for a specific room, based on hero colour,

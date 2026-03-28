@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:palette/core/theme/palette_colours.dart';
 
 /// Custom painter that renders an HSL colour wheel.
 ///
@@ -90,7 +91,7 @@ class ColourWheelPainter extends CustomPainter {
             pos,
             7,
             Paint()
-              ..color = Colors.white
+              ..color = PaletteColours.textOnAccent
               ..style = PaintingStyle.stroke
               ..strokeWidth = 2,
           );
@@ -101,7 +102,7 @@ class ColourWheelPainter extends CustomPainter {
             pos,
             5,
             Paint()
-              ..color = Colors.white.withValues(alpha: 0.8)
+              ..color = PaletteColours.textOnAccent.withValues(alpha: 0.8)
               ..style = PaintingStyle.stroke
               ..strokeWidth = 1.5,
           );
@@ -125,14 +126,14 @@ class ColourWheelPainter extends CustomPainter {
           markerPos,
           8,
           Paint()
-            ..color = Colors.white
+            ..color = PaletteColours.textOnAccent
             ..style = PaintingStyle.fill,
         )
         ..drawCircle(
           markerPos,
           8,
           Paint()
-            ..color = Colors.black54
+            ..color = PaletteColours.overlay
             ..style = PaintingStyle.stroke
             ..strokeWidth = 2,
         );

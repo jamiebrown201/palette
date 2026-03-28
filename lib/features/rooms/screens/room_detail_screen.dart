@@ -2651,13 +2651,21 @@ bool _isLightColour(String hex) {
 // Room Checklist
 // ---------------------------------------------------------------------------
 
-class _RoomChecklist extends ConsumerWidget {
+class _RoomChecklist extends ConsumerStatefulWidget {
   const _RoomChecklist({required this.room});
 
   final Room room;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_RoomChecklist> createState() => _RoomChecklistState();
+}
+
+class _RoomChecklistState extends ConsumerState<_RoomChecklist> {
+  bool? _expandedOverride;
+
+  @override
+  Widget build(BuildContext context) {
+    final room = widget.room;
     final config = ref.watch(roomModeConfigProvider(room.isRenterMode));
     final furnitureAsync = ref.watch(furnitureForRoomProvider(room.id));
     final coherenceAsync = ref.watch(coherenceReportProvider);
@@ -2727,6 +2735,16 @@ class _RoomChecklist extends ConsumerWidget {
 
     final completed = items.where((i) => i.done).length;
 
+    // Auto-collapse when 4+ items complete (spec 1B.2), user can toggle
+    final isExpanded = _expandedOverride ?? completed < 4;
+
+    // Hero colour for progress bar (spec 1E.5)
+    final heroHex = room.heroColourHex?.replaceFirst('#', '');
+    final progressColour =
+        heroHex != null && heroHex.length == 6
+            ? Color(int.parse('FF$heroHex', radix: 16))
+            : PaletteColours.sageGreen;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -2736,41 +2754,63 @@ class _RoomChecklist extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'Room checklist',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '$completed/${items.length}',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textSecondary,
+          GestureDetector(
+            onTap:
+                completed >= 4
+                    ? () => setState(() {
+                      _expandedOverride = !isExpanded;
+                    })
+                    : null,
+            child: Row(
+              children: [
+                Text(
+                  'Room checklist',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Text(
+                  '$completed/${items.length}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+                ),
+                if (completed >= 4) ...[
+                  const Spacer(),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: PaletteColours.textSecondary,
+                  ),
+                ],
+              ],
+            ),
           ),
           const SizedBox(height: 8),
-          // Progress bar
+          // Progress bar with hero colour (spec 1E.5)
           ClipRRect(
             borderRadius: BorderRadius.circular(3),
             child: LinearProgressIndicator(
               value: completed / items.length,
               minHeight: 6,
               backgroundColor: PaletteColours.divider,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                PaletteColours.sageGreen,
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(progressColour),
             ),
           ),
-          const SizedBox(height: 12),
-          ...items.map((item) => _buildChecklistRow(context, item)),
+          if (isExpanded) ...[
+            const SizedBox(height: 12),
+            ...items.map((item) => _buildChecklistRow(context, item)),
+          ],
         ],
       ),
     );
+  }
+
+  void _showEditRoomSheet(BuildContext context, WidgetRef ref) {
+    _showRoomEditSheet(context, ref, widget.room);
   }
 
   Widget _buildChecklistRow(BuildContext context, _ChecklistItem item) {
@@ -2818,10 +2858,6 @@ class _RoomChecklist extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  void _showEditRoomSheet(BuildContext context, WidgetRef ref) {
-    _showRoomEditSheet(context, ref, room);
   }
 }
 
@@ -4212,7 +4248,7 @@ class _ProductCard extends ConsumerWidget {
     _recordFeedback(ref, product, 'buy');
 
     final uri = Uri.tryParse(product.affiliateUrl);
-    if (uri == null) return;
+    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) return;
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
