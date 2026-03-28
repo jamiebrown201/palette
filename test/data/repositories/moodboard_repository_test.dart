@@ -93,7 +93,7 @@ void main() {
       await repo.create(makeBoard(id: 'b1', name: 'Old Name'));
       await repo.update(
         'b1',
-        MoodboardsCompanion(name: const Value('New Name')),
+        const MoodboardsCompanion(name: Value('New Name')),
       );
 
       final board = await repo.getById('b1');

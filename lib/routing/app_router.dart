@@ -20,6 +20,7 @@ import 'package:palette/features/red_thread/screens/red_thread_screen.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/features/rooms/screens/room_detail_screen.dart';
 import 'package:palette/features/rooms/screens/room_list_screen.dart';
+import 'package:palette/features/samples/screens/sample_list_screen.dart';
 import 'package:palette/features/shopping_list/screens/shopping_list_screen.dart';
 import 'package:palette/features/subscription/screens/paywall_screen.dart';
 import 'package:palette/providers/analytics_provider.dart';
@@ -94,6 +95,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/shopping-list',
         builder: (context, state) => const ShoppingListScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/samples',
+        builder: (context, state) => const SampleListScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

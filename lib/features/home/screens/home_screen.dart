@@ -23,6 +23,7 @@ import 'package:palette/features/red_thread/providers/red_thread_providers.dart'
 import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
 import 'package:palette/features/rooms/logic/whole_home_bundles.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/features/samples/providers/sample_list_providers.dart';
 import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/database_providers.dart';
@@ -150,6 +151,10 @@ class HomeScreen extends ConsumerWidget {
 
             // Shopping List summary
             const _ShoppingListSummary(),
+            const SizedBox(height: 12),
+
+            // Sample List summary
+            const _SampleListSummary(),
             const SizedBox(height: 20),
 
             // Seasonal Refresh Suggestions
@@ -1094,6 +1099,92 @@ class _ShoppingListSummary extends ConsumerWidget {
               ),
             ),
           ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sample List summary (Phase 1D.3)
+// ---------------------------------------------------------------------------
+
+class _SampleListSummary extends ConsumerWidget {
+  const _SampleListSummary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final itemsAsync = ref.watch(sampleListProvider);
+
+    return itemsAsync.when(
+      data: (items) {
+        if (items.isEmpty) return const SizedBox.shrink();
+
+        final brands = items.map((i) => i.brand).toSet().length;
+        final ordered = items.where((i) => i.isOrdered).length;
+
+        return GestureDetector(
+          onTap: () => GoRouter.of(context).push('/samples'),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.warmGrey),
+              boxShadow: const [
+                BoxShadow(
+                  offset: Offset(0, 2),
+                  blurRadius: 8,
+                  color: Color(0x14000000),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: PaletteColours.softGold.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.color_lens_outlined,
+                    color: PaletteColours.softGold,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${items.length} ${items.length == 1 ? 'sample' : 'samples'} to order',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$brands ${brands == 1 ? 'brand' : 'brands'}'
+                        '${ordered > 0 ? ' · $ordered ordered' : ''}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right,
+                  color: PaletteColours.textTertiary,
+                ),
+              ],
+            ),
+          ),
         );
       },
       loading: () => const SizedBox.shrink(),

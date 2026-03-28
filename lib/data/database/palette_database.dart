@@ -14,6 +14,7 @@ import 'package:palette/data/models/recommendation_feedback.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
+import 'package:palette/data/models/sample_list_item.dart';
 import 'package:palette/data/models/shopping_list_item.dart';
 import 'package:palette/data/models/user_profile.dart';
 
@@ -35,13 +36,14 @@ part 'palette_database.g.dart';
     RecommendationFeedbacks,
     Moodboards,
     MoodboardItems,
+    SampleListItems,
   ],
 )
 class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -127,6 +129,10 @@ class PaletteDatabase extends _$PaletteDatabase {
         // Moodboards (Phase 1D.2)
         await m.createTable(moodboards);
         await m.createTable(moodboardItems);
+      }
+      if (from < 13) {
+        // Sample List (Phase 1D.3)
+        await m.createTable(sampleListItems);
       }
     },
   );

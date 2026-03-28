@@ -12,6 +12,7 @@ import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/services/seed_data_service.dart';
+import 'package:palette/features/samples/widgets/order_sample_button.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -367,13 +368,26 @@ class _PaintMatchTile extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 6),
-          SizedBox(
-            width: double.infinity,
-            child: BuyThisPaintButton(
-              brand: colour.brand,
-              colourCode: colour.code,
-              colourName: colour.name,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: BuyThisPaintButton(
+                  brand: colour.brand,
+                  colourCode: colour.code,
+                  colourName: colour.name,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OrderSampleButton(
+                  paintColourId: colour.id,
+                  colourName: colour.name,
+                  colourCode: colour.code,
+                  brand: colour.brand,
+                  hex: colour.hex,
+                ),
+              ),
+            ],
           ),
         ],
       ),

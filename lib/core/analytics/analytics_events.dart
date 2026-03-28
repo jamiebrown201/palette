@@ -75,6 +75,14 @@ abstract final class AnalyticsEvents {
   static const moodboardItemAdded = 'moodboard_item_added';
   static const moodboardItemRemoved = 'moodboard_item_removed';
 
+  // ── Sample Ordering ─────────────────────────────────────────
+  static const sampleAdded = 'sample_added';
+  static const sampleRemoved = 'sample_removed';
+  static const sampleMarkedOrdered = 'sample_marked_ordered';
+  static const sampleMarkedArrived = 'sample_marked_arrived';
+  static const sampleListViewed = 'sample_list_viewed';
+  static const sampleTestingGuideOpened = 'sample_testing_guide_opened';
+
   // ── Retention ───────────────────────────────────────────────
   static const sessionStarted = 'session_started';
   static const sessionDuration = 'session_duration';

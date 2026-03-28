@@ -9,6 +9,7 @@ import 'package:palette/data/repositories/palette_repository.dart';
 import 'package:palette/data/repositories/product_repository.dart';
 import 'package:palette/data/repositories/red_thread_repository.dart';
 import 'package:palette/data/repositories/room_repository.dart';
+import 'package:palette/data/repositories/sample_list_repository.dart';
 import 'package:palette/data/repositories/shopping_list_repository.dart';
 import 'package:palette/data/repositories/user_profile_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -66,3 +67,7 @@ FeedbackRepository feedbackRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 MoodboardRepository moodboardRepository(Ref ref) =>
     MoodboardRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+SampleListRepository sampleListRepository(Ref ref) =>
+    SampleListRepository(ref.watch(paletteDatabaseProvider));

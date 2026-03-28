@@ -163,20 +163,23 @@ class MoodboardDetailScreen extends ConsumerWidget {
                             crossAxisSpacing: 12,
                             childAspectRatio: 1.0,
                           ),
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final item = itemList[index];
-                        return MoodboardItemTile(
-                          item: item,
-                          onDelete:
-                              isPremium
-                                  ? () => _deleteItem(ref, item.id)
-                                  : null,
-                          onLabelEdit:
-                              isPremium
-                                  ? () => _editLabel(context, ref, item)
-                                  : null,
-                        );
-                      }, childCount: itemList.length),
+                      delegate: SliverChildBuilderDelegate(
+                        childCount: itemList.length,
+                        (context, index) {
+                          final item = itemList[index];
+                          return MoodboardItemTile(
+                            item: item,
+                            onDelete:
+                                isPremium
+                                    ? () => _deleteItem(ref, item.id)
+                                    : null,
+                            onLabelEdit:
+                                isPremium
+                                    ? () => _editLabel(context, ref, item)
+                                    : null,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],

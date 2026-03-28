@@ -4,15 +4,16 @@ import 'package:palette/data/database/converters.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/colour_interaction.dart';
 import 'package:palette/data/models/locked_furniture.dart';
+import 'package:palette/data/models/moodboard.dart';
+import 'package:palette/data/models/moodboard_item.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
 import 'package:palette/data/models/product.dart';
-import 'package:palette/data/models/moodboard.dart';
-import 'package:palette/data/models/moodboard_item.dart';
 import 'package:palette/data/models/recommendation_feedback.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
+import 'package:palette/data/models/sample_list_item.dart';
 import 'package:palette/data/models/shopping_list_item.dart';
 import 'package:palette/data/models/user_profile.dart';
 
@@ -439,6 +440,28 @@ class RecommendationFeedbacks extends Table {
   TextColumn get dismissReason => text().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Sample list items (Phase 1D.3)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(SampleListItem)
+class SampleListItems extends Table {
+  TextColumn get id => text()();
+  TextColumn get paintColourId => text()();
+  TextColumn get colourName => text()();
+  TextColumn get colourCode => text()();
+  TextColumn get brand => text()();
+  TextColumn get hex => text()();
+  TextColumn get roomId => text().nullable()();
+  TextColumn get roomName => text().nullable()();
+  DateTimeColumn get addedAt => dateTime()();
+  DateTimeColumn get orderedAt => dateTime().nullable()();
+  DateTimeColumn get arrivedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
