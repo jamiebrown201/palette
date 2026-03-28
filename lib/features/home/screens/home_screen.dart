@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/progress_bar.dart';
 import 'package:palette/core/widgets/section_header.dart';
+import 'package:palette/data/models/product.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/home/logic/next_action.dart';
@@ -16,9 +18,11 @@ import 'package:palette/features/onboarding/providers/dna_drift_provider.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/logic/coherence_checker.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
+import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/database_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -139,6 +143,10 @@ class HomeScreen extends ConsumerWidget {
 
             // Shopping List summary
             const _ShoppingListSummary(),
+            const SizedBox(height: 20),
+
+            // Seasonal Refresh Suggestions
+            const _SeasonalRefreshSection(),
             const SizedBox(height: 20),
 
             // Whole-Home Coherence
@@ -1069,6 +1077,194 @@ class _ShoppingListSummary extends ConsumerWidget {
       },
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Seasonal Refresh Suggestions (2B.5)
+// ---------------------------------------------------------------------------
+
+class _SeasonalRefreshSection extends ConsumerWidget {
+  const _SeasonalRefreshSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final suggestionsAsync = ref.watch(seasonalSuggestionsProvider);
+
+    return suggestionsAsync.when(
+      data: (suggestions) {
+        if (suggestions.isEmpty) return const SizedBox.shrink();
+
+        final season = seasonFromDate(DateTime.now());
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SectionHeader(
+              title: '${season.displayName} Refresh',
+              subtitle: 'Small changes that make a big difference',
+            ),
+            const SizedBox(height: 4),
+            ...suggestions.map(
+              (s) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _SeasonalSuggestionCard(suggestion: s),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _SeasonalSuggestionCard extends ConsumerWidget {
+  const _SeasonalSuggestionCard({required this.suggestion});
+
+  final SeasonalSuggestion suggestion;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analytics = ref.read(analyticsProvider);
+    final season = suggestion.season;
+    final product = suggestion.matchedProduct;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: PaletteColours.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap:
+              product != null
+                  ? () {
+                    analytics
+                        .track(AnalyticsEvents.seasonalRefreshProductTapped, {
+                          'season': season.name,
+                          'room_id': suggestion.room.id,
+                          'room_name': suggestion.room.name,
+                          'product_id': product.id,
+                          'product_category': product.category.name,
+                        });
+                    context.push('/rooms/${suggestion.room.id}');
+                  }
+                  : () => context.push('/rooms/${suggestion.room.id}'),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Colour swatch + season icon
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: hexToColor(suggestion.colourHint),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: PaletteColours.divider,
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      season.emoji,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        suggestion.headline,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        suggestion.description,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (product != null) ...[
+                        const SizedBox(height: 8),
+                        _ProductChip(product: product),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Padding(
+                  padding: EdgeInsets.only(top: 12),
+                  child: Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: PaletteColours.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductChip extends StatelessWidget {
+  const _ProductChip({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: hexToColor(product.primaryColourHex),
+              shape: BoxShape.circle,
+              border: Border.all(color: PaletteColours.divider, width: 0.5),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              '${product.name} · £${product.priceGbp.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: PaletteColours.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -55,6 +55,11 @@ abstract final class AnalyticsEvents {
   static const exploreLearnCardOpened = 'explore_learn_card_opened';
   static const screenViewed = 'screen_viewed';
 
+  // ── Seasonal Refresh ────────────────────────────────────────
+  static const seasonalRefreshViewed = 'seasonal_refresh_viewed';
+  static const seasonalRefreshProductTapped = 'seasonal_refresh_product_tapped';
+  static const seasonalRefreshDismissed = 'seasonal_refresh_dismissed';
+
   // ── Retention ───────────────────────────────────────────────
   static const sessionStarted = 'session_started';
   static const sessionDuration = 'session_duration';

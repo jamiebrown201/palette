@@ -6,6 +6,7 @@ import 'package:palette/features/red_thread/providers/red_thread_providers.dart'
 import 'package:palette/features/rooms/logic/product_scoring.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
+import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
 import 'package:palette/providers/database_providers.dart';
 
 /// Stream of all rooms, ordered by sort order.
@@ -92,4 +93,27 @@ final roomProductRecsProvider = FutureProvider.family<
   );
 
   return diverseRecommendations(scored: scored);
+});
+
+/// Seasonal refresh suggestions for all rooms.
+///
+/// Generates one suggestion per room with a 70/20/10 plan,
+/// using the current season and matching products from the catalogue.
+final seasonalSuggestionsProvider = FutureProvider<List<SeasonalSuggestion>>((
+  ref,
+) async {
+  final rooms = await ref.watch(allRoomsProvider.future);
+  final productRepo = ref.watch(productRepositoryProvider);
+  final catalogue = await productRepo.getAllProducts();
+  final threadColours = await ref.watch(threadColoursProvider.future);
+
+  final now = DateTime.now();
+  final season = seasonFromDate(now);
+
+  return generateSeasonalSuggestions(
+    rooms: rooms,
+    catalogue: catalogue,
+    season: season,
+    threadColourHexes: threadColours.map((t) => t.hex).toList(),
+  );
 });
