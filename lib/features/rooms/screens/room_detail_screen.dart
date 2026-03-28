@@ -35,6 +35,7 @@ import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/room_story.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -3025,20 +3026,41 @@ class _PaintRecommendationCard extends ConsumerWidget {
 // Room Gap Analysis — "What this room still needs"
 // ---------------------------------------------------------------------------
 
-class _RoomGapSection extends ConsumerWidget {
+class _RoomGapSection extends ConsumerStatefulWidget {
   const _RoomGapSection({required this.roomId});
 
   final String roomId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final gapAsync = ref.watch(roomGapReportProvider(roomId));
+  ConsumerState<_RoomGapSection> createState() => _RoomGapSectionState();
+}
+
+class _RoomGapSectionState extends ConsumerState<_RoomGapSection> {
+  bool _gapsTracked = false;
+
+  void _trackGaps(RoomGapReport report) {
+    if (_gapsTracked || !report.hasGaps) return;
+    _gapsTracked = true;
+    final analytics = ref.read(analyticsProvider);
+    for (final gap in report.gaps) {
+      analytics.trackGapIdentified(
+        gapType: gap.gapType.name,
+        severity: gap.severity.name,
+        roomId: widget.roomId,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gapAsync = ref.watch(roomGapReportProvider(widget.roomId));
     final theme = Theme.of(context);
 
     return gapAsync.when(
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
       data: (report) {
+        _trackGaps(report);
         if (!report.hasGaps) return const SizedBox.shrink();
 
         return Column(
@@ -3275,15 +3297,43 @@ class _SeverityBadge extends StatelessWidget {
 
 // ── "Complete the Room" Product Recommendations ──
 
-class _ProductRecommendationsSection extends ConsumerWidget {
+class _ProductRecommendationsSection extends ConsumerStatefulWidget {
   const _ProductRecommendationsSection({required this.roomId});
 
   final String roomId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final recsAsync = ref.watch(roomProductRecsProvider(roomId));
-    final gapAsync = ref.watch(roomGapReportProvider(roomId));
+  ConsumerState<_ProductRecommendationsSection> createState() =>
+      _ProductRecommendationsSectionState();
+}
+
+class _ProductRecommendationsSectionState
+    extends ConsumerState<_ProductRecommendationsSection> {
+  bool _recsTracked = false;
+
+  void _trackRecsViewed(
+    List<(RecommendationSlot, ScoredProduct)> recs,
+    String? gapType,
+  ) {
+    if (_recsTracked) return;
+    _recsTracked = true;
+    final analytics = ref.read(analyticsProvider);
+    for (var i = 0; i < recs.length; i++) {
+      final (slot, scored) = recs[i];
+      analytics.trackRecommendationViewed(
+        gapType: gapType ?? 'unknown',
+        productId: scored.product.id,
+        position: i,
+        roomId: widget.roomId,
+        slot: slot.name,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final recsAsync = ref.watch(roomProductRecsProvider(widget.roomId));
+    final gapAsync = ref.watch(roomGapReportProvider(widget.roomId));
     final theme = Theme.of(context);
 
     return recsAsync.when(
@@ -3311,7 +3361,11 @@ class _ProductRecommendationsSection extends ConsumerWidget {
           );
         }
 
-        final gapTitle = gapAsync.valueOrNull?.primaryGap?.title;
+        final primaryGap = gapAsync.valueOrNull?.primaryGap;
+        final gapTitle = primaryGap?.title;
+
+        // Track recommendation views once
+        _trackRecsViewed(recs, primaryGap?.gapType.name);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -3368,7 +3422,11 @@ class _ProductRecommendationsSection extends ConsumerWidget {
             ...recs.map(
               (entry) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _ProductCard(slot: entry.$1, scoredProduct: entry.$2),
+                child: _ProductCard(
+                  slot: entry.$1,
+                  scoredProduct: entry.$2,
+                  roomId: widget.roomId,
+                ),
               ),
             ),
           ],
@@ -3426,14 +3484,19 @@ class _NoProductsMessage extends StatelessWidget {
   }
 }
 
-class _ProductCard extends StatelessWidget {
-  const _ProductCard({required this.slot, required this.scoredProduct});
+class _ProductCard extends ConsumerWidget {
+  const _ProductCard({
+    required this.slot,
+    required this.scoredProduct,
+    required this.roomId,
+  });
 
   final RecommendationSlot slot;
   final ScoredProduct scoredProduct;
+  final String roomId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final product = scoredProduct.product;
     final theme = Theme.of(context);
     final productColour = hexToColor(product.primaryColourHex);
@@ -3621,7 +3684,7 @@ class _ProductCard extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () => _openAffiliateLink(context, product),
+                onPressed: () => _openAffiliateLink(context, ref, product),
                 icon: const Icon(Icons.open_in_new, size: 16),
                 label: Text('Buy from ${product.retailer}'),
                 style: FilledButton.styleFrom(
@@ -3640,7 +3703,22 @@ class _ProductCard extends StatelessWidget {
     );
   }
 
-  Future<void> _openAffiliateLink(BuildContext context, Product product) async {
+  Future<void> _openAffiliateLink(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+  ) async {
+    ref
+        .read(analyticsProvider)
+        .trackRecommendationBuyTapped(
+          productId: product.id,
+          productCategory: product.category.name,
+          price: product.priceGbp,
+          retailer: product.retailer,
+          roomId: roomId,
+          slot: slot.name,
+        );
+
     final uri = Uri.tryParse(product.affiliateUrl);
     if (uri == null) return;
     try {

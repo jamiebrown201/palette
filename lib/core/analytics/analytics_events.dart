@@ -39,7 +39,13 @@ abstract final class AnalyticsEvents {
   static const productRecTapped = 'product_rec_tapped';
   static const productRecDismissed = 'product_rec_dismissed';
   static const productRecSaved = 'product_rec_saved';
+  static const recommendationBought = 'recommendation_bought';
   static const affiliateLinkTapped = 'affiliate_link_tapped';
+
+  // ── Recommendation Intelligence ────────────────────────────
+  static const gapIdentified = 'gap_identified';
+  static const filterApplied = 'filter_applied';
+  static const filterCleared = 'filter_cleared';
 
   // ── Engagement ──────────────────────────────────────────────
   static const colourWheelOpened = 'colour_wheel_opened';

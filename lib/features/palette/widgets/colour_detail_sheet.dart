@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/lab_colour.dart';
@@ -10,6 +12,7 @@ import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/services/seed_data_service.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Bottom sheet showing colour details, closest paint matches,
@@ -379,11 +382,12 @@ class _PaintMatchTile extends StatelessWidget {
 }
 
 /// Reusable "Buy This Paint" button that launches the retailer URL.
-class BuyThisPaintButton extends StatefulWidget {
+class BuyThisPaintButton extends ConsumerStatefulWidget {
   const BuyThisPaintButton({
     required this.brand,
     required this.colourCode,
     required this.colourName,
+    this.sourceScreen,
     super.key,
   });
 
@@ -391,11 +395,14 @@ class BuyThisPaintButton extends StatefulWidget {
   final String colourCode;
   final String colourName;
 
+  /// Optional screen name for analytics attribution.
+  final String? sourceScreen;
+
   @override
-  State<BuyThisPaintButton> createState() => _BuyThisPaintButtonState();
+  ConsumerState<BuyThisPaintButton> createState() => _BuyThisPaintButtonState();
 }
 
-class _BuyThisPaintButtonState extends State<BuyThisPaintButton> {
+class _BuyThisPaintButtonState extends ConsumerState<BuyThisPaintButton> {
   Map<String, RetailerConfig>? _configs;
 
   @override
@@ -413,6 +420,12 @@ class _BuyThisPaintButtonState extends State<BuyThisPaintButton> {
     if (_configs == null) return;
     final config = _configs![widget.brand];
     if (config == null) return;
+
+    ref.read(analyticsProvider).track(AnalyticsEvents.buyPaintTapped, {
+      'brand': widget.brand,
+      'colour': widget.colourName,
+      'source_screen': widget.sourceScreen ?? 'unknown',
+    });
 
     final url = config.buildUrl(
       colourCode: widget.colourCode,
