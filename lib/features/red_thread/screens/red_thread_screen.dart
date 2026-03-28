@@ -1181,7 +1181,7 @@ class _TemplatePicker extends StatelessWidget {
   }
 }
 
-class _FloorPlanView extends StatelessWidget {
+class _FloorPlanView extends ConsumerWidget {
   const _FloorPlanView({
     required this.template,
     required this.rooms,
@@ -1193,7 +1193,9 @@ class _FloorPlanView extends StatelessWidget {
   final List<String> threadHexes;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final coherenceAsync = ref.watch(coherenceReportProvider);
+
     // Map template zones to room hero colours by matching names
     final roomByName = <String, Room>{};
     for (final room in rooms) {
@@ -1201,28 +1203,99 @@ class _FloorPlanView extends StatelessWidget {
     }
 
     final colourMap = <String, String?>{};
+    final zoneToRoomId = <String, String>{};
     for (final zone in template.zones) {
       final matchedRoom = roomByName[zone.name.toLowerCase()];
       colourMap[zone.id] = matchedRoom?.heroColourHex;
+      if (matchedRoom != null) {
+        zoneToRoomId[zone.id] = matchedRoom.id;
+      }
     }
 
+    // Build disconnected zone IDs from coherence report
+    final disconnectedZoneIds = <String>{};
+    coherenceAsync.whenData((report) {
+      final disconnectedRoomIds =
+          report.results
+              .where((r) => !r.isConnected)
+              .map((r) => r.roomId)
+              .toSet();
+
+      for (final zone in template.zones) {
+        final matchedRoom = roomByName[zone.name.toLowerCase()];
+        if (matchedRoom != null &&
+            disconnectedRoomIds.contains(matchedRoom.id)) {
+          disconnectedZoneIds.add(zone.id);
+        }
+      }
+    });
+
     return Container(
-      height: 250,
+      height: 300,
       decoration: BoxDecoration(
         color: PaletteColours.cardBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: PaletteColours.divider),
       ),
-      padding: const EdgeInsets.all(16),
-      child: CustomPaint(
-        painter: FloorPlanPainter(
-          template: template,
-          roomColours: colourMap,
-          threadHexes: threadHexes,
+      clipBehavior: Clip.hardEdge,
+      child: InteractiveViewer(
+        minScale: 0.8,
+        maxScale: 3.0,
+        child: GestureDetector(
+          onTapUp: (details) {
+            _handleTap(context, details.localPosition, zoneToRoomId);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: CustomPaint(
+              painter: FloorPlanPainter(
+                template: template,
+                roomColours: colourMap,
+                threadHexes: threadHexes,
+                disconnectedZoneIds: disconnectedZoneIds,
+              ),
+              size: Size.infinite,
+            ),
+          ),
         ),
-        size: Size.infinite,
       ),
     );
+  }
+
+  void _handleTap(
+    BuildContext context,
+    Offset localPosition,
+    Map<String, String> zoneToRoomId,
+  ) {
+    // Account for the 16px padding
+    final adjustedPosition = localPosition - const Offset(16, 16);
+
+    // Get the render box to compute actual size
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    // Canvas size = container size minus padding
+    final canvasSize = Size(
+      renderBox.size.width - 32,
+      renderBox.size.height - 32,
+    );
+
+    for (final zone in template.zones) {
+      final rect = Rect.fromLTWH(
+        zone.x * canvasSize.width,
+        zone.y * canvasSize.height,
+        zone.width * canvasSize.width,
+        zone.height * canvasSize.height,
+      );
+
+      if (rect.contains(adjustedPosition)) {
+        final roomId = zoneToRoomId[zone.id];
+        if (roomId != null) {
+          context.push('/rooms/$roomId');
+        }
+        return;
+      }
+    }
   }
 }
 
