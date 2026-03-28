@@ -54,9 +54,11 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
       if (byteData == null) return;
 
       final bytes = byteData.buffer.asUint8List();
-      await Share.shareXFiles([
-        XFile.fromData(bytes, mimeType: 'image/png', name: 'red-thread.png'),
-      ], text: 'My Red Thread whole-house colour plan.');
+      await Share.shareXFiles(
+        [XFile.fromData(bytes, mimeType: 'image/png', name: 'red-thread.png')],
+        // ignore: require_trailing_commas
+        text: 'My Red Thread whole-house colour plan.',
+      );
     } finally {
       if (mounted) setState(() => _isExporting = false);
     }
@@ -972,25 +974,28 @@ class _DnaSuggestions extends ConsumerWidget {
     final suggestions =
         <({String hex, String name, String brand, String reason})>[];
 
-    suggestions.add((
+    final spineSuggestion = (
       hex: systemPalette.spineColour.hex,
       name: systemPalette.spineColour.name,
       brand: systemPalette.spineColour.brand,
       reason: 'Connects naturally to your whole palette',
-    ));
-    suggestions.add((
+    );
+    suggestions.add(spineSuggestion);
+    final anchorSuggestion = (
       hex: systemPalette.deepAnchor.hex,
       name: systemPalette.deepAnchor.name,
       brand: systemPalette.deepAnchor.brand,
       reason: 'Adds depth across rooms',
-    ));
+    );
+    suggestions.add(anchorSuggestion);
     if (systemPalette.dominantWalls.isNotEmpty) {
-      suggestions.add((
+      final wallSuggestion = (
         hex: systemPalette.dominantWalls.first.hex,
         name: systemPalette.dominantWalls.first.name,
         brand: systemPalette.dominantWalls.first.brand,
         reason: 'Your signature wall colour as a thread',
-      ));
+      );
+      suggestions.add(wallSuggestion);
     }
 
     return Padding(

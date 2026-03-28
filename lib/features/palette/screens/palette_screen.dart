@@ -55,9 +55,11 @@ class _PaletteScreenState extends ConsumerState<PaletteScreen> {
       if (byteData == null) return;
 
       final bytes = byteData.buffer.asUint8List();
-      await Share.shareXFiles([
-        XFile.fromData(bytes, mimeType: 'image/png', name: 'colour-dna.png'),
-      ], text: 'I just discovered my Colour DNA! Take the quiz to find yours.');
+      await Share.shareXFiles(
+        [XFile.fromData(bytes, mimeType: 'image/png', name: 'colour-dna.png')],
+        // ignore: require_trailing_commas
+        text: 'I just discovered my Colour DNA! Take the quiz to find yours.',
+      );
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }

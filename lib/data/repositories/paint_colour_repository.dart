@@ -84,11 +84,12 @@ class PaintColourRepository {
       final lab = LabColour(pc.labL, pc.labA, pc.labB);
       final dE = deltaE2000(sourceLab, lab);
       if (dE <= threshold) {
-        matches.add((
+        final match = (
           colour: pc,
           deltaE: dE,
           matchPercent: deltaEToMatchPercentage(dE),
-        ));
+        );
+        matches.add(match);
       }
     }
     matches.sort((a, b) => a.deltaE.compareTo(b.deltaE));
