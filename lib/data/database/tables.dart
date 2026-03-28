@@ -277,6 +277,19 @@ class UserProfiles extends Table {
   BoolColumn get keepingFlooring => boolean().nullable()();
   BoolColumn get isTemporaryHome => boolean().nullable()();
   BoolColumn get reversibleOnly => boolean().nullable()();
+
+  // Notification preferences (1D.4)
+  BoolColumn get notificationsEnabled => boolean().nullable()();
+  TextColumn get notificationFrequency =>
+      text().nullable().map(
+        const EnumNameConverter<NotificationFrequency>(
+          NotificationFrequency.values,
+        ),
+      )();
+  DateTimeColumn get notificationOptInPromptShownAt => dateTime().nullable()();
+  DateTimeColumn get movingDate => dateTime().nullable()();
+  DateTimeColumn get lastPromptDismissedAt => dateTime().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 

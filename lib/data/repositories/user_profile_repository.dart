@@ -108,4 +108,61 @@ class UserProfileRepository {
       ),
     );
   }
+
+  // ── Notification preferences (1D.4) ──────────────────────────
+
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        notificationsEnabled: Value(enabled),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> setNotificationFrequency(NotificationFrequency frequency) async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        notificationFrequency: Value(frequency),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> markOptInPromptShown() async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        notificationOptInPromptShownAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> setMovingDate(DateTime? date) async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        movingDate: Value(date),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> dismissPrompt() async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        lastPromptDismissedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 }

@@ -14,6 +14,7 @@ import 'package:palette/data/models/product.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/home/logic/next_action.dart';
+import 'package:palette/features/notifications/widgets/prompt_card.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/onboarding/logic/dna_drift.dart';
 import 'package:palette/features/onboarding/providers/dna_drift_provider.dart';
@@ -90,6 +91,9 @@ class HomeScreen extends ConsumerWidget {
 
             // Drift prompt
             _DriftPromptCard(),
+
+            // Re-engagement / notification prompts (1D.4)
+            const PromptCard(),
             const SizedBox(height: 16),
 
             // Next Recommended Action

@@ -43,7 +43,7 @@ class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -133,6 +133,17 @@ class PaletteDatabase extends _$PaletteDatabase {
       if (from < 13) {
         // Sample List (Phase 1D.3)
         await m.createTable(sampleListItems);
+      }
+      if (from < 14) {
+        // Notification preferences (Phase 1D.4)
+        await m.addColumn(userProfiles, userProfiles.notificationsEnabled);
+        await m.addColumn(userProfiles, userProfiles.notificationFrequency);
+        await m.addColumn(
+          userProfiles,
+          userProfiles.notificationOptInPromptShownAt,
+        );
+        await m.addColumn(userProfiles, userProfiles.movingDate);
+        await m.addColumn(userProfiles, userProfiles.lastPromptDismissedAt);
       }
     },
   );

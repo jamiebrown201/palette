@@ -2,13 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/features/notifications/providers/notification_providers.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 
@@ -210,6 +213,18 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+
+          // Notifications section
+          Text(
+            'Notifications',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: PaletteColours.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const _NotificationSettingsCard(),
           const SizedBox(height: 24),
 
           // About section
@@ -434,6 +449,196 @@ class _SettingsToggle extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _NotificationSettingsCard extends ConsumerWidget {
+  const _NotificationSettingsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(userProfileStreamProvider);
+
+    return profileAsync.when(
+      data: (profile) {
+        final enabled = profile.notificationsEnabled ?? false;
+        final frequency =
+            profile.notificationFrequency ?? NotificationFrequency.weekly;
+        final hasMovingDate = profile.movingDate != null;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: PaletteColours.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: PaletteColours.divider),
+          ),
+          child: Column(
+            children: [
+              SwitchListTile(
+                secondary: const Icon(
+                  Icons.notifications_outlined,
+                  color: PaletteColours.sageGreen,
+                ),
+                title: const Text('In-app reminders'),
+                subtitle: const Text(
+                  'Project nudges, sample follow-ups, seasonal tips',
+                ),
+                value: enabled,
+                onChanged: (v) async {
+                  await ref
+                      .read(userProfileRepositoryProvider)
+                      .setNotificationsEnabled(v);
+                  ref.read(analyticsProvider).track(
+                    AnalyticsEvents.notificationOptIn,
+                    {'enabled': v},
+                  );
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              if (enabled) ...[
+                const Divider(height: 1, indent: 56),
+                _ProfileRow(
+                  icon: Icons.schedule_outlined,
+                  iconColor: PaletteColours.sageGreen,
+                  title: 'Frequency',
+                  subtitle: frequency.displayName,
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: PaletteColours.textTertiary,
+                  ),
+                  onTap: () => _showFrequencyPicker(context, ref, frequency),
+                ),
+                const Divider(height: 1, indent: 56),
+                _ProfileRow(
+                  icon: Icons.calendar_month_outlined,
+                  iconColor: PaletteColours.softGold,
+                  title: 'Moving day',
+                  subtitle:
+                      hasMovingDate
+                          ? _formatDate(profile.movingDate!)
+                          : 'Set a target date for countdown reminders',
+                  trailing: Icon(
+                    hasMovingDate ? Icons.edit_outlined : Icons.add,
+                    color: PaletteColours.textTertiary,
+                    size: 20,
+                  ),
+                  onTap:
+                      () => _showDatePicker(context, ref, profile.movingDate),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+      loading:
+          () => Container(
+            height: 60,
+            decoration: BoxDecoration(
+              color: PaletteColours.warmGrey,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  void _showFrequencyPicker(
+    BuildContext context,
+    WidgetRef ref,
+    NotificationFrequency current,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder:
+          (ctx) => Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Reminder frequency',
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'How often should we check in?',
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textTertiary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                for (final freq in [
+                  NotificationFrequency.daily,
+                  NotificationFrequency.weekly,
+                ])
+                  RadioListTile<NotificationFrequency>(
+                    title: Text(freq.displayName),
+                    subtitle: Text(
+                      freq == NotificationFrequency.daily
+                          ? 'See prompts each time you open the app'
+                          : 'See prompts at most once a week',
+                    ),
+                    value: freq,
+                    groupValue: current,
+                    onChanged: (v) async {
+                      if (v == null) return;
+                      await ref
+                          .read(userProfileRepositoryProvider)
+                          .setNotificationFrequency(v);
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  Future<void> _showDatePicker(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime? current,
+  ) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current ?? DateTime.now().add(const Duration(days: 30)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 730)),
+      helpText: 'When are you moving in?',
+    );
+
+    if (picked != null) {
+      await ref.read(userProfileRepositoryProvider).setMovingDate(picked);
+    }
   }
 }
 

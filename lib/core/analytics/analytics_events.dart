@@ -90,4 +90,11 @@ abstract final class AnalyticsEvents {
   static const timeOnScreen = 'time_on_screen';
   static const notificationOptIn = 'notification_opt_in';
   static const notificationTapped = 'notification_tapped';
+
+  // ── In-App Prompts (1D.4) ──────────────────────────────────
+  static const promptViewed = 'prompt_viewed';
+  static const promptDismissed = 'prompt_dismissed';
+  static const promptActioned = 'prompt_actioned';
+  static const movingDateSet = 'moving_date_set';
+  static const notificationFrequencyChanged = 'notification_frequency_changed';
 }

@@ -754,3 +754,17 @@ extension PriceTierX on PriceTier {
     PriceTier.investment => BudgetBracket.investment,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Notification preferences (1D.4)
+// ---------------------------------------------------------------------------
+
+enum NotificationFrequency { daily, weekly, off }
+
+extension NotificationFrequencyX on NotificationFrequency {
+  String get displayName => switch (this) {
+    NotificationFrequency.daily => 'Daily',
+    NotificationFrequency.weekly => 'Weekly',
+    NotificationFrequency.off => 'Off',
+  };
+}

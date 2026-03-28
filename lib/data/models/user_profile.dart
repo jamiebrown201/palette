@@ -16,6 +16,11 @@ class UserProfile {
     this.keepingFlooring,
     this.isTemporaryHome,
     this.reversibleOnly,
+    this.notificationsEnabled,
+    this.notificationFrequency,
+    this.notificationOptInPromptShownAt,
+    this.movingDate,
+    this.lastPromptDismissedAt,
   });
 
   final String id;
@@ -29,6 +34,23 @@ class UserProfile {
   final bool? keepingFlooring;
   final bool? isTemporaryHome;
   final bool? reversibleOnly;
+
+  /// Whether in-app prompts and notifications are enabled.
+  /// Null = not yet asked, false = opted out, true = opted in.
+  final bool? notificationsEnabled;
+
+  /// Notification frequency: 'daily', 'weekly', or 'off'.
+  final NotificationFrequency? notificationFrequency;
+
+  /// When the opt-in prompt was first shown (to avoid re-showing).
+  final DateTime? notificationOptInPromptShownAt;
+
+  /// User's target move-in / completion date for life-event prompts.
+  final DateTime? movingDate;
+
+  /// Last time the user dismissed an in-app prompt (rate-limit).
+  final DateTime? lastPromptDismissedAt;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 }
