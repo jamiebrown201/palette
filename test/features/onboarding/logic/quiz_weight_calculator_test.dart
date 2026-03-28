@@ -21,8 +21,9 @@ void main() {
       );
 
       // Primary should be warmNeutrals
-      final sorted = result.finalWeights.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sorted =
+          result.finalWeights.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
       expect(sorted.first.key, PaletteFamily.warmNeutrals);
 
       // Confidence should be high (clear winner)
@@ -48,8 +49,9 @@ void main() {
         stage2CardCount: 1,
       );
 
-      final sorted = result.finalWeights.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sorted =
+          result.finalWeights.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
       expect(sorted.first.key, PaletteFamily.coolNeutrals);
       expect(result.confidence, DnaConfidence.high);
       expect(result.consistencyBonusApplied, isTrue);
@@ -70,8 +72,9 @@ void main() {
         stage2CardCount: 1,
       );
 
-      final sorted = result.finalWeights.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sorted =
+          result.finalWeights.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
       expect(sorted.first.key, PaletteFamily.jewelTones);
       expect(result.confidence, DnaConfidence.high);
     });
@@ -93,10 +96,7 @@ void main() {
       );
 
       // Confidence should not be high since warm and cool are close
-      expect(
-        result.confidence,
-        anyOf(DnaConfidence.medium, DnaConfidence.low),
-      );
+      expect(result.confidence, anyOf(DnaConfidence.medium, DnaConfidence.low));
 
       // No consistency bonus (2 warm, 2 cool)
       expect(result.consistencyBonusApplied, isFalse);
@@ -126,8 +126,9 @@ void main() {
         stage2CardCount: 8,
       );
 
-      final sorted = result.finalWeights.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sorted =
+          result.finalWeights.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
 
       // warmNeutrals should remain primary because:
       // Stage 1 raw: warmNeutrals = 11, * 0.50 = 5.5
@@ -198,8 +199,9 @@ void main() {
         stage2CardCount: 1,
       );
 
-      final sorted = result.finalWeights.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sorted =
+          result.finalWeights.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
       expect(sorted.first.key, PaletteFamily.earthTones);
     });
 
@@ -256,8 +258,9 @@ void main() {
 
       // Should work fine — Stage 2 contributes nothing
       expect(result.normalisedStage2Weights, isEmpty);
-      final sorted = result.finalWeights.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sorted =
+          result.finalWeights.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
       expect(sorted.first.key, PaletteFamily.warmNeutrals);
     });
 
@@ -271,8 +274,9 @@ void main() {
       );
 
       // Only Stage 2 contributes
-      final sorted = result.finalWeights.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+      final sorted =
+          result.finalWeights.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
       expect(sorted.first.key, PaletteFamily.darks);
       expect(result.consistencyBonusApplied, isFalse);
     });

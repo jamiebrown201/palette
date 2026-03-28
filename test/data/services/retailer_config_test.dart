@@ -33,9 +33,7 @@ void main() {
     });
 
     test('falls back to homepage when no templates', () {
-      const config = RetailerConfig(
-        homepageUrl: 'https://example.com',
-      );
+      const config = RetailerConfig(homepageUrl: 'https://example.com');
 
       final url = config.buildUrl(
         colourCode: 'FB-001',
@@ -72,10 +70,7 @@ void main() {
         colourName: 'Hague Blue',
       );
 
-      expect(
-        url,
-        'https://example.com/search?q=Hague%20Blue&ref=palette',
-      );
+      expect(url, 'https://example.com/search?q=Hague%20Blue&ref=palette');
     });
 
     test('URL-encodes colour names with special characters', () {
@@ -89,10 +84,7 @@ void main() {
         colourName: "Elephant's Breath",
       );
 
-      expect(
-        url,
-        "https://example.com/search?q=Elephant's%20Breath",
-      );
+      expect(url, "https://example.com/search?q=Elephant's%20Breath");
     });
   });
 }

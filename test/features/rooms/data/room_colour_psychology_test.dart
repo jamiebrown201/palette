@@ -5,10 +5,16 @@ void main() {
   group('roomColourGuidance', () {
     test('all entries have non-empty insight and avoid', () {
       for (final entry in roomColourGuidance.entries) {
-        expect(entry.value.insight, isNotEmpty,
-            reason: '${entry.key} insight should not be empty');
-        expect(entry.value.avoid, isNotEmpty,
-            reason: '${entry.key} avoid should not be empty');
+        expect(
+          entry.value.insight,
+          isNotEmpty,
+          reason: '${entry.key} insight should not be empty',
+        );
+        expect(
+          entry.value.avoid,
+          isNotEmpty,
+          reason: '${entry.key} avoid should not be empty',
+        );
       }
     });
 

@@ -14,10 +14,11 @@ class AppShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
-        ),
+        onDestinationSelected:
+            (index) => navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
+            ),
         backgroundColor: PaletteColours.cardBackground,
         indicatorColor: PaletteColours.sageGreenLight.withValues(alpha: 0.4),
         destinations: const [

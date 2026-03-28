@@ -11,31 +11,29 @@ ColourDnaResult _makeDna({
   Undertone? undertone = Undertone.warm,
   ChromaBand? saturation = ChromaBand.muted,
   List<String> hexes = const ['#B8A99A', '#8B7C64', '#DDA92A'],
-}) =>
-    ColourDnaResult(
-      id: 'test-dna',
-      primaryFamily: primary,
-      secondaryFamily: secondary,
-      colourHexes: hexes,
-      completedAt: DateTime(2025, 1, 1),
-      isComplete: true,
-      undertoneTemperature: undertone,
-      saturationPreference: saturation,
-    );
+}) => ColourDnaResult(
+  id: 'test-dna',
+  primaryFamily: primary,
+  secondaryFamily: secondary,
+  colourHexes: hexes,
+  completedAt: DateTime(2025, 1, 1),
+  isComplete: true,
+  undertoneTemperature: undertone,
+  saturationPreference: saturation,
+);
 
 /// Helper to build a colour interaction.
 ColourInteraction _makeInteraction({
   required String hex,
   String type = 'heroSelected',
   String screen = 'planner',
-}) =>
-    ColourInteraction(
-      id: 'int-${hex.hashCode}',
-      interactionType: type,
-      hex: hex,
-      contextScreen: screen,
-      createdAt: DateTime(2025, 6, 1),
-    );
+}) => ColourInteraction(
+  id: 'int-${hex.hashCode}',
+  interactionType: type,
+  hex: hex,
+  contextScreen: screen,
+  createdAt: DateTime(2025, 6, 1),
+);
 
 void main() {
   group('computeDrift', () {
@@ -130,23 +128,26 @@ void main() {
       expect(drift.overallDrift, 0);
     });
 
-    test('undertone drift: warm DNA + cool selections → high undertone drift', () {
-      final dna = _makeDna(
-        primary: PaletteFamily.coolNeutrals,
-        undertone: Undertone.warm,
-        saturation: ChromaBand.muted,
-      );
-      // All cool undertone selections
-      final interactions = [
-        _makeInteraction(hex: '#5B758A'), // cool
-        _makeInteraction(hex: '#8ABED6'), // cool
-        _makeInteraction(hex: '#B4BFC8'), // cool
-        _makeInteraction(hex: '#1A3A4A'), // cool
-      ];
+    test(
+      'undertone drift: warm DNA + cool selections → high undertone drift',
+      () {
+        final dna = _makeDna(
+          primary: PaletteFamily.coolNeutrals,
+          undertone: Undertone.warm,
+          saturation: ChromaBand.muted,
+        );
+        // All cool undertone selections
+        final interactions = [
+          _makeInteraction(hex: '#5B758A'), // cool
+          _makeInteraction(hex: '#8ABED6'), // cool
+          _makeInteraction(hex: '#B4BFC8'), // cool
+          _makeInteraction(hex: '#1A3A4A'), // cool
+        ];
 
-      final drift = computeDrift(dna, interactions);
-      expect(drift.undertoneDrift, greaterThanOrEqualTo(0.5));
-    });
+        final drift = computeDrift(dna, interactions);
+        expect(drift.undertoneDrift, greaterThanOrEqualTo(0.5));
+      },
+    );
 
     test('chroma drift: muted DNA + bold selections → high chroma drift', () {
       final dna = _makeDna(

@@ -29,8 +29,8 @@ class VisualPreferencePage extends ConsumerWidget {
           Text(
             'Select as many as you like',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: PaletteColours.textTertiary,
-                ),
+              color: PaletteColours.textTertiary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -47,27 +47,30 @@ class VisualPreferencePage extends ConsumerWidget {
                 final room = rooms[index];
                 final roomId = room['id'] as String;
                 final isSelected = quizState.selectedRoomIds.contains(roomId);
-                final familyWeights =
-                    (room['familyWeights'] as Map<String, dynamic>)
-                        .map((k, v) => MapEntry(k, (v as num).toInt()));
+                final familyWeights = (room['familyWeights']
+                        as Map<String, dynamic>)
+                    .map((k, v) => MapEntry(k, (v as num).toInt()));
                 final undertoneStr = room['undertoneTemp'] as String?;
-                final undertoneTemp = undertoneStr != null
-                    ? Undertone.values.byName(undertoneStr)
-                    : null;
+                final undertoneTemp =
+                    undertoneStr != null
+                        ? Undertone.values.byName(undertoneStr)
+                        : null;
                 final chromaBandStr = room['chromaBand'] as String?;
-                final chromaBand = chromaBandStr != null
-                    ? ChromaBand.values.byName(chromaBandStr)
-                    : null;
+                final chromaBand =
+                    chromaBandStr != null
+                        ? ChromaBand.values.byName(chromaBandStr)
+                        : null;
 
                 return _RoomCard(
                   description: room['description'] as String,
                   isSelected: isSelected,
-                  onTap: () => notifier.toggleRoomSelection(
-                    roomId,
-                    familyWeights,
-                    undertoneTemp: undertoneTemp,
-                    chromaBand: chromaBand,
-                  ),
+                  onTap:
+                      () => notifier.toggleRoomSelection(
+                        roomId,
+                        familyWeights,
+                        undertoneTemp: undertoneTemp,
+                        chromaBand: chromaBand,
+                      ),
                 );
               },
             ),
@@ -106,9 +109,8 @@ class _RoomCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? PaletteColours.sageGreen
-                : PaletteColours.divider,
+            color:
+                isSelected ? PaletteColours.sageGreen : PaletteColours.divider,
             width: isSelected ? 3 : 1,
           ),
           color: PaletteColours.cardBackground,
@@ -133,9 +135,10 @@ class _RoomCard extends StatelessWidget {
                         child: Icon(
                           Icons.home_outlined,
                           size: 32,
-                          color: isSelected
-                              ? PaletteColours.sageGreen
-                              : PaletteColours.textTertiary,
+                          color:
+                              isSelected
+                                  ? PaletteColours.sageGreen
+                                  : PaletteColours.textTertiary,
                         ),
                       ),
                     ),
@@ -144,8 +147,8 @@ class _RoomCard extends StatelessWidget {
                   Text(
                     description,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PaletteColours.textPrimary,
-                        ),
+                      color: PaletteColours.textPrimary,
+                    ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

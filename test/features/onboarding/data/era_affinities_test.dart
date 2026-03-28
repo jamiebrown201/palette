@@ -56,12 +56,21 @@ void main() {
       for (final entry in eraAffinities.entries) {
         final range = entry.value.suggestedLRange;
         if (range != null) {
-          expect(range.$1, greaterThan(0),
-              reason: '${entry.key.name} min L* should be positive');
-          expect(range.$2, greaterThan(range.$1),
-              reason: '${entry.key.name} max L* should be > min');
-          expect(range.$2, lessThanOrEqualTo(100),
-              reason: '${entry.key.name} max L* should be ≤ 100');
+          expect(
+            range.$1,
+            greaterThan(0),
+            reason: '${entry.key.name} min L* should be positive',
+          );
+          expect(
+            range.$2,
+            greaterThan(range.$1),
+            reason: '${entry.key.name} max L* should be > min',
+          );
+          expect(
+            range.$2,
+            lessThanOrEqualTo(100),
+            reason: '${entry.key.name} max L* should be ≤ 100',
+          );
         }
       }
     });

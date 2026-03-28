@@ -142,8 +142,10 @@ void main() {
       );
 
       expect(plan, isNotNull);
-      expect(plan!.surpriseColour.paletteFamily,
-          isNot(PaletteFamily.warmNeutrals));
+      expect(
+        plan!.surpriseColour.paletteFamily,
+        isNot(PaletteFamily.warmNeutrals),
+      );
     });
 
     test('dash colour is present when red thread hexes provided', () {
@@ -232,8 +234,11 @@ void main() {
 
       if (plan.dashColour != null) {
         ids.add(plan.dashColour!.id);
-        expect(ids.length, 4,
-            reason: 'Dash should be distinct from other tiers');
+        expect(
+          ids.length,
+          4,
+          reason: 'Dash should be distinct from other tiers',
+        );
       }
     });
 

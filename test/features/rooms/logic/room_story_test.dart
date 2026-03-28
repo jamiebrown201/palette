@@ -35,22 +35,25 @@ void main() {
       expect(story.summary, contains('Savage Ground'));
     });
 
-    test('north-facing + warm hero is aligned (warm recommended for north)', () {
-      // North-facing rooms recommend warm undertones, so warm hero = aligned
-      final story = generateRoomStory(
-        roomName: 'Bedroom',
-        direction: CompassDirection.north,
-        usageTime: UsageTime.morning,
-        moods: [RoomMood.calm],
-        heroHex: '#C4A882',
-        heroName: 'Savage Ground',
-        isRenterMode: false,
-      );
+    test(
+      'north-facing + warm hero is aligned (warm recommended for north)',
+      () {
+        // North-facing rooms recommend warm undertones, so warm hero = aligned
+        final story = generateRoomStory(
+          roomName: 'Bedroom',
+          direction: CompassDirection.north,
+          usageTime: UsageTime.morning,
+          moods: [RoomMood.calm],
+          heroHex: '#C4A882',
+          heroName: 'Savage Ground',
+          isRenterMode: false,
+        );
 
-      expect(story.isComplete, isTrue);
-      expect(story.summary, contains('glow'));
-      expect(story.summary, contains('north'));
-    });
+        expect(story.isComplete, isTrue);
+        expect(story.summary, contains('glow'));
+        expect(story.summary, contains('north'));
+      },
+    );
 
     test('north-facing + cool hero mentions counterbalance', () {
       // North-facing rooms recommend warm; a cool blue hero is mismatched

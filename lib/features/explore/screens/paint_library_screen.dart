@@ -17,8 +17,7 @@ class PaintLibraryScreen extends ConsumerStatefulWidget {
   const PaintLibraryScreen({super.key});
 
   @override
-  ConsumerState<PaintLibraryScreen> createState() =>
-      _PaintLibraryScreenState();
+  ConsumerState<PaintLibraryScreen> createState() => _PaintLibraryScreenState();
 }
 
 class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
@@ -102,13 +101,14 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                   const SizedBox(width: 8),
                   ActionChip(
                     label: const Text('Clear'),
-                    onPressed: () => setState(() {
-                      _brandFilter = null;
-                      _familyFilter = null;
-                      _undertoneFilter = null;
-                      _paletteFilter = false;
-                      _searchQuery = '';
-                    }),
+                    onPressed:
+                        () => setState(() {
+                          _brandFilter = null;
+                          _familyFilter = null;
+                          _undertoneFilter = null;
+                          _paletteFilter = false;
+                          _searchQuery = '';
+                        }),
                   ),
                 ],
               ],
@@ -132,20 +132,20 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                     child: Text(
                       'No colours match your filters',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: PaletteColours.textSecondary,
-                          ),
+                        color: PaletteColours.textSecondary,
+                      ),
                     ),
                   );
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: results.length,
-                  itemBuilder: (context, index) =>
-                      _PaintColourTile(result: results[index]),
+                  itemBuilder:
+                      (context, index) =>
+                          _PaintColourTile(result: results[index]),
                 );
               },
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
             ),
           ),
@@ -170,9 +170,8 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
 
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      filtered = filtered
-          .where((c) => c.name.toLowerCase().contains(query))
-          .toList();
+      filtered =
+          filtered.where((c) => c.name.toLowerCase().contains(query)).toList();
     }
 
     if (_brandFilter != null) {
@@ -191,9 +190,10 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
 
     // Compute match data.
     final paletteHexes = dna?.colourHexes ?? <String>[];
-    final archetypeName = dna?.archetype != null
-        ? archetypeDefinitions[dna!.archetype]?.name
-        : null;
+    final archetypeName =
+        dna?.archetype != null
+            ? archetypeDefinitions[dna!.archetype]?.name
+            : null;
     final dnaUndertone = dna?.undertoneTemperature;
 
     var results = computePaintMatches(
@@ -245,9 +245,7 @@ class _FilterDropdown<T> extends StatelessWidget {
     final isActive = value != null;
     return FilterChip(
       label: Text(
-        isActive
-            ? (labelBuilder?.call(value as T) ?? value.toString())
-            : label,
+        isActive ? (labelBuilder?.call(value as T) ?? value.toString()) : label,
       ),
       selected: isActive,
       onSelected: (_) {
@@ -264,21 +262,24 @@ class _FilterDropdown<T> extends StatelessWidget {
   void _showPicker(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: items.map((item) {
-            final itemLabel = labelBuilder?.call(item) ?? item.toString();
-            return ListTile(
-              title: Text(itemLabel),
-              onTap: () {
-                onChanged(item);
-                Navigator.pop(ctx);
-              },
-            );
-          }).toList(),
-        ),
-      ),
+      builder:
+          (ctx) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  items.map((item) {
+                    final itemLabel =
+                        labelBuilder?.call(item) ?? item.toString();
+                    return ListTile(
+                      title: Text(itemLabel),
+                      onTap: () {
+                        onChanged(item);
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  }).toList(),
+            ),
+          ),
     );
   }
 }
@@ -310,8 +311,10 @@ class _PaintColourTile extends StatelessWidget {
                   alignment: Alignment.topRight,
                   child: Container(
                     margin: const EdgeInsets.all(2),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 3,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(3),
@@ -334,14 +337,14 @@ class _PaintColourTile extends StatelessWidget {
                     Text(
                       colour.name,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     Text(
                       '${colour.brand} \u2022 ${colour.paletteFamily.displayName}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: PaletteColours.textSecondary,
-                          ),
+                        color: PaletteColours.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -352,15 +355,15 @@ class _PaintColourTile extends StatelessWidget {
                   Text(
                     colour.hex.toUpperCase(),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: PaletteColours.textTertiary,
-                        ),
+                      color: PaletteColours.textTertiary,
+                    ),
                   ),
                   if (colour.approximatePricePerLitre != null)
                     Text(
                       '\u00A3${colour.approximatePricePerLitre!.toStringAsFixed(0)}/L',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: PaletteColours.textTertiary,
-                          ),
+                        color: PaletteColours.textTertiary,
+                      ),
                     ),
                 ],
               ),
@@ -395,9 +398,9 @@ class _PaintColourTile extends StatelessWidget {
               child: Text(
                 'Prices approximate, last checked ${DateFormat.yMMMd().format(colour.priceLastChecked!)}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: PaletteColours.textTertiary,
-                      fontStyle: FontStyle.italic,
-                    ),
+                  color: PaletteColours.textTertiary,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
           const SizedBox(height: 4),
@@ -445,9 +448,9 @@ class _Badge extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),

@@ -25,13 +25,13 @@ class RoomStory {
 /// Falls back gracefully when data is missing.
 RoomStory generateRoomStory({
   required String roomName,
-  CompassDirection? direction,
   required UsageTime usageTime,
   required List<RoomMood> moods,
+  required bool isRenterMode,
+  CompassDirection? direction,
   String? heroHex,
   String? betaHex,
   String? surpriseHex,
-  required bool isRenterMode,
   String? heroName,
   String renterMoodTemplate = '',
 }) {
@@ -43,13 +43,15 @@ RoomStory generateRoomStory({
 
   // Sentence 1: Light + undertone alignment
   if (direction != null) {
-    sentences.add(_lightSentence(
-      roomName: roomName,
-      direction: direction,
-      usageTime: usageTime,
-      heroHex: heroHex,
-      heroName: heroName,
-    ));
+    sentences.add(
+      _lightSentence(
+        roomName: roomName,
+        direction: direction,
+        usageTime: usageTime,
+        heroHex: heroHex,
+        heroName: heroName,
+      ),
+    );
   }
 
   // Sentence 2: Colour relationship
@@ -70,10 +72,7 @@ RoomStory generateRoomStory({
   );
   if (moodSentence != null) sentences.add(moodSentence);
 
-  return RoomStory(
-    summary: sentences.join(' '),
-    isComplete: direction != null,
-  );
+  return RoomStory(summary: sentences.join(' '), isComplete: direction != null);
 }
 
 // ---------------------------------------------------------------------------
@@ -168,10 +167,11 @@ String? _moodSentence({
   if (moods.isEmpty) return null;
 
   final labels = moods.map((m) => m.displayName.toLowerCase()).toList();
-  final joined = labels.length == 1
-      ? labels.first
-      : '${labels.sublist(0, labels.length - 1).join(', ')} '
-          'and ${labels.last}';
+  final joined =
+      labels.length == 1
+          ? labels.first
+          : '${labels.sublist(0, labels.length - 1).join(', ')} '
+              'and ${labels.last}';
 
   return 'This palette matches your $joined vision for this room.';
 }

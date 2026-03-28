@@ -61,21 +61,20 @@ ColourPlan? generateColourPlan({
   final heroLab = LabColour(heroColour.labL, heroColour.labA, heroColour.labB);
 
   // Filter paints by budget bracket if set
-  final paints = budget != null
-      ? _filterByBudget(allPaintColours, budget)
-      : allPaintColours;
+  final paints =
+      budget != null
+          ? _filterByBudget(allPaintColours, budget)
+          : allPaintColours;
   // Fall back to unfiltered if budget filtering leaves too few options
   final candidatePaints = paints.length >= 10 ? paints : allPaintColours;
 
   final warnings = <String>[];
 
   // Check locked furniture for pre-filled tiers
-  final lockedBeta = lockedFurniture
-      ?.where((f) => f.role == FurnitureRole.beta)
-      .toList();
-  final lockedSurprise = lockedFurniture
-      ?.where((f) => f.role == FurnitureRole.surprise)
-      .toList();
+  final lockedBeta =
+      lockedFurniture?.where((f) => f.role == FurnitureRole.beta).toList();
+  final lockedSurprise =
+      lockedFurniture?.where((f) => f.role == FurnitureRole.surprise).toList();
 
   // Warn if locked items in same tier have very different colours
   if (lockedBeta != null && lockedBeta.length > 1) {
@@ -98,7 +97,7 @@ ColourPlan? generateColourPlan({
   // Determine preferred undertone: DNA preference overrides light direction
   // because DNA represents the user's aesthetic choice, while light direction
   // is environmental context.
-  Undertone? preferredUndertone = dnaUndertone;
+  var preferredUndertone = dnaUndertone;
   if (preferredUndertone == null && direction != null) {
     final lightRec = getLightRecommendation(
       direction: direction,
@@ -112,15 +111,18 @@ ColourPlan? generateColourPlan({
   if (lockedBeta != null && lockedBeta.isNotEmpty) {
     // Average all locked furniture colours for this tier
     final averageHex = _averageLockedHexes(lockedBeta.map((f) => f.colourHex));
-    betaColour = _findNearestPaint(
-      hex: averageHex,
-      allColours: candidatePaints,
-      excludeIds: {heroColour.id},
-    ) ?? _findNearestPaint(
-      hex: averageHex,
-      allColours: allPaintColours,
-      excludeIds: const <String>{},
-    ) ?? candidatePaints.first;
+    betaColour =
+        _findNearestPaint(
+          hex: averageHex,
+          allColours: candidatePaints,
+          excludeIds: {heroColour.id},
+        ) ??
+        _findNearestPaint(
+          hex: averageHex,
+          allColours: allPaintColours,
+          excludeIds: const <String>{},
+        ) ??
+        candidatePaints.first;
   } else {
     final betaCandidates = _findBetaCandidates(
       heroLab: heroLab,
@@ -135,17 +137,21 @@ ColourPlan? generateColourPlan({
   // Find or use locked surprise
   PaintColour surpriseColour;
   if (lockedSurprise != null && lockedSurprise.isNotEmpty) {
-    final averageHex =
-        _averageLockedHexes(lockedSurprise.map((f) => f.colourHex));
-    surpriseColour = _findNearestPaint(
-      hex: averageHex,
-      allColours: candidatePaints,
-      excludeIds: {heroColour.id, betaColour.id},
-    ) ?? _findNearestPaint(
-      hex: averageHex,
-      allColours: allPaintColours,
-      excludeIds: const <String>{},
-    ) ?? candidatePaints.first;
+    final averageHex = _averageLockedHexes(
+      lockedSurprise.map((f) => f.colourHex),
+    );
+    surpriseColour =
+        _findNearestPaint(
+          hex: averageHex,
+          allColours: candidatePaints,
+          excludeIds: {heroColour.id, betaColour.id},
+        ) ??
+        _findNearestPaint(
+          hex: averageHex,
+          allColours: allPaintColours,
+          excludeIds: const <String>{},
+        ) ??
+        candidatePaints.first;
   } else {
     final surpriseCandidates = _findSurpriseCandidates(
       heroLab: heroLab,
@@ -154,8 +160,7 @@ ColourPlan? generateColourPlan({
       excludeIds: {heroColour.id, betaColour.id},
     );
     if (surpriseCandidates.isEmpty) return null;
-    surpriseColour =
-        surpriseCandidates[rng.nextInt(surpriseCandidates.length)];
+    surpriseColour = surpriseCandidates[rng.nextInt(surpriseCandidates.length)];
   }
 
   // Find dash: closest red thread colour that exists as a paint colour
@@ -224,14 +229,12 @@ List<PaintColour> _findBetaCandidates({
   }
 
   // Ultimate fallback: return the 5 closest paints by delta-E
-  final sorted = allColours
-      .where((pc) => pc.id != heroId)
-      .map((pc) {
-        final lab = LabColour(pc.labL, pc.labA, pc.labB);
-        return (paint: pc, dE: deltaE2000(heroLab, lab));
-      })
-      .toList()
-    ..sort((a, b) => a.dE.compareTo(b.dE));
+  final sorted =
+      allColours.where((pc) => pc.id != heroId).map((pc) {
+          final lab = LabColour(pc.labL, pc.labA, pc.labB);
+          return (paint: pc, dE: deltaE2000(heroLab, lab));
+        }).toList()
+        ..sort((a, b) => a.dE.compareTo(b.dE));
   return sorted.take(5).map((e) => e.paint).toList();
 }
 
@@ -276,14 +279,12 @@ List<PaintColour> _findSurpriseCandidates({
   }
 
   // Ultimate fallback: closest paints excluding hero/beta
-  final sorted = allColours
-      .where((pc) => !excludeIds.contains(pc.id))
-      .map((pc) {
-        final lab = LabColour(pc.labL, pc.labA, pc.labB);
-        return (paint: pc, dE: deltaE2000(heroLab, lab));
-      })
-      .toList()
-    ..sort((a, b) => a.dE.compareTo(b.dE));
+  final sorted =
+      allColours.where((pc) => !excludeIds.contains(pc.id)).map((pc) {
+          final lab = LabColour(pc.labL, pc.labA, pc.labB);
+          return (paint: pc, dE: deltaE2000(heroLab, lab));
+        }).toList()
+        ..sort((a, b) => a.dE.compareTo(b.dE));
   return sorted.take(5).map((e) => e.paint).toList();
 }
 

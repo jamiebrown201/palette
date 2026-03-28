@@ -35,54 +35,42 @@ class PaletteDatabase extends _$PaletteDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.addColumn(
-              colourDnaResults,
-              colourDnaResults.dnaConfidence,
-            );
-            await m.addColumn(
-              colourDnaResults,
-              colourDnaResults.archetype,
-            );
-          }
-          if (from < 3) {
-            // PaintColours gets two new non-nullable columns (cabStar,
-            // chromaBand). Simplest approach: delete all seed rows so
-            // seedIfNeeded() re-seeds with the new columns on next launch.
-            await delete(paintColours).go();
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(colourDnaResults, colourDnaResults.dnaConfidence);
+        await m.addColumn(colourDnaResults, colourDnaResults.archetype);
+      }
+      if (from < 3) {
+        // PaintColours gets two new non-nullable columns (cabStar,
+        // chromaBand). Simplest approach: delete all seed rows so
+        // seedIfNeeded() re-seeds with the new columns on next launch.
+        await delete(paintColours).go();
 
-            // ColourDnaResults gets two new nullable columns.
-            await m.addColumn(
-              colourDnaResults,
-              colourDnaResults.undertoneTemperature,
-            );
-            await m.addColumn(
-              colourDnaResults,
-              colourDnaResults.systemPaletteJson,
-            );
-          }
-          if (from < 4) {
-            await m.addColumn(
-              colourDnaResults,
-              colourDnaResults.saturationPreference,
-            );
-          }
-          if (from < 5) {
-            await m.createTable(colourInteractions);
-            await m.addColumn(
-              userProfiles,
-              userProfiles.driftPromptDismissedAt,
-            );
-          }
-          if (from < 6) {
-            await m.addColumn(userProfiles, userProfiles.canPaint);
-            await m.addColumn(userProfiles, userProfiles.canDrill);
-            await m.addColumn(userProfiles, userProfiles.keepingFlooring);
-            await m.addColumn(userProfiles, userProfiles.isTemporaryHome);
-            await m.addColumn(userProfiles, userProfiles.reversibleOnly);
-          }
-        },
-      );
+        // ColourDnaResults gets two new nullable columns.
+        await m.addColumn(
+          colourDnaResults,
+          colourDnaResults.undertoneTemperature,
+        );
+        await m.addColumn(colourDnaResults, colourDnaResults.systemPaletteJson);
+      }
+      if (from < 4) {
+        await m.addColumn(
+          colourDnaResults,
+          colourDnaResults.saturationPreference,
+        );
+      }
+      if (from < 5) {
+        await m.createTable(colourInteractions);
+        await m.addColumn(userProfiles, userProfiles.driftPromptDismissedAt);
+      }
+      if (from < 6) {
+        await m.addColumn(userProfiles, userProfiles.canPaint);
+        await m.addColumn(userProfiles, userProfiles.canDrill);
+        await m.addColumn(userProfiles, userProfiles.keepingFlooring);
+        await m.addColumn(userProfiles, userProfiles.isTemporaryHome);
+        await m.addColumn(userProfiles, userProfiles.reversibleOnly);
+      }
+    },
+  );
 }

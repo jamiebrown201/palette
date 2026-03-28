@@ -19,28 +19,28 @@ class RoomListScreen extends ConsumerWidget {
       body: roomsAsync.when(
         data: (rooms) {
           if (rooms.isEmpty) {
-            return _EmptyRoomView(
-              onCreateRoom: () => _showCreateRoom(context),
-            );
+            return _EmptyRoomView(onCreateRoom: () => _showCreateRoom(context));
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: rooms.length,
-            itemBuilder: (context, index) => _RoomCard(
-              room: rooms[index],
-              onTap: () => context.go('/rooms/${rooms[index].id}'),
-            ),
+            itemBuilder:
+                (context, index) => _RoomCard(
+                  room: rooms[index],
+                  onTap: () => context.go('/rooms/${rooms[index].id}'),
+                ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
-      floatingActionButton: roomsAsync.valueOrNull?.isNotEmpty ?? false
-          ? FloatingActionButton(
-              onPressed: () => _showCreateRoom(context),
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton:
+          roomsAsync.valueOrNull?.isNotEmpty ?? false
+              ? FloatingActionButton(
+                onPressed: () => _showCreateRoom(context),
+                child: const Icon(Icons.add),
+              )
+              : null,
     );
   }
 
@@ -90,8 +90,8 @@ class _EmptyRoomView extends StatelessWidget {
               'Create your first room to get personalised '
               'colour recommendations',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                color: PaletteColours.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -108,10 +108,7 @@ class _EmptyRoomView extends StatelessWidget {
 }
 
 class _RoomCard extends StatelessWidget {
-  const _RoomCard({
-    required this.room,
-    required this.onTap,
-  });
+  const _RoomCard({required this.room, required this.onTap});
 
   final Room room;
   final VoidCallback onTap;
@@ -138,19 +135,21 @@ class _RoomCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: room.heroColourHex != null
-                        ? _hexToColor(room.heroColourHex!)
-                        : PaletteColours.warmGrey,
+                    color:
+                        room.heroColourHex != null
+                            ? _hexToColor(room.heroColourHex!)
+                            : PaletteColours.warmGrey,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: PaletteColours.divider),
                   ),
-                  child: room.heroColourHex == null
-                      ? const Icon(
-                          Icons.palette_outlined,
-                          size: 20,
-                          color: PaletteColours.textTertiary,
-                        )
-                      : null,
+                  child:
+                      room.heroColourHex == null
+                          ? const Icon(
+                            Icons.palette_outlined,
+                            size: 20,
+                            color: PaletteColours.textTertiary,
+                          )
+                          : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -159,18 +158,15 @@ class _RoomCard extends StatelessWidget {
                     children: [
                       Text(
                         room.name,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         _buildSubtitle(room),
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: PaletteColours.textSecondary,
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
                       ),
                     ],
                   ),

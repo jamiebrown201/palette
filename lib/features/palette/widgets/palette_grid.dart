@@ -3,11 +3,7 @@ import 'package:palette/core/theme/palette_colours.dart';
 
 /// A mosaic grid displaying the user's palette colours.
 class PaletteGrid extends StatelessWidget {
-  const PaletteGrid({
-    required this.hexColours,
-    this.onColourTap,
-    super.key,
-  });
+  const PaletteGrid({required this.hexColours, this.onColourTap, super.key});
 
   final List<String> hexColours;
   final void Function(String hex)? onColourTap;
@@ -27,9 +23,8 @@ class PaletteGrid extends StatelessWidget {
           _GridTile(
             hex: hexColours[i],
             index: i,
-            onTap: onColourTap != null
-                ? () => onColourTap!(hexColours[i])
-                : null,
+            onTap:
+                onColourTap != null ? () => onColourTap!(hexColours[i]) : null,
           ),
       ],
     );
@@ -37,11 +32,7 @@ class PaletteGrid extends StatelessWidget {
 }
 
 class _GridTile extends StatelessWidget {
-  const _GridTile({
-    required this.hex,
-    required this.index,
-    this.onTap,
-  });
+  const _GridTile({required this.hex, required this.index, this.onTap});
 
   final String hex;
   final int index;
@@ -65,10 +56,7 @@ class _GridTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: _hexToColor(hex),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: PaletteColours.divider,
-              width: 0.5,
-            ),
+            border: Border.all(color: PaletteColours.divider, width: 0.5),
           ),
         ),
       ),

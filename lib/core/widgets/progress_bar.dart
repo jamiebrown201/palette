@@ -27,18 +27,17 @@ class SteppedProgressBar extends StatelessWidget {
 
           return Expanded(
             child: Padding(
-              padding: EdgeInsets.only(
-                right: index < totalSteps - 1 ? 4 : 0,
-              ),
+              padding: EdgeInsets.only(right: index < totalSteps - 1 ? 4 : 0),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 height: 5,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(2),
-                  color: isCompleted || isCurrent
-                      ? active
-                      : PaletteColours.warmGrey,
+                  color:
+                      isCompleted || isCurrent
+                          ? active
+                          : PaletteColours.warmGrey,
                 ),
               ),
             ),

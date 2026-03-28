@@ -40,28 +40,129 @@ void main() {
   // Build a diverse test palette covering the roles we need
   final testPaints = <PaintColour>[
     // Whites (trim candidates)
-    _make(id: 'w1', labL: 95, labA: 0.5, labB: 2, family: PaletteFamily.warmNeutrals),
-    _make(id: 'w2', labL: 93, labA: -0.5, labB: -1, family: PaletteFamily.coolNeutrals, undertone: Undertone.cool),
+    _make(
+      id: 'w1',
+      labL: 95,
+      labA: 0.5,
+      labB: 2,
+      family: PaletteFamily.warmNeutrals,
+    ),
+    _make(
+      id: 'w2',
+      labL: 93,
+      labA: -0.5,
+      labB: -1,
+      family: PaletteFamily.coolNeutrals,
+      undertone: Undertone.cool,
+    ),
     // Warm neutrals (dominant/supporting candidates)
-    _make(id: 'wn1', labL: 70, labA: 3, labB: 15, family: PaletteFamily.warmNeutrals),
-    _make(id: 'wn2', labL: 60, labA: 4, labB: 18, family: PaletteFamily.warmNeutrals),
-    _make(id: 'wn3', labL: 50, labA: 5, labB: 20, family: PaletteFamily.warmNeutrals),
-    _make(id: 'wn4', labL: 75, labA: 2, labB: 10, family: PaletteFamily.warmNeutrals),
+    _make(
+      id: 'wn1',
+      labL: 70,
+      labA: 3,
+      labB: 15,
+      family: PaletteFamily.warmNeutrals,
+    ),
+    _make(
+      id: 'wn2',
+      labL: 60,
+      labA: 4,
+      labB: 18,
+      family: PaletteFamily.warmNeutrals,
+    ),
+    _make(
+      id: 'wn3',
+      labL: 50,
+      labA: 5,
+      labB: 20,
+      family: PaletteFamily.warmNeutrals,
+    ),
+    _make(
+      id: 'wn4',
+      labL: 75,
+      labA: 2,
+      labB: 10,
+      family: PaletteFamily.warmNeutrals,
+    ),
     // Earth tones (secondary family candidates)
-    _make(id: 'et1', labL: 55, labA: 10, labB: 25, family: PaletteFamily.earthTones),
-    _make(id: 'et2', labL: 45, labA: 8, labB: 20, family: PaletteFamily.earthTones),
-    _make(id: 'et3', labL: 65, labA: 6, labB: 15, family: PaletteFamily.earthTones),
+    _make(
+      id: 'et1',
+      labL: 55,
+      labA: 10,
+      labB: 25,
+      family: PaletteFamily.earthTones,
+    ),
+    _make(
+      id: 'et2',
+      labL: 45,
+      labA: 8,
+      labB: 20,
+      family: PaletteFamily.earthTones,
+    ),
+    _make(
+      id: 'et3',
+      labL: 65,
+      labA: 6,
+      labB: 15,
+      family: PaletteFamily.earthTones,
+    ),
     // Deep darks (anchor candidates)
-    _make(id: 'd1', labL: 30, labA: 5, labB: 10, family: PaletteFamily.warmNeutrals),
-    _make(id: 'd2', labL: 25, labA: -3, labB: -20, family: PaletteFamily.darks, undertone: Undertone.cool),
+    _make(
+      id: 'd1',
+      labL: 30,
+      labA: 5,
+      labB: 10,
+      family: PaletteFamily.warmNeutrals,
+    ),
+    _make(
+      id: 'd2',
+      labL: 25,
+      labA: -3,
+      labB: -20,
+      family: PaletteFamily.darks,
+      undertone: Undertone.cool,
+    ),
     // Jewel tones (accent candidates, high chroma)
-    _make(id: 'jt1', labL: 35, labA: -10, labB: -35, family: PaletteFamily.jewelTones, undertone: Undertone.cool),
-    _make(id: 'jt2', labL: 40, labA: 30, labB: -25, family: PaletteFamily.jewelTones, undertone: Undertone.cool),
+    _make(
+      id: 'jt1',
+      labL: 35,
+      labA: -10,
+      labB: -35,
+      family: PaletteFamily.jewelTones,
+      undertone: Undertone.cool,
+    ),
+    _make(
+      id: 'jt2',
+      labL: 40,
+      labA: 30,
+      labB: -25,
+      family: PaletteFamily.jewelTones,
+      undertone: Undertone.cool,
+    ),
     // Brights (accent candidates, high chroma)
-    _make(id: 'br1', labL: 70, labA: 25, labB: 40, family: PaletteFamily.brights),
+    _make(
+      id: 'br1',
+      labL: 70,
+      labA: 25,
+      labB: 40,
+      family: PaletteFamily.brights,
+    ),
     // Spine candidates (muted mid-tones)
-    _make(id: 'sp1', labL: 68, labA: 2, labB: 8, family: PaletteFamily.warmNeutrals),
-    _make(id: 'sp2', labL: 72, labA: 1, labB: 5, family: PaletteFamily.coolNeutrals, undertone: Undertone.neutral),
+    _make(
+      id: 'sp1',
+      labL: 68,
+      labA: 2,
+      labB: 8,
+      family: PaletteFamily.warmNeutrals,
+    ),
+    _make(
+      id: 'sp2',
+      labL: 72,
+      labA: 1,
+      labB: 5,
+      family: PaletteFamily.coolNeutrals,
+      undertone: Undertone.neutral,
+    ),
   ];
 
   group('generateSystemPalette', () {

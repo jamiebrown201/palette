@@ -32,50 +32,73 @@ void main() {
     });
 
     test('no two archetypes share the same name', () {
-      final names =
-          archetypeDefinitions.values.map((d) => d.name).toSet();
+      final names = archetypeDefinitions.values.map((d) => d.name).toSet();
       expect(names.length, archetypeDefinitions.length);
     });
 
     test('all definitions have non-empty required fields', () {
       for (final def in archetypeDefinitions.values) {
-        expect(def.name, isNotEmpty,
-            reason: '${def.archetype.name} name should not be empty');
-        expect(def.headline, isNotEmpty,
-            reason: '${def.archetype.name} headline should not be empty');
-        expect(def.description, isNotEmpty,
-            reason: '${def.archetype.name} description should not be empty');
-        expect(def.whyItWorks, isNotEmpty,
-            reason: '${def.archetype.name} whyItWorks should not be empty');
-        expect(def.watchOutFor, isNotEmpty,
-            reason: '${def.archetype.name} watchOutFor should not be empty');
+        expect(
+          def.name,
+          isNotEmpty,
+          reason: '${def.archetype.name} name should not be empty',
+        );
+        expect(
+          def.headline,
+          isNotEmpty,
+          reason: '${def.archetype.name} headline should not be empty',
+        );
+        expect(
+          def.description,
+          isNotEmpty,
+          reason: '${def.archetype.name} description should not be empty',
+        );
+        expect(
+          def.whyItWorks,
+          isNotEmpty,
+          reason: '${def.archetype.name} whyItWorks should not be empty',
+        );
+        expect(
+          def.watchOutFor,
+          isNotEmpty,
+          reason: '${def.archetype.name} watchOutFor should not be empty',
+        );
       }
     });
 
     test('all definitions have exactly 3 style tips', () {
       for (final def in archetypeDefinitions.values) {
-        expect(def.styleTips.length, 3,
-            reason: '${def.archetype.name} should have 3 style tips');
+        expect(
+          def.styleTips.length,
+          3,
+          reason: '${def.archetype.name} should have 3 style tips',
+        );
       }
     });
 
     test('all definitions have suggested rooms', () {
       for (final def in archetypeDefinitions.values) {
-        expect(def.suggestedRooms, isNotEmpty,
-            reason: '${def.archetype.name} should have suggested rooms');
+        expect(
+          def.suggestedRooms,
+          isNotEmpty,
+          reason: '${def.archetype.name} should have suggested rooms',
+        );
       }
     });
 
     test('descriptions use second person', () {
       for (final def in archetypeDefinitions.values) {
         // Descriptions should contain "You" or "Your"
-        final hasSecondPerson = def.description.contains('You') ||
+        final hasSecondPerson =
+            def.description.contains('You') ||
             def.description.contains('Your') ||
             def.description.contains('you') ||
             def.description.contains('your');
-        expect(hasSecondPerson, isTrue,
-            reason:
-                '${def.archetype.name} description should use second person');
+        expect(
+          hasSecondPerson,
+          isTrue,
+          reason: '${def.archetype.name} description should use second person',
+        );
       }
     });
   });
@@ -186,10 +209,9 @@ void main() {
       final reachable = <ColourArchetype>{};
       for (final family in PaletteFamily.values) {
         for (final band in ChromaBand.values) {
-          reachable.add(mapToArchetype(
-            primaryFamily: family,
-            saturationPreference: band,
-          ));
+          reachable.add(
+            mapToArchetype(primaryFamily: family, saturationPreference: band),
+          );
         }
       }
       // 14 archetypes minus theMinimalist (special case) = 13 reachable

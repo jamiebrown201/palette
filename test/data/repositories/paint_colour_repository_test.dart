@@ -276,10 +276,7 @@ void main() {
 
     test('findCrossBrandMatches finds equivalents', () async {
       final white = await repo.getById('white');
-      final matches = await repo.findCrossBrandMatches(
-        white!,
-        threshold: 50,
-      );
+      final matches = await repo.findCrossBrandMatches(white!, threshold: 50);
 
       // Should only include brand B colours
       expect(matches.every((m) => m.colour.brand == 'B'), isTrue);

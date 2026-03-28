@@ -35,7 +35,7 @@ String describePaletteImpact({
   // Find the strongest named relationship and the closest colour.
   ColourRelationship? bestRelationship;
   String? bestPartnerHex;
-  double closestDe = double.infinity;
+  var closestDe = double.infinity;
   String? closestHex;
 
   // Priority ranking for relationships.
@@ -58,9 +58,8 @@ String describePaletteImpact({
     final rel = classifyHuePair(newLab, lab);
     if (rel != null) {
       final newPriority = priority[rel] ?? 0;
-      final oldPriority = bestRelationship != null
-          ? (priority[bestRelationship] ?? 0)
-          : -1;
+      final oldPriority =
+          bestRelationship != null ? (priority[bestRelationship] ?? 0) : -1;
       if (newPriority > oldPriority) {
         bestRelationship = rel;
         bestPartnerHex = hex;
@@ -77,20 +76,20 @@ String describePaletteImpact({
       ColourRelationship.analogous => 'calm harmony',
     };
     final partnerName = _display(bestPartnerHex, nameMap);
-    final relLabel = '${bestRelationship.name[0].toUpperCase()}${bestRelationship.name.substring(1)}';
+    final relLabel =
+        '${bestRelationship.name[0].toUpperCase()}${bestRelationship.name.substring(1)}';
     return '$relLabel to $partnerName — $desc';
   }
 
   // Fallback: undertone observation.
   final newUndertone = classifyUndertone(newLab).classification;
-  final existingUndertones = existingHexes
-      .map((h) => classifyUndertone(hexToLab(h)).classification)
-      .toList();
+  final existingUndertones =
+      existingHexes
+          .map((h) => classifyUndertone(hexToLab(h)).classification)
+          .toList();
 
-  final warmCount =
-      existingUndertones.where((u) => u == Undertone.warm).length;
-  final coolCount =
-      existingUndertones.where((u) => u == Undertone.cool).length;
+  final warmCount = existingUndertones.where((u) => u == Undertone.warm).length;
+  final coolCount = existingUndertones.where((u) => u == Undertone.cool).length;
 
   if (newUndertone == Undertone.cool && warmCount > coolCount) {
     return 'Adds cool balance to a warm-leaning palette';
@@ -137,16 +136,17 @@ String describePaletteImpact({
 
   // Undertone analysis.
   final undertone = classifyUndertone(lab).classification;
-  final otherUndertones =
-      otherHexes.map((h) => classifyUndertone(hexToLab(h)).classification);
+  final otherUndertones = otherHexes.map(
+    (h) => classifyUndertone(hexToLab(h)).classification,
+  );
   final isOnlyOfUndertone =
-      undertone != Undertone.neutral &&
-      !otherUndertones.contains(undertone);
+      undertone != Undertone.neutral && !otherUndertones.contains(undertone);
 
   // Chroma band analysis.
   final chroma = classifyChromaBand(lab.chroma);
-  final otherChromas =
-      otherHexes.map((h) => classifyChromaBand(hexToLab(h).chroma));
+  final otherChromas = otherHexes.map(
+    (h) => classifyChromaBand(hexToLab(h).chroma),
+  );
   final isOnlyOfChroma =
       chroma != ChromaBand.mid && !otherChromas.contains(chroma);
 
@@ -159,9 +159,10 @@ String describePaletteImpact({
       ColourRelationship.splitComplementary => 'Split-complementary',
       ColourRelationship.analogous => 'Analogous',
     };
-    role = relationshipCount == 1
-        ? '$relName partner to another colour'
-        : '$relName anchor to $relationshipCount colours';
+    role =
+        relationshipCount == 1
+            ? '$relName partner to another colour'
+            : '$relName anchor to $relationshipCount colours';
   } else if (isOnlyOfUndertone) {
     role = 'Your only ${undertone.displayName.toLowerCase()}-toned colour';
   } else if (isOnlyOfChroma) {
@@ -172,17 +173,16 @@ String describePaletteImpact({
     };
     role = 'Your only $chromaName colour';
   } else {
-    role = 'Part of your palette\'s tonal range';
+    role = "Part of your palette's tonal range";
   }
 
   // Build warning string.
   String? warning;
   if (isOnlyOfUndertone) {
     final remainingTone = undertone == Undertone.warm ? 'cool' : 'warm';
-    warning =
-        'Removing it leaves your palette entirely $remainingTone-toned';
+    warning = 'Removing it leaves your palette entirely $remainingTone-toned';
   } else if (otherHexes.length == 1) {
-    warning = 'You\'ll be left with just one colour';
+    warning = "You'll be left with just one colour";
   }
 
   return (role: role, warning: warning);
@@ -222,14 +222,14 @@ double _hueDiff(LabColour a, LabColour b) {
 
 /// Human-readable label for a [PaletteFamily].
 String _familyLabel(PaletteFamily f) => switch (f) {
-      PaletteFamily.pastels => 'pastels',
-      PaletteFamily.brights => 'brights',
-      PaletteFamily.jewelTones => 'jewel tones',
-      PaletteFamily.earthTones => 'earth tones',
-      PaletteFamily.darks => 'darks',
-      PaletteFamily.warmNeutrals => 'warm neutrals',
-      PaletteFamily.coolNeutrals => 'cool neutrals',
-    };
+  PaletteFamily.pastels => 'pastels',
+  PaletteFamily.brights => 'brights',
+  PaletteFamily.jewelTones => 'jewel tones',
+  PaletteFamily.earthTones => 'earth tones',
+  PaletteFamily.darks => 'darks',
+  PaletteFamily.warmNeutrals => 'warm neutrals',
+  PaletteFamily.coolNeutrals => 'cool neutrals',
+};
 
 /// Analyse the overall harmony of a palette of hex colours.
 ///
@@ -324,9 +324,10 @@ PaletteHealthSummary analysePaletteHealth(
 
   if (lightnessRange < 15) {
     final avgL = lightnesses.reduce((a, b) => a + b) / lightnesses.length;
-    final zone = avgL > 65
-        ? 'light tones'
-        : avgL < 35
+    final zone =
+        avgL > 65
+            ? 'light tones'
+            : avgL < 35
             ? 'dark tones'
             : 'mid-tones';
     clashes.add(
@@ -365,8 +366,9 @@ PaletteHealthSummary analysePaletteHealth(
   for (final f in families) {
     familyCounts[f] = (familyCounts[f] ?? 0) + 1;
   }
-  final dominantEntry = familyCounts.entries
-      .reduce((a, b) => a.value >= b.value ? a : b);
+  final dominantEntry = familyCounts.entries.reduce(
+    (a, b) => a.value >= b.value ? a : b,
+  );
   final dominantFraction = dominantEntry.value / hexes.length;
 
   if (dominantFraction >= 0.6) {
@@ -394,13 +396,15 @@ PaletteHealthSummary analysePaletteHealth(
   String? suggestion;
   if (lightnessRange < 15) {
     final avgL = lightnesses.reduce((a, b) => a + b) / lightnesses.length;
-    suggestion = avgL > 50
-        ? 'A deeper shade would ground the palette'
-        : 'A lighter tone would open the palette up';
+    suggestion =
+        avgL > 50
+            ? 'A deeper shade would ground the palette'
+            : 'A lighter tone would open the palette up';
   } else if (allSameBand && hexes.length >= 3) {
-    suggestion = chromaBands.first == ChromaBand.muted
-        ? 'A saturated accent would give the eye a place to land'
-        : 'A softer neutral would let your bold colours shine';
+    suggestion =
+        chromaBands.first == ChromaBand.muted
+            ? 'A saturated accent would give the eye a place to land'
+            : 'A softer neutral would let your bold colours shine';
   } else if (warmCount > total * 0.8 && total >= 3) {
     suggestion = 'A cool accent could add contrast and depth';
   } else if (coolCount > total * 0.8 && total >= 3) {
@@ -441,20 +445,22 @@ PaletteHealthSummary analysePaletteHealth(
         'Your palette has strong relationships but a couple of pairs '
         'could work harder together.';
   } else if (hasAnalogous && hasCompOrTriadic) {
-    final familyNote = dominantFraction >= 0.6
-        ? ' through ${_familyLabel(dominantEntry.key)}'
-        : '';
+    final familyNote =
+        dominantFraction >= 0.6
+            ? ' through ${_familyLabel(dominantEntry.key)}'
+            : '';
     verdict = 'Dynamic balance';
     explanation =
         'Your palette blends calm harmony with vibrant contrast$familyNote '
         '— versatile and engaging.';
   } else if (hasAnalogous && !hasCompOrTriadic) {
     verdict = 'Harmonious flow';
-    explanation = lightnessRange > 30
-        ? 'Neighbouring hues with good tonal range create a rich, '
-            'layered feel.'
-        : 'Your colours sit close on the colour wheel, creating a '
-            'calm, cohesive feel throughout.';
+    explanation =
+        lightnessRange > 30
+            ? 'Neighbouring hues with good tonal range create a rich, '
+                'layered feel.'
+            : 'Your colours sit close on the colour wheel, creating a '
+                'calm, cohesive feel throughout.';
   } else if (hasCompOrTriadic) {
     verdict = 'Vibrant contrast';
     explanation =

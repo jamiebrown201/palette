@@ -8,7 +8,6 @@ import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/kelvin_simulation.dart';
 import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/constants/enums.dart';
-import 'package:palette/core/constants/room_mode_config.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
@@ -53,14 +52,16 @@ class RoomDetailScreen extends ConsumerWidget {
         }
         return _RoomDetailContent(room: room);
       },
-      loading: () => Scaffold(
-        appBar: AppBar(),
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (e, _) => Scaffold(
-        appBar: AppBar(),
-        body: Center(child: Text('Error: $e')),
-      ),
+      loading:
+          () => Scaffold(
+            appBar: AppBar(),
+            body: const Center(child: CircularProgressIndicator()),
+          ),
+      error:
+          (e, _) => Scaffold(
+            appBar: AppBar(),
+            body: Center(child: Text('Error: $e')),
+          ),
     );
   }
 }
@@ -104,10 +105,12 @@ class _RoomDetailContent extends ConsumerWidget {
                   icon: Icons.schedule_outlined,
                   label: room.usageTime.displayName,
                 ),
-                ...room.moods.map((m) => _InfoChip(
-                      icon: Icons.mood_outlined,
-                      label: m.displayName,
-                    )),
+                ...room.moods.map(
+                  (m) => _InfoChip(
+                    icon: Icons.mood_outlined,
+                    label: m.displayName,
+                  ),
+                ),
                 if (config.modeBadge != null)
                   _InfoChip(
                     icon: Icons.vpn_key_outlined,
@@ -153,9 +156,10 @@ class _RoomDetailContent extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
-                      onPressed: () => context.push(
-                        '/explore/white-finder?roomId=${room.id}',
-                      ),
+                      onPressed:
+                          () => context.push(
+                            '/explore/white-finder?roomId=${room.id}',
+                          ),
                       icon: const Icon(Icons.format_paint_outlined, size: 16),
                       label: Text(config.finderIntro),
                       style: OutlinedButton.styleFrom(
@@ -170,13 +174,16 @@ class _RoomDetailContent extends ConsumerWidget {
             ],
 
             // Furniture Lock
-            SectionHeader(key: _furnitureSectionKey, title: 'Existing Furniture'),
+            SectionHeader(
+              key: _furnitureSectionKey,
+              title: 'Existing Furniture',
+            ),
             const SizedBox(height: 4),
             Text(
               "Lock items you're keeping so colour suggestions adapt around them.",
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                color: PaletteColours.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             _FurnitureLockSection(
@@ -214,8 +221,7 @@ class _RoomDetailContent extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // Contextual tool links
-            if (room.heroColourHex != null)
-              _ContextualToolLinks(room: room),
+            if (room.heroColourHex != null) _ContextualToolLinks(room: room),
             const SizedBox(height: 24),
 
             // Light simulation
@@ -246,129 +252,133 @@ class _RoomDetailContent extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            24,
-            24,
-            24,
-            24 + MediaQuery.of(ctx).viewInsets.bottom,
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setSheetState) => Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    24,
+                    24,
+                    24 + MediaQuery.of(ctx).viewInsets.bottom,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Edit Room',
+                        style: Theme.of(ctx).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        initialValue: name,
+                        decoration: const InputDecoration(
+                          labelText: 'Room name',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (v) => name = v,
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<CompassDirection>(
+                        value: direction,
+                        decoration: const InputDecoration(
+                          labelText: 'Window direction',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            CompassDirection.values.map((d) {
+                              return DropdownMenuItem(
+                                value: d,
+                                child: Text(d.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) => setSheetState(() => direction = v),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<UsageTime>(
+                        value: usageTime,
+                        decoration: const InputDecoration(
+                          labelText: 'Primary usage time',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            UsageTime.values.map((t) {
+                              return DropdownMenuItem(
+                                value: t,
+                                child: Text(t.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) {
+                          if (v != null) setSheetState(() => usageTime = v);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<BudgetBracket>(
+                        value: budget,
+                        decoration: const InputDecoration(
+                          labelText: 'Budget bracket',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            BudgetBracket.values.map((b) {
+                              return DropdownMenuItem(
+                                value: b,
+                                child: Text(b.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) {
+                          if (v != null) setSheetState(() => budget = v);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        title: const Text('Renter Mode'),
+                        subtitle: const Text(
+                          'Focus on furniture and accessories',
+                        ),
+                        value: isRenterMode,
+                        onChanged: (v) => setSheetState(() => isRenterMode = v),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: () async {
+                          final repo = ref.read(roomRepositoryProvider);
+                          await repo.updateRoom(
+                            RoomsCompanion(
+                              id: Value(room.id),
+                              name: Value(name),
+                              direction: Value(direction),
+                              usageTime: Value(usageTime),
+                              moods: Value(room.moods),
+                              budget: Value(budget),
+                              isRenterMode: Value(isRenterMode),
+                              heroColourHex: Value(room.heroColourHex),
+                              betaColourHex: Value(room.betaColourHex),
+                              surpriseColourHex: Value(room.surpriseColourHex),
+                              wallColourHex: Value(room.wallColourHex),
+                              sortOrder: Value(room.sortOrder),
+                              createdAt: Value(room.createdAt),
+                              updatedAt: Value(DateTime.now()),
+                            ),
+                          );
+                          ref
+                            ..invalidate(roomByIdProvider(room.id))
+                            ..invalidate(allRoomsProvider);
+                          if (ctx.mounted) Navigator.pop(ctx);
+                        },
+                        child: const Text('Save Changes'),
+                      ),
+                    ],
+                  ),
+                ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Edit Room',
-                style: Theme.of(ctx).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                initialValue: name,
-                decoration: const InputDecoration(
-                  labelText: 'Room name',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (v) => name = v,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<CompassDirection>(
-                initialValue: direction,
-                decoration: const InputDecoration(
-                  labelText: 'Window direction',
-                  border: OutlineInputBorder(),
-                ),
-                items: CompassDirection.values.map((d) {
-                  return DropdownMenuItem(
-                    value: d,
-                    child: Text(d.displayName),
-                  );
-                }).toList(),
-                onChanged: (v) => setSheetState(() => direction = v),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<UsageTime>(
-                initialValue: usageTime,
-                decoration: const InputDecoration(
-                  labelText: 'Primary usage time',
-                  border: OutlineInputBorder(),
-                ),
-                items: UsageTime.values.map((t) {
-                  return DropdownMenuItem(
-                    value: t,
-                    child: Text(t.displayName),
-                  );
-                }).toList(),
-                onChanged: (v) {
-                  if (v != null) setSheetState(() => usageTime = v);
-                },
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<BudgetBracket>(
-                initialValue: budget,
-                decoration: const InputDecoration(
-                  labelText: 'Budget bracket',
-                  border: OutlineInputBorder(),
-                ),
-                items: BudgetBracket.values.map((b) {
-                  return DropdownMenuItem(
-                    value: b,
-                    child: Text(b.displayName),
-                  );
-                }).toList(),
-                onChanged: (v) {
-                  if (v != null) setSheetState(() => budget = v);
-                },
-              ),
-              const SizedBox(height: 12),
-              SwitchListTile(
-                title: const Text('Renter Mode'),
-                subtitle: const Text('Focus on furniture and accessories'),
-                value: isRenterMode,
-                onChanged: (v) => setSheetState(() => isRenterMode = v),
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () async {
-                  final repo = ref.read(roomRepositoryProvider);
-                  await repo.updateRoom(
-                    RoomsCompanion(
-                      id: Value(room.id),
-                      name: Value(name),
-                      direction: Value(direction),
-                      usageTime: Value(usageTime),
-                      moods: Value(room.moods),
-                      budget: Value(budget),
-                      isRenterMode: Value(isRenterMode),
-                      heroColourHex: Value(room.heroColourHex),
-                      betaColourHex: Value(room.betaColourHex),
-                      surpriseColourHex: Value(room.surpriseColourHex),
-                      wallColourHex: Value(room.wallColourHex),
-                      sortOrder: Value(room.sortOrder),
-                      createdAt: Value(room.createdAt),
-                      updatedAt: Value(DateTime.now()),
-                    ),
-                  );
-                  ref
-                    ..invalidate(roomByIdProvider(room.id))
-                    ..invalidate(allRoomsProvider);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                },
-                child: const Text('Save Changes'),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
 
 class _HeroColourSwatch extends ConsumerWidget {
-  const _HeroColourSwatch({
-    required this.hex,
-    required this.label,
-  });
+  const _HeroColourSwatch({required this.hex, required this.label});
 
   final String hex;
   final String label;
@@ -376,20 +386,22 @@ class _HeroColourSwatch extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allPaintsAsync = ref.watch(allPaintColoursProvider);
-    final paintName = allPaintsAsync.whenOrNull(data: (paints) {
-      final lab = hexToLab(hex);
-      PaintColour? closest;
-      var bestDe = 10.0;
-      for (final paint in paints) {
-        final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
-        final dE = deltaE2000(lab, paintLab);
-        if (dE < bestDe) {
-          bestDe = dE;
-          closest = paint;
+    final paintName = allPaintsAsync.whenOrNull(
+      data: (paints) {
+        final lab = hexToLab(hex);
+        PaintColour? closest;
+        var bestDe = 10.0;
+        for (final paint in paints) {
+          final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
+          final dE = deltaE2000(lab, paintLab);
+          if (dE < bestDe) {
+            bestDe = dE;
+            closest = paint;
+          }
         }
-      }
-      return closest?.name;
-    });
+        return closest?.name;
+      },
+    );
 
     final isLight = _isLightColour(hex);
     final fgPrimary = isLight ? Colors.black87 : Colors.white;
@@ -409,16 +421,16 @@ class _HeroColourSwatch extends ConsumerWidget {
           Text(
             paintName ?? hex.toUpperCase(),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: fgPrimary,
-                ),
+              fontWeight: FontWeight.w600,
+              color: fgPrimary,
+            ),
           ),
           const Spacer(),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: fgSecondary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: fgSecondary),
           ),
         ],
       ),
@@ -434,20 +446,22 @@ class _WallContextRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allPaintsAsync = ref.watch(allPaintColoursProvider);
-    final paintName = allPaintsAsync.whenOrNull(data: (paints) {
-      final lab = hexToLab(hex);
-      PaintColour? closest;
-      var bestDe = 10.0;
-      for (final paint in paints) {
-        final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
-        final dE = deltaE2000(lab, paintLab);
-        if (dE < bestDe) {
-          bestDe = dE;
-          closest = paint;
+    final paintName = allPaintsAsync.whenOrNull(
+      data: (paints) {
+        final lab = hexToLab(hex);
+        PaintColour? closest;
+        var bestDe = 10.0;
+        for (final paint in paints) {
+          final paintLab = LabColour(paint.labL, paint.labA, paint.labB);
+          final dE = deltaE2000(lab, paintLab);
+          if (dE < bestDe) {
+            bestDe = dE;
+            closest = paint;
+          }
         }
-      }
-      return closest?.name;
-    });
+        return closest?.name;
+      },
+    );
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -472,8 +486,8 @@ class _WallContextRow extends ConsumerWidget {
             child: Text(
               'Your walls \u00b7 ${paintName ?? hex.toUpperCase()}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                color: PaletteColours.textSecondary,
+              ),
             ),
           ),
           const Icon(
@@ -488,10 +502,7 @@ class _WallContextRow extends ConsumerWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-  });
+  const _InfoChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -511,9 +522,9 @@ class _InfoChip extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textPrimary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: PaletteColours.textPrimary),
           ),
         ],
       ),
@@ -549,8 +560,11 @@ class _LightDirectionCompact extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.wb_sunny_outlined,
-                  size: 18, color: PaletteColours.softGold),
+              const Icon(
+                Icons.wb_sunny_outlined,
+                size: 18,
+                color: PaletteColours.softGold,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -583,10 +597,7 @@ class _LightDirectionCompact extends StatelessWidget {
 }
 
 class _UndertoneChip extends StatelessWidget {
-  const _UndertoneChip({
-    required this.label,
-    required this.isPositive,
-  });
+  const _UndertoneChip({required this.label, required this.isPositive});
 
   final String label;
   final bool isPositive;
@@ -596,18 +607,20 @@ class _UndertoneChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isPositive
-            ? PaletteColours.sageGreenLight
-            : PaletteColours.warmGrey,
+        color:
+            isPositive
+                ? PaletteColours.sageGreenLight
+                : PaletteColours.warmGrey,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isPositive
+          color:
+              isPositive
                   ? PaletteColours.sageGreenDark
                   : PaletteColours.textSecondary,
-            ),
+        ),
       ),
     );
   }
@@ -628,7 +641,9 @@ class _ColourHarmonyInsight extends StatelessWidget {
 
     final hasWarning = harmony.hasWarning;
     final bgColor =
-        hasWarning ? PaletteColours.softGoldLight : PaletteColours.sageGreenLight;
+        hasWarning
+            ? PaletteColours.softGoldLight
+            : PaletteColours.sageGreenLight;
     final fgColor =
         hasWarning ? PaletteColours.softGoldDark : PaletteColours.sageGreenDark;
     final icon = hasWarning ? Icons.lightbulb_outline : Icons.auto_awesome;
@@ -649,28 +664,27 @@ class _ColourHarmonyInsight extends StatelessWidget {
               Text(
                 harmony.verdict,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: fgColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: fgColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             harmony.explanation,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: fgColor),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: fgColor),
           ),
           if (harmony.warning != null) ...[
             const SizedBox(height: 6),
             Text(
               harmony.warning!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.softGoldDark,
-                    fontStyle: FontStyle.italic,
-                  ),
+                color: PaletteColours.softGoldDark,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ],
@@ -704,8 +718,9 @@ class _ColourPlanSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(roomModeConfigProvider(room.isRenterMode));
     final hasHero = room.heroColourHex != null;
-    final allPaints =
-        ref.watch(allPaintColoursProvider).whenOrNull(data: (p) => p);
+    final allPaints = ref
+        .watch(allPaintColoursProvider)
+        .whenOrNull(data: (p) => p);
 
     return Column(
       children: [
@@ -713,28 +728,30 @@ class _ColourPlanSection extends ConsumerWidget {
           Text(
             config.heroPrompt,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: PaletteColours.textSecondary,
-                ),
+              color: PaletteColours.textSecondary,
+            ),
           ),
           if (config.showLandlordPresets) ...[
             const SizedBox(height: 12),
             Text(
               'Common landlord colours',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: PaletteColours.textSecondary,
-                  ),
+                color: PaletteColours.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _landlordPresets.map((preset) {
-                return _LandlordPresetChip(
-                  label: preset.name,
-                  hex: preset.hex,
-                  onTap: () => _applyLandlordPreset(context, ref, preset.hex),
-                );
-              }).toList(),
+              children:
+                  _landlordPresets.map((preset) {
+                    return _LandlordPresetChip(
+                      label: preset.name,
+                      hex: preset.hex,
+                      onTap:
+                          () => _applyLandlordPreset(context, ref, preset.hex),
+                    );
+                  }).toList(),
             ),
           ],
           const SizedBox(height: 12),
@@ -791,25 +808,26 @@ class _ColourPlanSection extends ConsumerWidget {
   ];
 
   Future<void> _applyLandlordPreset(
-      BuildContext context, WidgetRef ref, String hex) async {
+    BuildContext context,
+    WidgetRef ref,
+    String hex,
+  ) async {
     final allPaints = await ref.read(allPaintColoursProvider.future);
     final dnaResult = await ref.read(latestColourDnaProvider.future);
 
     // Find the closest real paint to the preset
-    final heroPaint = allPaints
-        .map((p) {
-          final lab = hexToLab(hex);
-          final pLab = LabColour(p.labL, p.labA, p.labB);
-          return (paint: p, dE: deltaE2000(lab, pLab));
-        })
-        .toList()
-      ..sort((a, b) => a.dE.compareTo(b.dE));
+    final heroPaint =
+        allPaints.map((p) {
+            final lab = hexToLab(hex);
+            final pLab = LabColour(p.labL, p.labA, p.labB);
+            return (paint: p, dE: deltaE2000(lab, pLab));
+          }).toList()
+          ..sort((a, b) => a.dE.compareTo(b.dE));
 
     if (heroPaint.isEmpty) return;
     final selected = heroPaint.first.paint;
 
-    final furniture =
-        await ref.read(furnitureForRoomProvider(room.id).future);
+    final furniture = await ref.read(furnitureForRoomProvider(room.id).future);
     final redThreadHexes = await ref.read(threadHexesProvider.future);
 
     final plan = generateColourPlan(
@@ -847,7 +865,9 @@ class _ColourPlanSection extends ConsumerWidget {
       ..invalidate(allRoomsProvider);
 
     // Log interaction: hero selected (landlord preset)
-    ref.read(colourInteractionRepositoryProvider).logInteraction(
+    ref
+        .read(colourInteractionRepositoryProvider)
+        .logInteraction(
           id: _uuid.v4(),
           interactionType: 'heroSelected',
           hex: selected.hex,
@@ -857,14 +877,16 @@ class _ColourPlanSection extends ConsumerWidget {
         );
 
     if (plan != null && plan.warnings.isNotEmpty && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(plan.warnings.first)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(plan.warnings.first)));
     }
   }
 
   Future<void> _showHeroColourPicker(
-      BuildContext context, WidgetRef ref) async {
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final allPaints = await ref.read(allPaintColoursProvider.future);
     final dnaResult = await ref.read(latestColourDnaProvider.future);
     final redThreadHexList = await ref.read(threadHexesProvider.future);
@@ -897,18 +919,18 @@ class _ColourPlanSection extends ConsumerWidget {
     final selected = await showModalBottomSheet<PaintColour>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => SmartPaintColourPicker(
-        title: config.heroButtonLabel,
-        paintColours: allPaints,
-        suggestions: suggestions,
-      ),
+      builder:
+          (ctx) => SmartPaintColourPicker(
+            title: config.heroButtonLabel,
+            paintColours: allPaints,
+            suggestions: suggestions,
+          ),
     );
 
     if (selected == null || !context.mounted) return;
 
     // Fetch furniture and red thread data for the algorithm
-    final furniture =
-        await ref.read(furnitureForRoomProvider(room.id).future);
+    final furniture = await ref.read(furnitureForRoomProvider(room.id).future);
     final redThreadHexes = await ref.read(threadHexesProvider.future);
 
     // Generate full plan from hero
@@ -936,7 +958,9 @@ class _ColourPlanSection extends ConsumerWidget {
         heroColourHex: Value(selected.hex),
         betaColourHex: Value(plan?.betaColour.hex),
         surpriseColourHex: Value(plan?.surpriseColour.hex),
-        wallColourHex: Value(room.isRenterMode ? selected.hex : room.wallColourHex),
+        wallColourHex: Value(
+          room.isRenterMode ? selected.hex : room.wallColourHex,
+        ),
         sortOrder: Value(room.sortOrder),
         createdAt: Value(room.createdAt),
         updatedAt: Value(DateTime.now()),
@@ -947,7 +971,9 @@ class _ColourPlanSection extends ConsumerWidget {
       ..invalidate(allRoomsProvider);
 
     // Log interaction: hero selected
-    ref.read(colourInteractionRepositoryProvider).logInteraction(
+    ref
+        .read(colourInteractionRepositoryProvider)
+        .logInteraction(
           id: _uuid.v4(),
           interactionType: 'heroSelected',
           hex: selected.hex,
@@ -957,20 +983,22 @@ class _ColourPlanSection extends ConsumerWidget {
         );
 
     if (plan != null && plan.warnings.isNotEmpty && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(plan.warnings.first)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(plan.warnings.first)));
     }
   }
 
   Future<void> _showSwapPicker(
-      BuildContext context, WidgetRef ref, String tier) async {
+    BuildContext context,
+    WidgetRef ref,
+    String tier,
+  ) async {
     final allPaints = await ref.read(allPaintColoursProvider.future);
 
     if (!context.mounted) return;
 
-    final pickerRole =
-        tier == 'beta' ? PickerRole.beta : PickerRole.surprise;
+    final pickerRole = tier == 'beta' ? PickerRole.beta : PickerRole.surprise;
     final suggestions = generateSuggestions(
       context: PickerContext(
         pickerRole: pickerRole,
@@ -1010,12 +1038,14 @@ class _ColourPlanSection extends ConsumerWidget {
     final selected = await showModalBottomSheet<PaintColour>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => SmartPaintColourPicker(
-        title: 'Swap ${tier == 'beta' ? 'Supporting (20%)' : 'Surprise (10%)'} colour',
-        paintColours: allPaints,
-        suggestions: suggestions,
-        contextBanner: banner,
-      ),
+      builder:
+          (ctx) => SmartPaintColourPicker(
+            title:
+                'Swap ${tier == 'beta' ? 'Supporting (20%)' : 'Surprise (10%)'} colour',
+            paintColours: allPaints,
+            suggestions: suggestions,
+            contextBanner: banner,
+          ),
     );
 
     if (selected == null || !context.mounted) return;
@@ -1031,10 +1061,12 @@ class _ColourPlanSection extends ConsumerWidget {
         budget: Value(room.budget),
         isRenterMode: Value(room.isRenterMode),
         heroColourHex: Value(room.heroColourHex),
-        betaColourHex:
-            Value(tier == 'beta' ? selected.hex : room.betaColourHex),
-        surpriseColourHex:
-            Value(tier == 'surprise' ? selected.hex : room.surpriseColourHex),
+        betaColourHex: Value(
+          tier == 'beta' ? selected.hex : room.betaColourHex,
+        ),
+        surpriseColourHex: Value(
+          tier == 'surprise' ? selected.hex : room.surpriseColourHex,
+        ),
         wallColourHex: Value(room.wallColourHex),
         sortOrder: Value(room.sortOrder),
         createdAt: Value(room.createdAt),
@@ -1046,7 +1078,9 @@ class _ColourPlanSection extends ConsumerWidget {
     // Log interaction: colour swapped
     final previousHex =
         tier == 'beta' ? room.betaColourHex : room.surpriseColourHex;
-    ref.read(colourInteractionRepositoryProvider).logInteraction(
+    ref
+        .read(colourInteractionRepositoryProvider)
+        .logInteraction(
           id: _uuid.v4(),
           interactionType: 'colourSwapped',
           hex: selected.hex,
@@ -1068,8 +1102,7 @@ class _ColourPlanSection extends ConsumerWidget {
     );
 
     // Fetch furniture and red thread data for the algorithm
-    final furniture =
-        await ref.read(furnitureForRoomProvider(room.id).future);
+    final furniture = await ref.read(furnitureForRoomProvider(room.id).future);
     final redThreadHexes = await ref.read(threadHexesProvider.future);
 
     final plan = generateColourPlan(
@@ -1106,13 +1139,12 @@ class _ColourPlanSection extends ConsumerWidget {
     );
     ref.invalidate(roomByIdProvider(room.id));
     if (plan.warnings.isNotEmpty && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(plan.warnings.first)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(plan.warnings.first)));
     }
   }
 }
-
 
 class _ColourTierRow extends StatelessWidget {
   const _ColourTierRow({
@@ -1149,15 +1181,18 @@ class _ColourTierRow extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: hex != null
-                      ? _hexToColor(hex!)
-                      : PaletteColours.warmGrey,
+                  color:
+                      hex != null ? _hexToColor(hex!) : PaletteColours.warmGrey,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: PaletteColours.divider),
                 ),
-                child: hex == null
-                    ? const Icon(Icons.add, color: PaletteColours.textTertiary)
-                    : null,
+                child:
+                    hex == null
+                        ? const Icon(
+                          Icons.add,
+                          color: PaletteColours.textTertiary,
+                        )
+                        : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1167,16 +1202,16 @@ class _ColourTierRow extends StatelessWidget {
                     Text(
                       label,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     Text(
                       hex != null && (paintName != null)
                           ? '$description \u2022 $paintName'
                           : description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: PaletteColours.textSecondary,
-                          ),
+                        color: PaletteColours.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -1218,15 +1253,18 @@ class _RoomPsychologyTip extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.psychology_outlined,
-                    size: 16, color: PaletteColours.sageGreenDark),
+                const Icon(
+                  Icons.psychology_outlined,
+                  size: 16,
+                  color: PaletteColours.sageGreenDark,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Colour psychology',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: PaletteColours.sageGreenDark,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: PaletteColours.sageGreenDark,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -1234,16 +1272,16 @@ class _RoomPsychologyTip extends StatelessWidget {
             Text(
               guidance.insight,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textPrimary,
-                  ),
+                color: PaletteColours.textPrimary,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               guidance.avoid,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textSecondary,
-                    fontStyle: FontStyle.italic,
-                  ),
+                color: PaletteColours.textSecondary,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ),
@@ -1265,7 +1303,9 @@ class _TrimWhiteSuggestion extends ConsumerWidget {
 
     return dnaAsync.when(
       data: (dnaResult) {
-        if (dnaResult?.systemPaletteJson == null) return const SizedBox.shrink();
+        if (dnaResult?.systemPaletteJson == null) {
+          return const SizedBox.shrink();
+        }
 
         final palette = SystemPalette.fromJson(dnaResult!.systemPaletteJson!);
         final trim = palette.trimWhite;
@@ -1296,17 +1336,14 @@ class _TrimWhiteSuggestion extends ConsumerWidget {
                     children: [
                       Text(
                         'Suggested trim white',
-                        style:
-                            Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         '${trim.name} by ${trim.brand}',
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: PaletteColours.textSecondary,
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -1323,10 +1360,7 @@ class _TrimWhiteSuggestion extends ConsumerWidget {
 }
 
 class _LightSimulation extends StatelessWidget {
-  const _LightSimulation({
-    required this.hex,
-    required this.direction,
-  });
+  const _LightSimulation({required this.hex, required this.direction});
 
   final String hex;
   final CompassDirection direction;
@@ -1359,10 +1393,7 @@ class _LightSimulation extends StatelessWidget {
 }
 
 class _LightSwatchColumn extends StatelessWidget {
-  const _LightSwatchColumn({
-    required this.label,
-    required this.hex,
-  });
+  const _LightSwatchColumn({required this.label, required this.hex});
 
   final String label;
   final String hex;
@@ -1382,9 +1413,9 @@ class _LightSwatchColumn extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isLight ? Colors.black54 : Colors.white70,
-                fontWeight: FontWeight.w500,
-              ),
+            color: isLight ? Colors.black54 : Colors.white70,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
@@ -1392,10 +1423,7 @@ class _LightSwatchColumn extends StatelessWidget {
 }
 
 class _FurnitureLockSection extends ConsumerWidget {
-  const _FurnitureLockSection({
-    required this.roomId,
-    this.heroColourHex,
-  });
+  const _FurnitureLockSection({required this.roomId, this.heroColourHex});
 
   final String roomId;
   final String? heroColourHex;
@@ -1408,61 +1436,58 @@ class _FurnitureLockSection extends ConsumerWidget {
       data: (items) {
         return Column(
           children: [
-            ...items.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: _hexToColor(item.colourHex),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: PaletteColours.divider),
-                        ),
-                        child: const Icon(Icons.lock,
-                            size: 14, color: Colors.white),
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: _hexToColor(item.colourHex),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: PaletteColours.divider),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            Text(
-                              item.role.displayName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: PaletteColours.textSecondary,
-                                  ),
-                            ),
-                          ],
-                        ),
+                      child: const Icon(
+                        Icons.lock,
+                        size: 14,
+                        color: Colors.white,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        onPressed: () async {
-                          final repo = ref.read(roomRepositoryProvider);
-                          await repo.deleteFurniture(item.id);
-                          ref.invalidate(furnitureForRoomProvider(roomId));
-                        },
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            item.role.displayName,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: PaletteColours.textSecondary),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      onPressed: () async {
+                        final repo = ref.read(roomRepositoryProvider);
+                        await repo.deleteFurniture(item.id);
+                        ref.invalidate(furnitureForRoomProvider(roomId));
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
             OutlinedButton.icon(
-              onPressed: () =>
-                  _showAddFurnitureDialog(context, ref, items.length),
+              onPressed:
+                  () => _showAddFurnitureDialog(context, ref, items.length),
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Lock existing furniture'),
               style: OutlinedButton.styleFrom(
@@ -1493,194 +1518,216 @@ class _FurnitureLockSection extends ConsumerWidget {
   };
 
   void _showAddFurnitureDialog(
-      BuildContext context, WidgetRef ref, int currentCount) {
+    BuildContext context,
+    WidgetRef ref,
+    int currentCount,
+  ) {
     final nameController = TextEditingController();
     var selectedHex = '#D3D3D3';
     var role = FurnitureRole.beta;
 
     showDialog<void>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Lock Furniture'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Item name',
-                  hintText: 'e.g. Brown leather sofa',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Approximate colour',
-                  style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
-                        color: PaletteColours.textSecondary,
-                      ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _commonColours.entries.map((e) {
-                  final isSelected = selectedHex == e.value;
-                  return GestureDetector(
-                    onTap: () => setDialogState(() => selectedHex = e.value),
-                    child: Tooltip(
-                      message: e.key,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: _hexToColor(e.value),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected
-                                ? PaletteColours.sageGreen
-                                : PaletteColours.divider,
-                            width: isSelected ? 2.5 : 1,
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setDialogState) => AlertDialog(
+                  title: const Text('Lock Furniture'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Item name',
+                          hintText: 'e.g. Brown leather sofa',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: isSelected
-                            ? Icon(
-                                Icons.check,
-                                size: 16,
-                                color: _isLightColour(e.value)
-                                    ? PaletteColours.textPrimary
-                                    : Colors.white,
-                              )
-                            : null,
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () async {
-                  final allPaints = await ref
-                      .read(allPaintColoursProvider.future);
-                  if (!ctx.mounted) return;
-                  final picked = await showModalBottomSheet<PaintColour>(
-                    context: ctx,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                    ),
-                    builder: (_) => SmartPaintColourPicker(
-                      title: 'Find exact colour',
-                      paintColours: allPaints,
-                    ),
-                  );
-                  if (picked != null) {
-                    setDialogState(() => selectedHex = picked.hex);
-                  }
-                },
-                icon: const Icon(Icons.palette_outlined, size: 16),
-                label: const Text('Find exact colour'),
-                style: TextButton.styleFrom(
-                  foregroundColor: PaletteColours.sageGreenDark,
-                ),
-              ),
-              // Colour relationship hint
-              if (heroColourHex != null) ...[
-                Builder(builder: (ctx) {
-                  final heroLab = hexToLab(heroColourHex!);
-                  final furnitureLab = hexToLab(selectedHex);
-                  final dE = deltaE2000(heroLab, furnitureLab);
-                  final hint = dE < 5
-                      ? 'Very close to your hero — will blend in'
-                      : dE < 20
-                          ? 'Tonal variation — cohesive and calm'
-                          : dE > 45
-                              ? 'High contrast — will stand out boldly'
-                              : 'Moderate contrast with your hero';
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.auto_awesome,
-                          size: 12,
-                          color: PaletteColours.sageGreenDark,
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Approximate colour',
+                          style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                            color: PaletteColours.textSecondary,
+                          ),
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            hint,
-                            style:
-                                Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                                      color: PaletteColours.sageGreenDark,
-                                      fontStyle: FontStyle.italic,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            _commonColours.entries.map((e) {
+                              final isSelected = selectedHex == e.value;
+                              return GestureDetector(
+                                onTap:
+                                    () => setDialogState(
+                                      () => selectedHex = e.value,
                                     ),
-                          ),
+                                child: Tooltip(
+                                  message: e.key,
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: _hexToColor(e.value),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color:
+                                            isSelected
+                                                ? PaletteColours.sageGreen
+                                                : PaletteColours.divider,
+                                        width: isSelected ? 2.5 : 1,
+                                      ),
+                                    ),
+                                    child:
+                                        isSelected
+                                            ? Icon(
+                                              Icons.check,
+                                              size: 16,
+                                              color:
+                                                  _isLightColour(e.value)
+                                                      ? PaletteColours
+                                                          .textPrimary
+                                                      : Colors.white,
+                                            )
+                                            : null,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: () async {
+                          final allPaints = await ref.read(
+                            allPaintColoursProvider.future,
+                          );
+                          if (!ctx.mounted) return;
+                          final picked =
+                              await showModalBottomSheet<PaintColour>(
+                                context: ctx,
+                                isScrollControlled: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(16),
+                                  ),
+                                ),
+                                builder:
+                                    (_) => SmartPaintColourPicker(
+                                      title: 'Find exact colour',
+                                      paintColours: allPaints,
+                                    ),
+                              );
+                          if (picked != null) {
+                            setDialogState(() => selectedHex = picked.hex);
+                          }
+                        },
+                        icon: const Icon(Icons.palette_outlined, size: 16),
+                        label: const Text('Find exact colour'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: PaletteColours.sageGreenDark,
+                        ),
+                      ),
+                      // Colour relationship hint
+                      if (heroColourHex != null) ...[
+                        Builder(
+                          builder: (ctx) {
+                            final heroLab = hexToLab(heroColourHex!);
+                            final furnitureLab = hexToLab(selectedHex);
+                            final dE = deltaE2000(heroLab, furnitureLab);
+                            final hint =
+                                dE < 5
+                                    ? 'Very close to your hero — will blend in'
+                                    : dE < 20
+                                    ? 'Tonal variation — cohesive and calm'
+                                    : dE > 45
+                                    ? 'High contrast — will stand out boldly'
+                                    : 'Moderate contrast with your hero';
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.auto_awesome,
+                                    size: 12,
+                                    color: PaletteColours.sageGreenDark,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      hint,
+                                      style: Theme.of(
+                                        ctx,
+                                      ).textTheme.bodySmall?.copyWith(
+                                        color: PaletteColours.sageGreenDark,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ],
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<FurnitureRole>(
+                        value: role,
+                        decoration: InputDecoration(
+                          labelText: 'Role in room',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        items:
+                            FurnitureRole.values.map((r) {
+                              return DropdownMenuItem(
+                                value: r,
+                                child: Text(r.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) {
+                          if (v != null) setDialogState(() => role = v);
+                        },
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Cancel'),
                     ),
-                  );
-                }),
-              ],
-              const SizedBox(height: 16),
-              DropdownButtonFormField<FurnitureRole>(
-                initialValue: role,
-                decoration: InputDecoration(
-                  labelText: 'Role in room',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                items: FurnitureRole.values.map((r) {
-                  return DropdownMenuItem(
-                      value: r, child: Text(r.displayName));
-                }).toList(),
-                onChanged: (v) {
-                  if (v != null) setDialogState(() => role = v);
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () async {
-                final name = nameController.text.trim();
-                if (name.isEmpty) return;
+                    FilledButton(
+                      onPressed: () async {
+                        final name = nameController.text.trim();
+                        if (name.isEmpty) return;
 
-                final repo = ref.read(roomRepositoryProvider);
-                await repo.insertFurniture(
-                  LockedFurnitureItemsCompanion.insert(
-                    id: const Uuid().v4(),
-                    roomId: roomId,
-                    name: name,
-                    colourHex: selectedHex,
-                    role: role,
-                    sortOrder: currentCount,
-                  ),
-                );
-                ref.invalidate(furnitureForRoomProvider(roomId));
-                if (ctx.mounted) Navigator.pop(ctx);
-              },
-              child: const Text('Lock'),
-            ),
-          ],
-        ),
-      ),
+                        final repo = ref.read(roomRepositoryProvider);
+                        await repo.insertFurniture(
+                          LockedFurnitureItemsCompanion.insert(
+                            id: const Uuid().v4(),
+                            roomId: roomId,
+                            name: name,
+                            colourHex: selectedHex,
+                            role: role,
+                            sortOrder: currentCount,
+                          ),
+                        );
+                        ref.invalidate(furnitureForRoomProvider(roomId));
+                        if (ctx.mounted) Navigator.pop(ctx);
+                      },
+                      child: const Text('Lock'),
+                    ),
+                  ],
+                ),
+          ),
     );
   }
-
 }
 
 class _DashColourRow extends ConsumerWidget {
@@ -1699,11 +1746,12 @@ class _DashColourRow extends ConsumerWidget {
         final allPaintsAsync = ref.watch(allPaintColoursProvider);
         return allPaintsAsync.when(
           data: (allPaints) {
-            final excludeHexes = {
-              room.heroColourHex,
-              room.betaColourHex,
-              room.surpriseColourHex,
-            }.whereType<String>().toSet();
+            final excludeHexes =
+                {
+                  room.heroColourHex,
+                  room.betaColourHex,
+                  room.surpriseColourHex,
+                }.whereType<String>().toSet();
 
             // Find the closest paint to any thread hex, excluding plan colours
             PaintColour? dashPaint;
@@ -1808,8 +1856,9 @@ class _RoomChecklist extends ConsumerWidget {
       error: (_, __) => false,
     );
     final hasRedThread = coherenceAsync.when(
-      data: (report) =>
-          report.results.any((r) => r.roomId == room.id && r.isConnected),
+      data:
+          (report) =>
+              report.results.any((r) => r.roomId == room.id && r.isConnected),
       loading: () => false,
       error: (_, __) => false,
     );
@@ -1839,9 +1888,7 @@ class _RoomChecklist extends ConsumerWidget {
         label: config.checklistWhiteLabel,
         done: false,
         actionLabel: config.checklistWhiteAction,
-        onAction: () => context.push(
-          '/explore/white-finder?roomId=${room.id}',
-        ),
+        onAction: () => context.push('/explore/white-finder?roomId=${room.id}'),
         isInformational: true,
       ),
       _ChecklistItem(
@@ -1851,8 +1898,10 @@ class _RoomChecklist extends ConsumerWidget {
         onAction: () {
           final ctx = _furnitureSectionKey.currentContext;
           if (ctx != null) {
-            Scrollable.ensureVisible(ctx,
-                duration: const Duration(milliseconds: 300));
+            Scrollable.ensureVisible(
+              ctx,
+              duration: const Duration(milliseconds: 300),
+            );
           }
         },
       ),
@@ -1879,16 +1928,16 @@ class _RoomChecklist extends ConsumerWidget {
             children: [
               Text(
                 'Room checklist',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(width: 8),
               Text(
                 '$completed/${items.length}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: PaletteColours.textSecondary,
-                    ),
+                  color: PaletteColours.textSecondary,
+                ),
               ),
             ],
           ),
@@ -1913,9 +1962,18 @@ class _RoomChecklist extends ConsumerWidget {
   }
 
   Widget _buildChecklistRow(BuildContext context, _ChecklistItem item) {
-    final icon = item.done
-        ? const Icon(Icons.check_circle, size: 18, color: PaletteColours.sageGreen)
-        : Icon(Icons.circle_outlined, size: 18, color: PaletteColours.textTertiary);
+    final icon =
+        item.done
+            ? const Icon(
+              Icons.check_circle,
+              size: 18,
+              color: PaletteColours.sageGreen,
+            )
+            : const Icon(
+              Icons.circle_outlined,
+              size: 18,
+              color: PaletteColours.textTertiary,
+            );
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -1927,10 +1985,11 @@ class _RoomChecklist extends ConsumerWidget {
             child: Text(
               item.label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: item.done
+                color:
+                    item.done
                         ? PaletteColours.textPrimary
                         : PaletteColours.textSecondary,
-                  ),
+              ),
             ),
           ),
           if (!item.done && item.actionLabel != null && item.onAction != null)
@@ -1939,9 +1998,9 @@ class _RoomChecklist extends ConsumerWidget {
               child: Text(
                 item.actionLabel!,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: PaletteColours.sageGreenDark,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: PaletteColours.sageGreenDark,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
         ],
@@ -2017,15 +2076,18 @@ class _WhyThisRoomWorksCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.auto_awesome,
-                    size: 16, color: PaletteColours.sageGreenDark),
+                const Icon(
+                  Icons.auto_awesome,
+                  size: 16,
+                  color: PaletteColours.sageGreenDark,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Why this works',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: PaletteColours.sageGreenDark,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: PaletteColours.sageGreenDark,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -2033,8 +2095,8 @@ class _WhyThisRoomWorksCard extends ConsumerWidget {
             Text(
               story.summary,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: PaletteColours.textPrimary,
-                  ),
+                color: PaletteColours.textPrimary,
+              ),
             ),
           ],
         ),
@@ -2095,110 +2157,117 @@ void _showRoomEditSheet(BuildContext context, WidgetRef ref, Room room) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setSheetState) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          24,
-          24,
-          24 + MediaQuery.of(ctx).viewInsets.bottom,
+    builder:
+        (ctx) => StatefulBuilder(
+          builder:
+              (ctx, setSheetState) => Padding(
+                padding: EdgeInsets.fromLTRB(
+                  24,
+                  24,
+                  24,
+                  24 + MediaQuery.of(ctx).viewInsets.bottom,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Edit Room',
+                      style: Theme.of(ctx).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      initialValue: name,
+                      decoration: const InputDecoration(
+                        labelText: 'Room name',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (v) => name = v,
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<CompassDirection>(
+                      value: direction,
+                      decoration: const InputDecoration(
+                        labelText: 'Window direction',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          CompassDirection.values.map((d) {
+                            return DropdownMenuItem(
+                              value: d,
+                              child: Text(d.displayName),
+                            );
+                          }).toList(),
+                      onChanged: (v) => setSheetState(() => direction = v),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<UsageTime>(
+                      value: usageTime,
+                      decoration: const InputDecoration(
+                        labelText: 'Primary usage time',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          UsageTime.values.map((t) {
+                            return DropdownMenuItem(
+                              value: t,
+                              child: Text(t.displayName),
+                            );
+                          }).toList(),
+                      onChanged: (v) {
+                        if (v != null) setSheetState(() => usageTime = v);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<BudgetBracket>(
+                      value: budget,
+                      decoration: const InputDecoration(
+                        labelText: 'Budget bracket',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          BudgetBracket.values.map((b) {
+                            return DropdownMenuItem(
+                              value: b,
+                              child: Text(b.displayName),
+                            );
+                          }).toList(),
+                      onChanged: (v) {
+                        if (v != null) setSheetState(() => budget = v);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      title: const Text('Renter Mode'),
+                      subtitle: const Text(
+                        'Focus on furniture and accessories',
+                      ),
+                      value: isRenterMode,
+                      onChanged: (v) => setSheetState(() => isRenterMode = v),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () async {
+                        final repo = ref.read(roomRepositoryProvider);
+                        await repo.updateRoom(
+                          RoomsCompanion(
+                            id: Value(room.id),
+                            name: Value(name),
+                            direction: Value(direction),
+                            usageTime: Value(usageTime),
+                            moods: Value(room.moods),
+                            budget: Value(budget),
+                            isRenterMode: Value(isRenterMode),
+                            updatedAt: Value(DateTime.now()),
+                          ),
+                        );
+                        if (ctx.mounted) Navigator.of(ctx).pop();
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Edit Room',
-              style: Theme.of(ctx).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              initialValue: name,
-              decoration: const InputDecoration(
-                labelText: 'Room name',
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (v) => name = v,
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<CompassDirection>(
-              initialValue: direction,
-              decoration: const InputDecoration(
-                labelText: 'Window direction',
-                border: OutlineInputBorder(),
-              ),
-              items: CompassDirection.values.map((d) {
-                return DropdownMenuItem(
-                  value: d,
-                  child: Text(d.displayName),
-                );
-              }).toList(),
-              onChanged: (v) => setSheetState(() => direction = v),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<UsageTime>(
-              initialValue: usageTime,
-              decoration: const InputDecoration(
-                labelText: 'Primary usage time',
-                border: OutlineInputBorder(),
-              ),
-              items: UsageTime.values.map((t) {
-                return DropdownMenuItem(
-                  value: t,
-                  child: Text(t.displayName),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) setSheetState(() => usageTime = v);
-              },
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<BudgetBracket>(
-              initialValue: budget,
-              decoration: const InputDecoration(
-                labelText: 'Budget bracket',
-                border: OutlineInputBorder(),
-              ),
-              items: BudgetBracket.values.map((b) {
-                return DropdownMenuItem(
-                  value: b,
-                  child: Text(b.displayName),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) setSheetState(() => budget = v);
-              },
-            ),
-            const SizedBox(height: 12),
-            SwitchListTile(
-              title: const Text('Renter Mode'),
-              subtitle: const Text('Focus on furniture and accessories'),
-              value: isRenterMode,
-              onChanged: (v) => setSheetState(() => isRenterMode = v),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () async {
-                final repo = ref.read(roomRepositoryProvider);
-                await repo.updateRoom(
-                  RoomsCompanion(
-                    id: Value(room.id),
-                    name: Value(name),
-                    direction: Value(direction),
-                    usageTime: Value(usageTime),
-                    moods: Value(room.moods),
-                    budget: Value(budget),
-                    isRenterMode: Value(isRenterMode),
-                    updatedAt: Value(DateTime.now()),
-                  ),
-                );
-                if (ctx.mounted) Navigator.of(ctx).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        ),
-      ),
-    ),
   );
 }

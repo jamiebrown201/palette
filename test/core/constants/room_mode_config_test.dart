@@ -17,10 +17,7 @@ void main() {
       // set to owner mode regardless of the user's global tenure.
       final config = RoomModeConfig.forRoom(
         isRenterMode: false,
-        constraints: const RenterConstraints(
-          isRenter: true,
-          canPaint: false,
-        ),
+        constraints: const RenterConstraints(isRenter: true, canPaint: false),
       );
       expect(identical(config, RoomModeConfig.owner), isTrue);
     });
@@ -28,10 +25,7 @@ void main() {
     test('returns renterCanPaint when renter can paint', () {
       final config = RoomModeConfig.forRoom(
         isRenterMode: true,
-        constraints: const RenterConstraints(
-          isRenter: true,
-          canPaint: true,
-        ),
+        constraints: const RenterConstraints(isRenter: true, canPaint: true),
       );
       expect(identical(config, RoomModeConfig.renterCanPaint), isTrue);
     });
@@ -48,26 +42,26 @@ void main() {
     test('returns renterCantPaint when walls are locked', () {
       final config = RoomModeConfig.forRoom(
         isRenterMode: true,
-        constraints: const RenterConstraints(
-          isRenter: true,
-          canPaint: false,
-        ),
+        constraints: const RenterConstraints(isRenter: true, canPaint: false),
       );
       expect(identical(config, RoomModeConfig.renterCantPaint), isTrue);
     });
 
-    test('returns renterCanPaint when isRenter is false but room is renter', () {
-      // Edge case: room toggled to renter mode but user hasn't set tenure.
-      // wallsAreLocked requires isRenter && canPaint == false.
-      final config = RoomModeConfig.forRoom(
-        isRenterMode: true,
-        constraints: const RenterConstraints(
-          isRenter: false,
-          canPaint: false,
-        ),
-      );
-      expect(identical(config, RoomModeConfig.renterCanPaint), isTrue);
-    });
+    test(
+      'returns renterCanPaint when isRenter is false but room is renter',
+      () {
+        // Edge case: room toggled to renter mode but user hasn't set tenure.
+        // wallsAreLocked requires isRenter && canPaint == false.
+        final config = RoomModeConfig.forRoom(
+          isRenterMode: true,
+          constraints: const RenterConstraints(
+            isRenter: false,
+            canPaint: false,
+          ),
+        );
+        expect(identical(config, RoomModeConfig.renterCanPaint), isTrue);
+      },
+    );
   });
 
   group('RoomModeConfig.owner', () {

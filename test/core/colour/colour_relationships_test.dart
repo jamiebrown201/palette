@@ -77,14 +77,8 @@ void main() {
         return diff;
       }
 
-      expect(
-        normaliseDiff(secondLch.h - originalLch.h),
-        closeTo(120, 0.01),
-      );
-      expect(
-        normaliseDiff(thirdLch.h - originalLch.h),
-        closeTo(-120, 0.01),
-      );
+      expect(normaliseDiff(secondLch.h - originalLch.h), closeTo(120, 0.01));
+      expect(normaliseDiff(thirdLch.h - originalLch.h), closeTo(-120, 0.01));
     });
   });
 
@@ -106,14 +100,8 @@ void main() {
         return diff;
       }
 
-      expect(
-        normaliseDiff(leftLch.h - originalLch.h),
-        closeTo(150, 0.01),
-      );
-      expect(
-        normaliseDiff(rightLch.h - originalLch.h),
-        closeTo(-150, 0.01),
-      );
+      expect(normaliseDiff(leftLch.h - originalLch.h), closeTo(150, 0.01));
+      expect(normaliseDiff(rightLch.h - originalLch.h), closeTo(-150, 0.01));
     });
   });
 

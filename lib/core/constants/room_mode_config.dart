@@ -49,7 +49,8 @@ class RoomModeConfig {
   static const owner = RoomModeConfig._(
     modeBadge: null,
     showWallAsFixedContext: false,
-    heroPrompt: 'Pick one colour you love — this will set '
+    heroPrompt:
+        'Pick one colour you love — this will set '
         'the tone for the whole room.',
     heroButtonLabel: 'Choose your hero colour',
     showLandlordPresets: false,
@@ -73,7 +74,8 @@ class RoomModeConfig {
   static const renterCanPaint = RoomModeConfig._(
     modeBadge: 'Renter',
     showWallAsFixedContext: false,
-    heroPrompt: 'Match your existing wall colour, or pick one '
+    heroPrompt:
+        'Match your existing wall colour, or pick one '
         'your landlord has approved.',
     heroButtonLabel: 'Match your wall colour',
     showLandlordPresets: true,
@@ -90,7 +92,8 @@ class RoomModeConfig {
     finderTitle: 'White Finder',
     finderIntro: 'Find the right white for your walls',
     finderSwatchAction: 'Buy this paint',
-    moodSentenceTemplate: 'paint and furnishings you can update '
+    moodSentenceTemplate:
+        'paint and furnishings you can update '
         'within your rental',
     redThreadMedium: 'paint and furnishings',
   );
@@ -98,7 +101,8 @@ class RoomModeConfig {
   static const renterCantPaint = RoomModeConfig._(
     modeBadge: 'Renter Edition',
     showWallAsFixedContext: true,
-    heroPrompt: 'Choose the colour of your largest textile — '
+    heroPrompt:
+        'Choose the colour of your largest textile — '
         'a rug, sofa, or bedding.',
     heroButtonLabel: 'Choose your key textile colour',
     showLandlordPresets: false,
@@ -115,7 +119,8 @@ class RoomModeConfig {
     finderTitle: 'Neutral Finder',
     finderIntro: 'Find a neutral base for your textiles',
     finderSwatchAction: 'Use this neutral',
-    moodSentenceTemplate: 'all through furniture and textiles '
+    moodSentenceTemplate:
+        'all through furniture and textiles '
         'you can take with you',
     redThreadMedium: 'furnishings and textiles',
   );

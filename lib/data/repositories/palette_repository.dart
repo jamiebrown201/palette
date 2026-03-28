@@ -34,8 +34,7 @@ class PaletteRepository {
 
   Future<void> deleteAllForResult(String colourDnaResultId) =>
       (_db.delete(_db.paletteColours)
-            ..where((t) => t.colourDnaResultId.equals(colourDnaResultId)))
-          .go();
+        ..where((t) => t.colourDnaResultId.equals(colourDnaResultId))).go();
 
   /// Check if adding a colour would clash with existing palette colours.
   ///

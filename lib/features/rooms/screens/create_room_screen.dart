@@ -107,8 +107,11 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   ),
                   const SizedBox(height: 16),
                   if (detected != null) ...[
-                    const Icon(Icons.explore,
-                        size: 48, color: PaletteColours.sageGreen),
+                    const Icon(
+                      Icons.explore,
+                      size: 48,
+                      color: PaletteColours.sageGreen,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       '${detected!.displayName}-facing',
@@ -210,8 +213,8 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   child: Text(
                     '${_currentStep + 1} of $_totalSteps',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: PaletteColours.textTertiary,
-                        ),
+                      color: PaletteColours.textTertiary,
+                    ),
                   ),
                 ),
               ],
@@ -228,8 +231,8 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   Text(
                     _stepTitles[_currentStep],
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   AnimatedSwitcher(
@@ -253,8 +256,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                         onPressed: _back,
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side:
-                              const BorderSide(color: PaletteColours.divider),
+                          side: const BorderSide(color: PaletteColours.divider),
                         ),
                         child: const Text('Back'),
                       ),
@@ -332,10 +334,10 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
 
 class _NameStep extends StatelessWidget {
   const _NameStep({
-    super.key,
     required this.controller,
     required this.presetNames,
     required this.onChanged,
+    super.key,
   });
 
   final TextEditingController controller;
@@ -351,9 +353,7 @@ class _NameStep extends StatelessWidget {
           controller: controller,
           decoration: InputDecoration(
             hintText: 'Enter room name',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           textCapitalization: TextCapitalization.words,
           onChanged: (_) => onChanged(),
@@ -362,25 +362,26 @@ class _NameStep extends StatelessWidget {
         Text(
           'Or pick a preset:',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: PaletteColours.textSecondary,
-              ),
+            color: PaletteColours.textSecondary,
+          ),
         ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: presetNames.map((name) {
-            final isSelected = controller.text == name;
-            return ChoiceChip(
-              label: Text(name),
-              selected: isSelected,
-              selectedColor: PaletteColours.sageGreenLight,
-              onSelected: (_) {
-                controller.text = name;
-                onChanged();
-              },
-            );
-          }).toList(),
+          children:
+              presetNames.map((name) {
+                final isSelected = controller.text == name;
+                return ChoiceChip(
+                  label: Text(name),
+                  selected: isSelected,
+                  selectedColor: PaletteColours.sageGreenLight,
+                  onSelected: (_) {
+                    controller.text = name;
+                    onChanged();
+                  },
+                );
+              }).toList(),
         ),
       ],
     );
@@ -389,10 +390,10 @@ class _NameStep extends StatelessWidget {
 
 class _DirectionStep extends StatelessWidget {
   const _DirectionStep({
-    super.key,
     required this.direction,
     required this.onDirectionChanged,
     required this.onDetectWithCompass,
+    super.key,
   });
 
   final CompassDirection? direction;
@@ -413,9 +414,9 @@ class _DirectionStep extends StatelessWidget {
       children: [
         Text(
           'Which way does the main window face?',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: PaletteColours.textSecondary,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: PaletteColours.textSecondary),
         ),
         const SizedBox(height: 16),
         // Direction grid
@@ -426,53 +427,60 @@ class _DirectionStep extends StatelessWidget {
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
           childAspectRatio: 2.2,
-          children: CompassDirection.values.map((dir) {
-            final isSelected = direction == dir;
-            return Material(
-              color: isSelected
-                  ? PaletteColours.sageGreenLight
-                  : PaletteColours.cardBackground,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => onDirectionChanged(dir),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  decoration: BoxDecoration(
+          children:
+              CompassDirection.values.map((dir) {
+                final isSelected = direction == dir;
+                return Material(
+                  color:
+                      isSelected
+                          ? PaletteColours.sageGreenLight
+                          : PaletteColours.cardBackground,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () => onDirectionChanged(dir),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected
-                          ? PaletteColours.sageGreen
-                          : PaletteColours.divider,
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        _directionIcons[dir],
-                        size: 20,
-                        color: isSelected
-                            ? PaletteColours.sageGreenDark
-                            : PaletteColours.textSecondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        dir.displayName,
-                        style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected
-                              ? PaletteColours.sageGreenDark
-                              : PaletteColours.textPrimary,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color:
+                              isSelected
+                                  ? PaletteColours.sageGreen
+                                  : PaletteColours.divider,
+                          width: isSelected ? 2 : 1,
                         ),
                       ),
-                    ],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _directionIcons[dir],
+                            size: 20,
+                            color:
+                                isSelected
+                                    ? PaletteColours.sageGreenDark
+                                    : PaletteColours.textSecondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            dir.displayName,
+                            style: TextStyle(
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                              color:
+                                  isSelected
+                                      ? PaletteColours.sageGreenDark
+                                      : PaletteColours.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
         ),
         const SizedBox(height: 16),
         Row(
@@ -497,9 +505,9 @@ class _DirectionStep extends StatelessWidget {
 
 class _UsageTimeStep extends StatelessWidget {
   const _UsageTimeStep({
-    super.key,
     required this.usageTime,
     required this.onChanged,
+    super.key,
   });
 
   final UsageTime usageTime;
@@ -515,71 +523,76 @@ class _UsageTimeStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: UsageTime.values.map((time) {
-        final isSelected = usageTime == time;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Material(
-            color: isSelected
-                ? PaletteColours.sageGreenLight
-                : PaletteColours.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () => onChanged(time),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
+      children:
+          UsageTime.values.map((time) {
+            final isSelected = usageTime == time;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Material(
+                color:
+                    isSelected
+                        ? PaletteColours.sageGreenLight
+                        : PaletteColours.cardBackground,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: () => onChanged(time),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected
-                        ? PaletteColours.sageGreen
-                        : PaletteColours.divider,
-                    width: isSelected ? 2 : 1,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            isSelected
+                                ? PaletteColours.sageGreen
+                                : PaletteColours.divider,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _usageIcons[time],
+                          color:
+                              isSelected
+                                  ? PaletteColours.sageGreenDark
+                                  : PaletteColours.textSecondary,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          time.displayName,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            fontWeight:
+                                isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (isSelected)
+                          const Icon(
+                            Icons.check_circle,
+                            color: PaletteColours.sageGreen,
+                            size: 22,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _usageIcons[time],
-                      color: isSelected
-                          ? PaletteColours.sageGreenDark
-                          : PaletteColours.textSecondary,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      time.displayName,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
-                    ),
-                    const Spacer(),
-                    if (isSelected)
-                      const Icon(
-                        Icons.check_circle,
-                        color: PaletteColours.sageGreen,
-                        size: 22,
-                      ),
-                  ],
-                ),
               ),
-            ),
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 }
 
 class _MoodStep extends StatelessWidget {
-  const _MoodStep({
-    super.key,
-    required this.moods,
-    required this.onToggle,
-  });
+  const _MoodStep({required this.moods, required this.onToggle, super.key});
 
   final Set<RoomMood> moods;
   final void Function(RoomMood mood, bool selected) onToggle;
@@ -591,25 +604,29 @@ class _MoodStep extends StatelessWidget {
       children: [
         Text(
           'Choose up to 3',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: PaletteColours.textSecondary,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: PaletteColours.textSecondary),
         ),
         const SizedBox(height: 16),
         Wrap(
           spacing: 8,
           runSpacing: 10,
-          children: RoomMood.values.map((mood) {
-            final isSelected = moods.contains(mood);
-            return FilterChip(
-              label: Text(mood.displayName),
-              selected: isSelected,
-              onSelected: (selected) => onToggle(mood, selected),
-              selectedColor: PaletteColours.sageGreenLight,
-              checkmarkColor: PaletteColours.sageGreenDark,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            );
-          }).toList(),
+          children:
+              RoomMood.values.map((mood) {
+                final isSelected = moods.contains(mood);
+                return FilterChip(
+                  label: Text(mood.displayName),
+                  selected: isSelected,
+                  onSelected: (selected) => onToggle(mood, selected),
+                  selectedColor: PaletteColours.sageGreenLight,
+                  checkmarkColor: PaletteColours.sageGreenDark,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
+                );
+              }).toList(),
         ),
         if (moods.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -621,15 +638,18 @@ class _MoodStep extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.auto_awesome,
-                    size: 16, color: PaletteColours.sageGreen),
+                const Icon(
+                  Icons.auto_awesome,
+                  size: 16,
+                  color: PaletteColours.sageGreen,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Selected: ${moods.map((m) => m.displayName).join(', ')}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: PaletteColours.sageGreenDark,
-                        ),
+                      color: PaletteColours.sageGreenDark,
+                    ),
                   ),
                 ),
               ],
@@ -643,11 +663,11 @@ class _MoodStep extends StatelessWidget {
 
 class _BudgetStep extends StatelessWidget {
   const _BudgetStep({
-    super.key,
     required this.budget,
     required this.isRenterMode,
     required this.onBudgetChanged,
     required this.onRenterChanged,
+    super.key,
   });
 
   final BudgetBracket budget;
@@ -662,9 +682,9 @@ class _BudgetStep extends StatelessWidget {
       children: [
         Text(
           'Budget',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 10),
         ...BudgetBracket.values.map((bracket) {
@@ -672,22 +692,26 @@ class _BudgetStep extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Material(
-              color: isSelected
-                  ? PaletteColours.sageGreenLight
-                  : PaletteColours.cardBackground,
+              color:
+                  isSelected
+                      ? PaletteColours.sageGreenLight
+                      : PaletteColours.cardBackground,
               borderRadius: BorderRadius.circular(12),
               child: InkWell(
                 onTap: () => onBudgetChanged(bracket),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected
-                          ? PaletteColours.sageGreen
-                          : PaletteColours.divider,
+                      color:
+                          isSelected
+                              ? PaletteColours.sageGreen
+                              : PaletteColours.divider,
                       width: isSelected ? 2 : 1,
                     ),
                   ),
@@ -695,12 +719,10 @@ class _BudgetStep extends StatelessWidget {
                     children: [
                       Text(
                         bracket.displayName,
-                        style:
-                            Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                        ),
                       ),
                       const Spacer(),
                       if (isSelected)
@@ -722,9 +744,10 @@ class _BudgetStep extends StatelessWidget {
             color: PaletteColours.cardBackground,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isRenterMode
-                  ? PaletteColours.sageGreen
-                  : PaletteColours.divider,
+              color:
+                  isRenterMode
+                      ? PaletteColours.sageGreen
+                      : PaletteColours.divider,
             ),
           ),
           child: SwitchListTile(

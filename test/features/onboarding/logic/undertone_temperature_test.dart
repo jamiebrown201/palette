@@ -9,68 +9,47 @@ void main() {
     });
 
     test('single entry returns that undertone', () {
-      expect(
-        deriveUndertoneTemperature({Undertone.warm: 5}),
-        Undertone.warm,
-      );
+      expect(deriveUndertoneTemperature({Undertone.warm: 5}), Undertone.warm);
     });
 
     test('clear warm winner returns warm', () {
       expect(
-        deriveUndertoneTemperature({
-          Undertone.warm: 10,
-          Undertone.cool: 3,
-        }),
+        deriveUndertoneTemperature({Undertone.warm: 10, Undertone.cool: 3}),
         Undertone.warm,
       );
     });
 
     test('clear cool winner returns cool', () {
       expect(
-        deriveUndertoneTemperature({
-          Undertone.cool: 8,
-          Undertone.warm: 2,
-        }),
+        deriveUndertoneTemperature({Undertone.cool: 8, Undertone.warm: 2}),
         Undertone.cool,
       );
     });
 
     test('gap of exactly 2 returns neutral', () {
       expect(
-        deriveUndertoneTemperature({
-          Undertone.warm: 7,
-          Undertone.cool: 5,
-        }),
+        deriveUndertoneTemperature({Undertone.warm: 7, Undertone.cool: 5}),
         Undertone.neutral,
       );
     });
 
     test('gap of 1 returns neutral', () {
       expect(
-        deriveUndertoneTemperature({
-          Undertone.warm: 6,
-          Undertone.cool: 5,
-        }),
+        deriveUndertoneTemperature({Undertone.warm: 6, Undertone.cool: 5}),
         Undertone.neutral,
       );
     });
 
     test('tied scores return neutral', () {
       expect(
-        deriveUndertoneTemperature({
-          Undertone.warm: 5,
-          Undertone.cool: 5,
-        }),
+        deriveUndertoneTemperature({Undertone.warm: 5, Undertone.cool: 5}),
         Undertone.neutral,
       );
     });
 
     test('gap of 3 returns the winner', () {
       expect(
-        deriveUndertoneTemperature({
-          Undertone.cool: 8,
-          Undertone.warm: 5,
-        }),
+        deriveUndertoneTemperature({Undertone.cool: 8, Undertone.warm: 5}),
         Undertone.cool,
       );
     });
@@ -100,10 +79,7 @@ void main() {
     });
 
     test('single bold entry returns bold', () {
-      expect(
-        deriveSaturationPreference({ChromaBand.bold: 3}),
-        ChromaBand.bold,
-      );
+      expect(deriveSaturationPreference({ChromaBand.bold: 3}), ChromaBand.bold);
     });
 
     test('clear muted winner returns muted', () {
@@ -119,30 +95,21 @@ void main() {
 
     test('clear bold winner returns bold', () {
       expect(
-        deriveSaturationPreference({
-          ChromaBand.bold: 7,
-          ChromaBand.muted: 2,
-        }),
+        deriveSaturationPreference({ChromaBand.bold: 7, ChromaBand.muted: 2}),
         ChromaBand.bold,
       );
     });
 
     test('tied top two returns mid', () {
       expect(
-        deriveSaturationPreference({
-          ChromaBand.muted: 5,
-          ChromaBand.bold: 5,
-        }),
+        deriveSaturationPreference({ChromaBand.muted: 5, ChromaBand.bold: 5}),
         ChromaBand.mid,
       );
     });
 
     test('tied muted and mid returns mid', () {
       expect(
-        deriveSaturationPreference({
-          ChromaBand.muted: 4,
-          ChromaBand.mid: 4,
-        }),
+        deriveSaturationPreference({ChromaBand.muted: 4, ChromaBand.mid: 4}),
         ChromaBand.mid,
       );
     });
@@ -150,10 +117,7 @@ void main() {
     test('deterministic tiebreaker uses enum index', () {
       // If bold and muted are tied, mid is returned (not dependent on index)
       expect(
-        deriveSaturationPreference({
-          ChromaBand.bold: 6,
-          ChromaBand.muted: 6,
-        }),
+        deriveSaturationPreference({ChromaBand.bold: 6, ChromaBand.muted: 6}),
         ChromaBand.mid,
       );
     });

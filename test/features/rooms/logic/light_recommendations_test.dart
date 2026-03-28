@@ -122,14 +122,17 @@ void main() {
     test('returns recommendation for every direction+time combo', () {
       for (final dir in CompassDirection.values) {
         for (final time in UsageTime.values) {
-          final rec = getLightRecommendation(
-            direction: dir,
-            usageTime: time,
+          final rec = getLightRecommendation(direction: dir, usageTime: time);
+          expect(
+            rec.summary,
+            isNotEmpty,
+            reason: '$dir/$time should have a summary',
           );
-          expect(rec.summary, isNotEmpty,
-              reason: '$dir/$time should have a summary');
-          expect(rec.recommendation, isNotEmpty,
-              reason: '$dir/$time should have a recommendation');
+          expect(
+            rec.recommendation,
+            isNotEmpty,
+            reason: '$dir/$time should have a recommendation',
+          );
         }
       }
     });
@@ -140,8 +143,11 @@ void main() {
       for (final dir in CompassDirection.values) {
         final summary = getLightDirectionSummary(dir);
         expect(summary, isNotEmpty);
-        expect(summary.contains('-facing'), isTrue,
-            reason: 'Summary for $dir should mention facing');
+        expect(
+          summary.contains('-facing'),
+          isTrue,
+          reason: 'Summary for $dir should mention facing',
+        );
       }
     });
 

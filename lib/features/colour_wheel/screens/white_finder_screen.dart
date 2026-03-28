@@ -48,12 +48,13 @@ class WhiteFinderScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(finderTitle)),
       body: whitesAsync.when(
-        data: (grouped) => _WhiteFinderContent(
-          grouped: grouped,
-          roomDirection: roomDirection,
-          dnaUndertone: dna?.undertoneTemperature,
-          trimWhiteHex: systemPalette?.trimWhite.hex,
-        ),
+        data:
+            (grouped) => _WhiteFinderContent(
+              grouped: grouped,
+              roomDirection: roomDirection,
+              dnaUndertone: dna?.undertoneTemperature,
+              trimWhiteHex: systemPalette?.trimWhite.hex,
+            ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
@@ -77,8 +78,7 @@ class _WhiteFinderContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Determine recommended undertone families based on room direction
-    final directionRecommended =
-        _getRecommendedWhiteUndertones(roomDirection);
+    final directionRecommended = _getRecommendedWhiteUndertones(roomDirection);
     final dnaRecommended = _getDnaRecommendedWhiteUndertones(dnaUndertone);
     final recommended = {...directionRecommended, ...dnaRecommended};
 
@@ -139,34 +139,37 @@ class _WhiteFinderContent extends StatelessWidget {
                       Container(
                         margin: const EdgeInsets.only(right: 6),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: PaletteColours.softGoldLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           'DNA Match',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: PaletteColours.softGold,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(
+                            color: PaletteColours.softGold,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     if (isDirectionMatch)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: PaletteColours.sageGreenLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           'Recommended',
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: PaletteColours.sageGreenDark,
-                                  ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(color: PaletteColours.sageGreenDark),
                         ),
                       ),
                   ],
@@ -185,7 +188,8 @@ class _WhiteFinderContent extends StatelessWidget {
   }
 
   static Set<WhiteUndertone> _getRecommendedWhiteUndertones(
-      CompassDirection? direction) {
+    CompassDirection? direction,
+  ) {
     if (direction == null) return {};
 
     return switch (direction) {
@@ -201,7 +205,8 @@ class _WhiteFinderContent extends StatelessWidget {
   }
 
   static Set<WhiteUndertone> _getDnaRecommendedWhiteUndertones(
-      Undertone? undertone) {
+    Undertone? undertone,
+  ) {
     if (undertone == null || undertone == Undertone.neutral) return {};
 
     return switch (undertone) {
@@ -212,7 +217,9 @@ class _WhiteFinderContent extends StatelessWidget {
   }
 
   static List<PaintColour> _sortByTrimWhiteProximity(
-      List<PaintColour> whites, String trimHex) {
+    List<PaintColour> whites,
+    String trimHex,
+  ) {
     final cleanHex = trimHex.replaceAll('#', '');
     final r = int.parse(cleanHex.substring(0, 2), radix: 16);
     final g = int.parse(cleanHex.substring(2, 4), radix: 16);
@@ -263,15 +270,17 @@ class _PaperTestCardState extends State<_PaperTestCard> {
           children: [
             Row(
               children: [
-                const Icon(Icons.lightbulb_outline,
-                    color: PaletteColours.softGold),
+                const Icon(
+                  Icons.lightbulb_outline,
+                  color: PaletteColours.softGold,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     "Sowerby's Paper Test",
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Icon(
@@ -293,8 +302,8 @@ class _PaperTestCardState extends State<_PaperTestCard> {
                 'If it looks blue or grey, it has a cool undertone. '
                 'This simple test reveals the hidden personality of any white.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: PaletteColours.textSecondary,
-                    ),
+                  color: PaletteColours.textSecondary,
+                ),
               ),
             ],
           ],
@@ -305,10 +314,7 @@ class _PaperTestCardState extends State<_PaperTestCard> {
 }
 
 class _DirectionHint extends StatefulWidget {
-  const _DirectionHint({
-    required this.direction,
-    required this.recommended,
-  });
+  const _DirectionHint({required this.direction, required this.recommended});
 
   final CompassDirection direction;
   final Set<WhiteUndertone> recommended;
@@ -359,8 +365,10 @@ class _DirectionHintState extends State<_DirectionHint> {
           children: [
             Row(
               children: [
-                const Icon(Icons.explore_outlined,
-                    color: PaletteColours.sageGreen),
+                const Icon(
+                  Icons.explore_outlined,
+                  color: PaletteColours.sageGreen,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -382,8 +390,8 @@ class _DirectionHintState extends State<_DirectionHint> {
                 child: Text(
                   detail,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PaletteColours.textSecondary,
-                      ),
+                    color: PaletteColours.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -418,8 +426,11 @@ class _DnaHint extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.auto_awesome_outlined,
-              color: PaletteColours.softGold, size: 20),
+          const Icon(
+            Icons.auto_awesome_outlined,
+            color: PaletteColours.softGold,
+            size: 20,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -472,8 +483,7 @@ class _WhiteSwatch extends StatelessWidget {
               alignment: Alignment.topRight,
               child: Container(
                 margin: const EdgeInsets.all(4),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(4),
@@ -481,10 +491,10 @@ class _WhiteSwatch extends StatelessWidget {
                 child: Text(
                   colour.undertone.badge,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: PaletteColours.textSecondary,
-                      ),
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: PaletteColours.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -500,9 +510,9 @@ class _WhiteSwatch extends StatelessWidget {
           Text(
             colour.brand,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textTertiary,
-                  fontSize: 10,
-                ),
+              color: PaletteColours.textTertiary,
+              fontSize: 10,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),

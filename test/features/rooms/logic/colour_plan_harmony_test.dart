@@ -13,8 +13,7 @@ void main() {
       );
       expect(result.verdict, contains('Complementary'));
       expect(result.relationships, isNotEmpty);
-      expect(result.relationships.first.type,
-          ColourRelationship.complementary);
+      expect(result.relationships.first.type, ColourRelationship.complementary);
       expect(result.explanation, contains('opposite'));
     });
 
@@ -26,8 +25,7 @@ void main() {
       );
       expect(result.verdict, contains('Analogous'));
       expect(result.relationships, isNotEmpty);
-      expect(
-          result.relationships.first.type, ColourRelationship.analogous);
+      expect(result.relationships.first.type, ColourRelationship.analogous);
       expect(result.explanation, contains('next to each other'));
     });
 
@@ -51,8 +49,7 @@ void main() {
       expect(
         result.relationships.isNotEmpty || result.warning != null,
         isTrue,
-        reason:
-            'Should detect a relationship or warn about bold combination',
+        reason: 'Should detect a relationship or warn about bold combination',
       );
     });
 

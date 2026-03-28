@@ -83,8 +83,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Tab-based navigation
       StatefulShellRoute.indexedStack(
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state, navigationShell) =>
-            AppShell(navigationShell: navigationShell),
+        builder:
+            (context, state, navigationShell) =>
+                AppShell(navigationShell: navigationShell),
         branches: [
           // Tab 0: Home
           StatefulShellBranch(
@@ -107,9 +108,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':roomId',
-                    builder: (context, state) => RoomDetailScreen(
-                      roomId: state.pathParameters['roomId']!,
-                    ),
+                    builder:
+                        (context, state) => RoomDetailScreen(
+                          roomId: state.pathParameters['roomId']!,
+                        ),
                   ),
                 ],
               ),
@@ -141,9 +143,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'white-finder',
-                    builder: (context, state) => WhiteFinderScreen(
-                      roomId: state.uri.queryParameters['roomId'],
-                    ),
+                    builder:
+                        (context, state) => WhiteFinderScreen(
+                          roomId: state.uri.queryParameters['roomId'],
+                        ),
                   ),
                   GoRoute(
                     path: 'paint-library',

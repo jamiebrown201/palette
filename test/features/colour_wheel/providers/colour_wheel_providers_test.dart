@@ -133,10 +133,12 @@ void main() {
       ];
 
       // Filter logic from provider: lrv > 70 or name contains 'white'
-      final whites = colours
-          .where(
-              (pc) => pc.lrv > 70 || pc.name.toLowerCase().contains('white'))
-          .toList();
+      final whites =
+          colours
+              .where(
+                (pc) => pc.lrv > 70 || pc.name.toLowerCase().contains('white'),
+              )
+              .toList();
 
       expect(whites.length, 2);
       expect(whites.map((w) => w.id), containsAll(['1', '3']));

@@ -60,7 +60,8 @@ void main() {
         expect(
           percent,
           lessThanOrEqualTo(25),
-          reason: '${entry.key.name} is ${percent.toStringAsFixed(1)}% '
+          reason:
+              '${entry.key.name} is ${percent.toStringAsFixed(1)}% '
               '(${entry.value}/$grandTotal) — exceeds 25% limit',
         );
       }
@@ -76,7 +77,8 @@ void main() {
         expect(
           percent,
           greaterThanOrEqualTo(10),
-          reason: '${family.name} is ${percent.toStringAsFixed(1)}% '
+          reason:
+              '${family.name} is ${percent.toStringAsFixed(1)}% '
               '($weight/$grandTotal) — below 10% minimum',
         );
       }
@@ -105,7 +107,8 @@ void main() {
         expect(
           count,
           greaterThanOrEqualTo(4),
-          reason: '${family.name} appears in only $count cards '
+          reason:
+              '${family.name} appears in only $count cards '
               '(need at least 4 for viable quiz paths)',
         );
       }
@@ -113,34 +116,63 @@ void main() {
 
     test('all memory prompt cards have required fields', () {
       for (final card in allMemoryCards()) {
-        expect(card.containsKey('id'), isTrue,
-            reason: 'Card missing id: $card');
-        expect(card.containsKey('label'), isTrue,
-            reason: 'Card missing label: ${card['id']}');
-        expect(card.containsKey('hex'), isTrue,
-            reason: 'Card missing hex: ${card['id']}');
-        expect(card.containsKey('undertoneTemp'), isTrue,
-            reason: 'Card missing undertoneTemp: ${card['id']}');
-        expect(card.containsKey('chromaBand'), isTrue,
-            reason: 'Card missing chromaBand: ${card['id']}');
-        expect(card.containsKey('familyWeights'), isTrue,
-            reason: 'Card missing familyWeights: ${card['id']}');
+        expect(
+          card.containsKey('id'),
+          isTrue,
+          reason: 'Card missing id: $card',
+        );
+        expect(
+          card.containsKey('label'),
+          isTrue,
+          reason: 'Card missing label: ${card['id']}',
+        );
+        expect(
+          card.containsKey('hex'),
+          isTrue,
+          reason: 'Card missing hex: ${card['id']}',
+        );
+        expect(
+          card.containsKey('undertoneTemp'),
+          isTrue,
+          reason: 'Card missing undertoneTemp: ${card['id']}',
+        );
+        expect(
+          card.containsKey('chromaBand'),
+          isTrue,
+          reason: 'Card missing chromaBand: ${card['id']}',
+        );
+        expect(
+          card.containsKey('familyWeights'),
+          isTrue,
+          reason: 'Card missing familyWeights: ${card['id']}',
+        );
       }
     });
 
     test('all visual preference cards have required fields', () {
       for (final card in visualPreferences) {
         final c = card as Map<String, dynamic>;
-        expect(c.containsKey('id'), isTrue,
-            reason: 'Card missing id: $c');
-        expect(c.containsKey('description'), isTrue,
-            reason: 'Card missing description: ${c['id']}');
-        expect(c.containsKey('undertoneTemp'), isTrue,
-            reason: 'Card missing undertoneTemp: ${c['id']}');
-        expect(c.containsKey('chromaBand'), isTrue,
-            reason: 'Card missing chromaBand: ${c['id']}');
-        expect(c.containsKey('familyWeights'), isTrue,
-            reason: 'Card missing familyWeights: ${c['id']}');
+        expect(c.containsKey('id'), isTrue, reason: 'Card missing id: $c');
+        expect(
+          c.containsKey('description'),
+          isTrue,
+          reason: 'Card missing description: ${c['id']}',
+        );
+        expect(
+          c.containsKey('undertoneTemp'),
+          isTrue,
+          reason: 'Card missing undertoneTemp: ${c['id']}',
+        );
+        expect(
+          c.containsKey('chromaBand'),
+          isTrue,
+          reason: 'Card missing chromaBand: ${c['id']}',
+        );
+        expect(
+          c.containsKey('familyWeights'),
+          isTrue,
+          reason: 'Card missing familyWeights: ${c['id']}',
+        );
       }
     });
   });
@@ -157,7 +189,7 @@ void main() {
           final cards =
               (prompt as Map<String, dynamic>)['cards'] as List<dynamic>;
           Map<String, dynamic>? bestCard;
-          int bestWeight = 0;
+          var bestWeight = 0;
 
           for (final card in cards) {
             final c = card as Map<String, dynamic>;
@@ -171,9 +203,7 @@ void main() {
 
           if (bestCard != null) {
             final weights = bestCard['familyWeights'] as Map<String, dynamic>;
-            selectedWeights.add(
-              weights.map((k, v) => MapEntry(k, v as int)),
-            );
+            selectedWeights.add(weights.map((k, v) => MapEntry(k, v as int)));
           }
         }
 
@@ -189,11 +219,8 @@ void main() {
 
         for (final entry in vpScored.take(2)) {
           if (entry.$1 > 0) {
-            final weights =
-                entry.$2['familyWeights'] as Map<String, dynamic>;
-            selectedWeights.add(
-              weights.map((k, v) => MapEntry(k, v as int)),
-            );
+            final weights = entry.$2['familyWeights'] as Map<String, dynamic>;
+            selectedWeights.add(weights.map((k, v) => MapEntry(k, v as int)));
           }
         }
 
@@ -201,16 +228,17 @@ void main() {
         final familyWeights = tallyFamilyWeights(selectedWeights);
 
         // Find the top family
-        final sorted = familyWeights.entries.toList()
-          ..sort((a, b) {
-            final cmp = b.value.compareTo(a.value);
-            return cmp != 0 ? cmp : a.key.index.compareTo(b.key.index);
-          });
+        final sorted =
+            familyWeights.entries.toList()..sort((a, b) {
+              final cmp = b.value.compareTo(a.value);
+              return cmp != 0 ? cmp : a.key.index.compareTo(b.key.index);
+            });
 
         expect(
           sorted.isNotEmpty && sorted.first.key == targetFamily,
           isTrue,
-          reason: '${targetFamily.name} could not become primary. '
+          reason:
+              '${targetFamily.name} could not become primary. '
               'Best path produced: ${sorted.map((e) => "${e.key.name}:${e.value}").join(", ")}',
         );
       }

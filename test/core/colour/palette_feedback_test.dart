@@ -77,10 +77,7 @@ void main() {
       // Should detect as analogous (very close hue) or tonal neighbour
       expect(
         result.toLowerCase(),
-        anyOf(
-          contains('analogous'),
-          contains('tonal neighbour'),
-        ),
+        anyOf(contains('analogous'), contains('tonal neighbour')),
       );
     });
   });
@@ -207,9 +204,15 @@ void main() {
 
     test('handles large palette (9 colours)', () {
       final result = analysePaletteHealth([
-        '#FF0000', '#00FF00', '#0000FF',
-        '#FFFF00', '#FF00FF', '#00FFFF',
-        '#FF8800', '#8800FF', '#00FF88',
+        '#FF0000',
+        '#00FF00',
+        '#0000FF',
+        '#FFFF00',
+        '#FF00FF',
+        '#00FFFF',
+        '#FF8800',
+        '#8800FF',
+        '#00FF88',
       ]);
       // Should not throw and should produce meaningful output
       expect(result.verdict, isNotEmpty);
@@ -234,10 +237,7 @@ void main() {
     test('uses nameMap for user-friendly clash messages', () {
       final result = analysePaletteHealth(
         ['#FF0000', '#FF0101'], // near-identical reds
-        nameMap: {
-          '#ff0000': 'Crimson Kiss',
-          '#ff0101': 'Ruby Red',
-        },
+        nameMap: {'#ff0000': 'Crimson Kiss', '#ff0101': 'Ruby Red'},
       );
       expect(result.clashes, isNotEmpty);
       expect(result.clashes.first, contains('Crimson Kiss'));
@@ -268,9 +268,11 @@ void main() {
         '#F0E68C', // light khaki (L* ~89)
       ]);
       expect(
-        result.strengths.any((s) =>
-            s.toLowerCase().contains('tonal range') ||
-            s.toLowerCase().contains('lightness')),
+        result.strengths.any(
+          (s) =>
+              s.toLowerCase().contains('tonal range') ||
+              s.toLowerCase().contains('lightness'),
+        ),
         isTrue,
       );
     });
@@ -322,9 +324,11 @@ void main() {
         '#FF0000', // bold red
       ]);
       expect(
-        result.strengths.any((s) =>
-            s.toLowerCase().contains('muted') &&
-            s.toLowerCase().contains('bold')),
+        result.strengths.any(
+          (s) =>
+              s.toLowerCase().contains('muted') &&
+              s.toLowerCase().contains('bold'),
+        ),
         isTrue,
       );
     });
@@ -384,8 +388,9 @@ void main() {
         '#FF0000', // red
         '#55AA33', // green — moderate hue sep, high dE
       ]);
-      final hasBoldClash =
-          result.clashes.any((c) => c.contains('bold together'));
+      final hasBoldClash = result.clashes.any(
+        (c) => c.contains('bold together'),
+      );
       expect(hasBoldClash, isFalse);
     });
   });
@@ -408,9 +413,11 @@ void main() {
         '#4488CC', // cool
       ]);
       expect(
-        result.strengths.any((s) =>
-            s.toLowerCase().contains('warm') &&
-            s.toLowerCase().contains('cool')),
+        result.strengths.any(
+          (s) =>
+              s.toLowerCase().contains('warm') &&
+              s.toLowerCase().contains('cool'),
+        ),
         isTrue,
       );
     });
@@ -429,11 +436,7 @@ void main() {
     });
 
     test('suggests neutral when all bold', () {
-      final result = analysePaletteHealth([
-        '#FF0000',
-        '#00FF00',
-        '#0000FF',
-      ]);
+      final result = analysePaletteHealth(['#FF0000', '#00FF00', '#0000FF']);
       expect(result.suggestion, isNotNull);
       expect(
         result.suggestion!.toLowerCase(),

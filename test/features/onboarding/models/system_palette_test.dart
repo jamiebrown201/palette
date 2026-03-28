@@ -54,7 +54,7 @@ void main() {
     role: 'spineColour',
   );
 
-  final palette = SystemPalette(
+  const palette = SystemPalette(
     trimWhite: trimWhite,
     dominantWalls: [domWall],
     supportingWalls: [supWall],
@@ -117,8 +117,11 @@ void main() {
     test('toColourHexes returns deduped list', () {
       final hexes = palette.toColourHexes();
       expect(hexes, isNotEmpty);
-      expect(hexes.length, hexes.toSet().length,
-          reason: 'No duplicate hex values');
+      expect(
+        hexes.length,
+        hexes.toSet().length,
+        reason: 'No duplicate hex values',
+      );
       expect(hexes.first, trimWhite.hex);
       expect(hexes, contains(domWall.hex));
       expect(hexes, contains(deepAnchor.hex));

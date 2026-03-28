@@ -118,7 +118,7 @@ PaletteFamily? _checkConsistencyBonus(
   for (final cardMap in stage1CardWeights) {
     if (cardMap.isEmpty) continue;
     String? topKey;
-    int topVal = -1;
+    var topVal = -1;
     for (final entry in cardMap.entries) {
       if (entry.value > topVal) {
         topVal = entry.value;
@@ -157,8 +157,8 @@ PaletteFamily? _checkConsistencyBonus(
 /// - medium: top two are very close (gap < 10% of total)
 /// - high: clear primary family
 DnaConfidence _computeConfidence(Map<PaletteFamily, double> weights) {
-  final sorted = weights.entries.toList()
-    ..sort((a, b) => b.value.compareTo(a.value));
+  final sorted =
+      weights.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
   if (sorted.isEmpty || sorted.length < 2) return DnaConfidence.low;
 

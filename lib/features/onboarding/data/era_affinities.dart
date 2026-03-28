@@ -6,10 +6,10 @@ import 'package:palette/core/constants/enums.dart';
 /// complement the architectural character of the user's home.
 class EraAffinity {
   const EraAffinity({
+    required this.description,
     this.affinityFamilies,
     this.chromaModifier,
     this.suggestedLRange,
-    required this.description,
   });
 
   /// Palette families that naturally complement this era.
@@ -39,15 +39,12 @@ const Map<PropertyEra, EraAffinity> eraAffinities = {
         'dramatic darks complement high ceilings and ornate mouldings.',
   ),
   PropertyEra.edwardian: EraAffinity(
-    affinityFamilies: [
-      PaletteFamily.warmNeutrals,
-      PaletteFamily.earthTones,
-    ],
+    affinityFamilies: [PaletteFamily.warmNeutrals, PaletteFamily.earthTones],
     chromaModifier: null,
     suggestedLRange: (45.0, 75.0),
     description:
         'Edwardian homes suit warm, elegant tones — soft creams, '
-        'warm greys, and muted earth tones honour the period\'s '
+        "warm greys, and muted earth tones honour the period's "
         'lighter, more open character.',
   ),
   PropertyEra.thirtiesToFifties: EraAffinity(
@@ -60,10 +57,7 @@ const Map<PropertyEra, EraAffinity> eraAffinities = {
         'and mid-century lines.',
   ),
   PropertyEra.postWar: EraAffinity(
-    affinityFamilies: [
-      PaletteFamily.warmNeutrals,
-      PaletteFamily.coolNeutrals,
-    ],
+    affinityFamilies: [PaletteFamily.warmNeutrals, PaletteFamily.coolNeutrals],
     chromaModifier: null,
     suggestedLRange: (50.0, 80.0),
     description:

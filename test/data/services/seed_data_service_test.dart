@@ -80,14 +80,14 @@ void main() {
     // Mock rootBundle to return our test JSON
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMessageHandler('flutter/assets', (message) async {
-      final key = utf8.decode(message!.buffer.asUint8List());
-      if (key == 'assets/data/paint_colours.json') {
-        return ByteData.sublistView(
-          utf8.encode(json.encode(_testColoursJson)),
-        );
-      }
-      return null;
-    });
+          final key = utf8.decode(message!.buffer.asUint8List());
+          if (key == 'assets/data/paint_colours.json') {
+            return ByteData.sublistView(
+              utf8.encode(json.encode(_testColoursJson)),
+            );
+          }
+          return null;
+        });
   });
 
   tearDown(() async {

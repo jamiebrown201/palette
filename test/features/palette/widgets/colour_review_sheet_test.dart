@@ -19,7 +19,8 @@ void main() {
       );
       // Should include both hexes
       final compFinding = strengths.firstWhere(
-          (f) => f.title.toLowerCase().contains('complementary'));
+        (f) => f.title.toLowerCase().contains('complementary'),
+      );
       expect(compFinding.hexes, contains('#FF0000'));
       expect(compFinding.hexes, contains('#00FFFF'));
     });
@@ -36,15 +37,13 @@ void main() {
 
     test('detects nearly identical colours as clash', () {
       final result = deriveStructuredFindings(['#FF0000', '#FE0101']);
-      final clashes =
-          result.where((f) => f.type == FindingType.clash).toList();
+      final clashes = result.where((f) => f.type == FindingType.clash).toList();
       expect(clashes, isNotEmpty);
-      expect(
-        clashes.any((f) => f.description.contains('very close')),
-        isTrue,
-      );
+      expect(clashes.any((f) => f.description.contains('very close')), isTrue);
       // Both hexes should be referenced
-      final clash = clashes.firstWhere((f) => f.description.contains('very close'));
+      final clash = clashes.firstWhere(
+        (f) => f.description.contains('very close'),
+      );
       expect(clash.hexes.length, 2);
     });
 
@@ -56,10 +55,7 @@ void main() {
       ]);
       final strengths =
           result.where((f) => f.type == FindingType.strength).toList();
-      expect(
-        strengths.any((f) => f.title.contains('tonal range')),
-        isTrue,
-      );
+      expect(strengths.any((f) => f.title.contains('tonal range')), isTrue);
     });
 
     test('detects narrow lightness range as clash', () {
@@ -68,8 +64,7 @@ void main() {
         '#7A7A7A', // slightly darker grey
         '#868686', // slightly lighter grey
       ]);
-      final clashes =
-          result.where((f) => f.type == FindingType.clash).toList();
+      final clashes = result.where((f) => f.type == FindingType.clash).toList();
       expect(
         clashes.any((f) => f.title.contains('Narrow tonal range')),
         isTrue,
@@ -82,12 +77,8 @@ void main() {
         '#8B8682', // slightly warm grey
         '#8A8D8F', // slightly cool grey
       ]);
-      final clashes =
-          result.where((f) => f.type == FindingType.clash).toList();
-      expect(
-        clashes.any((f) => f.title.contains('muted')),
-        isTrue,
-      );
+      final clashes = result.where((f) => f.type == FindingType.clash).toList();
+      expect(clashes.any((f) => f.title.contains('muted')), isTrue);
     });
 
     test('detects muted and bold balance as strength', () {
@@ -95,9 +86,11 @@ void main() {
       final strengths =
           result.where((f) => f.type == FindingType.strength).toList();
       expect(
-        strengths.any((f) =>
-            f.title.toLowerCase().contains('muted') &&
-            f.title.toLowerCase().contains('bold')),
+        strengths.any(
+          (f) =>
+              f.title.toLowerCase().contains('muted') &&
+              f.title.toLowerCase().contains('bold'),
+        ),
         isTrue,
       );
     });
@@ -107,9 +100,11 @@ void main() {
       final strengths =
           result.where((f) => f.type == FindingType.strength).toList();
       expect(
-        strengths.any((f) =>
-            f.title.toLowerCase().contains('warm') &&
-            f.title.toLowerCase().contains('cool')),
+        strengths.any(
+          (f) =>
+              f.title.toLowerCase().contains('warm') &&
+              f.title.toLowerCase().contains('cool'),
+        ),
         isTrue,
       );
     });
@@ -143,10 +138,7 @@ void main() {
     test('uses nameMap for paint names in findings', () {
       final result = deriveStructuredFindings(
         ['#FF0000', '#00FFFF'],
-        nameMap: {
-          '#ff0000': 'Crimson Kiss',
-          '#00ffff': 'Coastal Blue',
-        },
+        nameMap: {'#ff0000': 'Crimson Kiss', '#00ffff': 'Coastal Blue'},
       );
       // Strength finding should reference paint names
       final compFinding = result.firstWhere(
@@ -161,13 +153,9 @@ void main() {
     test('uses nameMap for clash names', () {
       final result = deriveStructuredFindings(
         ['#FF0000', '#FE0101'],
-        nameMap: {
-          '#ff0000': 'Crimson Kiss',
-          '#fe0101': 'Ruby Red',
-        },
+        nameMap: {'#ff0000': 'Crimson Kiss', '#fe0101': 'Ruby Red'},
       );
-      final clashes =
-          result.where((f) => f.type == FindingType.clash).toList();
+      final clashes = result.where((f) => f.type == FindingType.clash).toList();
       expect(clashes, isNotEmpty);
       // Title should use paint names
       final clash = clashes.first;
@@ -182,9 +170,12 @@ void main() {
         '#FF6600', // orange
       ]);
       // Should have complementary pair (red-cyan) and analogous (red-orange)
-      final relFindings = result
-          .where((f) => f.type == FindingType.strength && f.relationship != null)
-          .toList();
+      final relFindings =
+          result
+              .where(
+                (f) => f.type == FindingType.strength && f.relationship != null,
+              )
+              .toList();
       expect(relFindings.length, greaterThanOrEqualTo(2));
       // Each should have exactly 2 hexes
       for (final f in relFindings) {
@@ -194,9 +185,15 @@ void main() {
 
     test('handles large palette without error', () {
       final result = deriveStructuredFindings([
-        '#FF0000', '#00FF00', '#0000FF',
-        '#FFFF00', '#FF00FF', '#00FFFF',
-        '#FF8800', '#8800FF', '#00FF88',
+        '#FF0000',
+        '#00FF00',
+        '#0000FF',
+        '#FFFF00',
+        '#FF00FF',
+        '#00FFFF',
+        '#FF8800',
+        '#8800FF',
+        '#00FF88',
       ]);
       expect(result, isNotEmpty);
     });
@@ -205,16 +202,26 @@ void main() {
       // Many analogous earth-tone colours — should produce at most
       // one analogous strength card, not dozens.
       final result = deriveStructuredFindings([
-        '#C4A882', '#8B7355', '#D4C5A9', '#A0522D',
-        '#DEB887', '#F5DEB3', '#BC8F8F', '#CD853F',
-        '#D2B48C', '#4A6741',
+        '#C4A882',
+        '#8B7355',
+        '#D4C5A9',
+        '#A0522D',
+        '#DEB887',
+        '#F5DEB3',
+        '#BC8F8F',
+        '#CD853F',
+        '#D2B48C',
+        '#4A6741',
       ]);
-      final analogousFindings = result
-          .where((f) =>
-              f.type == FindingType.strength &&
-              f.relationship != null &&
-              f.title.toLowerCase().contains('analogous'))
-          .toList();
+      final analogousFindings =
+          result
+              .where(
+                (f) =>
+                    f.type == FindingType.strength &&
+                    f.relationship != null &&
+                    f.title.toLowerCase().contains('analogous'),
+              )
+              .toList();
       // Should have at most 1 analogous card
       expect(analogousFindings.length, lessThanOrEqualTo(1));
       // If it exists, the count should be noted in the title

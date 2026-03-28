@@ -201,10 +201,7 @@ void main() {
     test('is symmetric', () {
       const lab1 = LabColour(50, 25, -10);
       const lab2 = LabColour(60, -15, 30);
-      expect(
-        deltaE2000(lab1, lab2),
-        closeTo(deltaE2000(lab2, lab1), 1e-10),
-      );
+      expect(deltaE2000(lab1, lab2), closeTo(deltaE2000(lab2, lab1), 1e-10));
     });
 
     test('is non-negative', () {

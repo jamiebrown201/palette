@@ -9,13 +9,12 @@ final allRoomsProvider = StreamProvider<List<Room>>((ref) {
 });
 
 /// Stream of a single room by ID.
-final roomByIdProvider =
-    FutureProvider.family<Room?, String>((ref, roomId) {
+final roomByIdProvider = FutureProvider.family<Room?, String>((ref, roomId) {
   return ref.watch(roomRepositoryProvider).getRoomById(roomId);
 });
 
 /// Stream of furniture items for a room.
 final furnitureForRoomProvider =
     FutureProvider.family<List<LockedFurniture>, String>((ref, roomId) {
-  return ref.watch(roomRepositoryProvider).getFurnitureForRoom(roomId);
-});
+      return ref.watch(roomRepositoryProvider).getFurnitureForRoom(roomId);
+    });

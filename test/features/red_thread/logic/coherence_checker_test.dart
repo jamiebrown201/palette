@@ -30,10 +30,7 @@ Room _makeRoom({
 void main() {
   group('checkCoherence', () {
     test('returns incoherent when no rooms or threads', () {
-      final report = checkCoherence(
-        rooms: [],
-        threadColours: [],
-      );
+      final report = checkCoherence(rooms: [], threadColours: []);
       expect(report.overallCoherent, isFalse);
       expect(report.results, isEmpty);
     });
@@ -48,9 +45,7 @@ void main() {
 
     test('room with matching hero colour is connected', () {
       final report = checkCoherence(
-        rooms: [
-          _makeRoom(id: '1', name: 'Living', heroHex: '#8FAE8B'),
-        ],
+        rooms: [_makeRoom(id: '1', name: 'Living', heroHex: '#8FAE8B')],
         threadColours: const [
           RedThreadColour(id: 't1', hex: '#8FAE8B', sortOrder: 0),
         ],
@@ -62,25 +57,24 @@ void main() {
       expect(report.overallCoherent, isTrue);
     });
 
-    test('room with similar (not exact) colour is connected within delta-E', () {
-      // Slightly different shade — should still be within delta-E 15
-      final report = checkCoherence(
-        rooms: [
-          _makeRoom(id: '1', name: 'Living', heroHex: '#92B18E'),
-        ],
-        threadColours: const [
-          RedThreadColour(id: 't1', hex: '#8FAE8B', sortOrder: 0),
-        ],
-      );
+    test(
+      'room with similar (not exact) colour is connected within delta-E',
+      () {
+        // Slightly different shade — should still be within delta-E 15
+        final report = checkCoherence(
+          rooms: [_makeRoom(id: '1', name: 'Living', heroHex: '#92B18E')],
+          threadColours: const [
+            RedThreadColour(id: 't1', hex: '#8FAE8B', sortOrder: 0),
+          ],
+        );
 
-      expect(report.results[0].isConnected, isTrue);
-    });
+        expect(report.results[0].isConnected, isTrue);
+      },
+    );
 
     test('room with no colours is disconnected', () {
       final report = checkCoherence(
-        rooms: [
-          _makeRoom(id: '1', name: 'Empty Room'),
-        ],
+        rooms: [_makeRoom(id: '1', name: 'Empty Room')],
         threadColours: const [
           RedThreadColour(id: 't1', hex: '#8FAE8B', sortOrder: 0),
         ],
@@ -92,9 +86,7 @@ void main() {
 
     test('room with very different colour is disconnected', () {
       final report = checkCoherence(
-        rooms: [
-          _makeRoom(id: '1', name: 'Red Room', heroHex: '#FF0000'),
-        ],
+        rooms: [_makeRoom(id: '1', name: 'Red Room', heroHex: '#FF0000')],
         threadColours: const [
           RedThreadColour(id: 't1', hex: '#0000FF', sortOrder: 0),
         ],
@@ -158,9 +150,7 @@ void main() {
     test('custom threshold changes results', () {
       // With tight threshold, similar colours may not match
       final report = checkCoherence(
-        rooms: [
-          _makeRoom(id: '1', name: 'Room', heroHex: '#8FAE8B'),
-        ],
+        rooms: [_makeRoom(id: '1', name: 'Room', heroHex: '#8FAE8B')],
         threadColours: const [
           RedThreadColour(id: 't1', hex: '#6B8A67', sortOrder: 0),
         ],

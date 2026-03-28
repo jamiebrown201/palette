@@ -37,8 +37,9 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   /// Load quiz content from bundled assets.
   Future<void> loadContent() async {
-    final jsonString =
-        await rootBundle.loadString('assets/data/quiz_content.json');
+    final jsonString = await rootBundle.loadString(
+      'assets/data/quiz_content.json',
+    );
     final data = json.decode(jsonString) as Map<String, dynamic>;
     _memoryPrompts = data['memoryPrompts'] as List<dynamic>;
     _visualPreferences = data['visualPreferences'] as List<dynamic>;
@@ -152,11 +153,9 @@ class QuizNotifier extends StateNotifier<QuizState> {
   }
 
   // Renter constraint setters
-  void setCanPaint(bool value) =>
-      state = state.copyWith(canPaint: value);
+  void setCanPaint(bool value) => state = state.copyWith(canPaint: value);
 
-  void setCanDrill(bool value) =>
-      state = state.copyWith(canDrill: value);
+  void setCanDrill(bool value) => state = state.copyWith(canDrill: value);
 
   void setKeepingFlooring(bool value) =>
       state = state.copyWith(keepingFlooring: value);
@@ -227,7 +226,8 @@ class QuizNotifier extends StateNotifier<QuizState> {
     );
 
     // Use system palette hex list if available (backward compat)
-    final colourHexes = systemPalette?.toColourHexes() ??
+    final colourHexes =
+        systemPalette?.toColourHexes() ??
         palette.colours.map((c) => c.hex).toList();
 
     // Map to archetype using family + saturation
@@ -267,9 +267,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
     );
 
     // Mark onboarding complete
-    await userProfileRepo.setOnboardingComplete(
-      colourDnaResultId: resultId,
-    );
+    await userProfileRepo.setOnboardingComplete(colourDnaResultId: resultId);
 
     // Persist renter constraints (if any were answered)
     if (state.tenure == Tenure.renter) {

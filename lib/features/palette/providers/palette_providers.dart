@@ -11,5 +11,5 @@ final latestColourDnaProvider = StreamProvider<ColourDnaResult?>((ref) {
 /// Stream of palette colours for the current DNA result.
 final paletteColoursProvider =
     StreamProvider.family<List<PaletteColour>, String>((ref, resultId) {
-  return ref.watch(paletteRepositoryProvider).watchForResult(resultId);
-});
+      return ref.watch(paletteRepositoryProvider).watchForResult(resultId);
+    });

@@ -27,7 +27,19 @@ void main() {
     });
 
     test('all values in range for various temperatures', () {
-      for (final k in [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 15000, 20000]) {
+      for (final k in [
+        1000,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        10000,
+        15000,
+        20000,
+      ]) {
         final rgb = kelvinToRgb(k);
         expect(rgb.r, inInclusiveRange(0, 255), reason: '${k}K red');
         expect(rgb.g, inInclusiveRange(0, 255), reason: '${k}K green');
@@ -84,10 +96,11 @@ void main() {
     });
 
     test('allDay returns midday value', () {
-      final allDay =
-          getKelvinForRoom(CompassDirection.south, UsageTime.allDay);
-      final midday =
-          getKelvinForRoom(CompassDirection.south, UsageTime.afternoon);
+      final allDay = getKelvinForRoom(CompassDirection.south, UsageTime.allDay);
+      final midday = getKelvinForRoom(
+        CompassDirection.south,
+        UsageTime.afternoon,
+      );
       expect(allDay, midday);
     });
   });
