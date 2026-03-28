@@ -52,6 +52,7 @@ class HomeScreen extends ConsumerWidget {
                 if (dna == null) {
                   return _ActionCard(
                     icon: Icons.auto_awesome,
+                    iconColor: PaletteColours.softGold,
                     title: 'Discover Your ${BrandedTerms.colourDna}',
                     subtitle:
                         '${BrandedTerms.colourDnaSubtitle} — take a quick quiz',
@@ -400,6 +401,7 @@ class _NextActionCard extends StatelessWidget {
       NextActionType.completeRoomSetup => Icons.edit_outlined,
       NextActionType.defineRedThread => Icons.linear_scale,
       NextActionType.resolveCoherence => Icons.link_off,
+      NextActionType.findWhite => Icons.format_paint_outlined,
       NextActionType.completeColourPlan => Icons.palette_outlined,
       NextActionType.lockFurniture => Icons.chair_outlined,
       NextActionType.allDone => Icons.check_circle_outline,
@@ -778,6 +780,7 @@ class _ActionCard extends StatelessWidget {
     required this.subtitle,
     required this.actionLabel,
     required this.onAction,
+    this.iconColor = PaletteColours.sageGreen,
   });
 
   final IconData icon;
@@ -785,6 +788,7 @@ class _ActionCard extends StatelessWidget {
   final String subtitle;
   final String actionLabel;
   final VoidCallback onAction;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -797,7 +801,7 @@ class _ActionCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, size: 36, color: PaletteColours.sageGreen),
+          Icon(icon, size: 36, color: iconColor),
           const SizedBox(height: 12),
           Text(
             title,

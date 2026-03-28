@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
+import 'package:palette/core/constants/app_constants.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
+import 'package:palette/providers/app_providers.dart';
 
 class RoomListScreen extends ConsumerWidget {
   const RoomListScreen({super.key});
@@ -37,10 +39,7 @@ class RoomListScreen extends ConsumerWidget {
       ),
       floatingActionButton:
           roomsAsync.valueOrNull?.isNotEmpty ?? false
-              ? FloatingActionButton(
-                onPressed: () => _showCreateRoom(context),
-                child: const Icon(Icons.add),
-              )
+              ? _RoomListFab(onCreateRoom: () => _showCreateRoom(context))
               : null,
     );
   }
@@ -190,5 +189,25 @@ class _RoomCard extends StatelessWidget {
     parts.add(room.usageTime.displayName);
     if (room.isRenterMode) parts.add('Renter');
     return parts.join(' \u2022 ');
+  }
+}
+
+/// FAB that gates room creation behind the free room limit.
+class _RoomListFab extends ConsumerWidget {
+  const _RoomListFab({required this.onCreateRoom});
+
+  final VoidCallback onCreateRoom;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tier = ref.watch(subscriptionTierProvider);
+    final roomCount = ref.watch(allRoomsProvider).valueOrNull?.length ?? 0;
+    final atLimit =
+        tier == SubscriptionTier.free && roomCount >= AppConstants.maxFreeRooms;
+
+    return FloatingActionButton(
+      onPressed: atLimit ? () => context.push('/paywall') : onCreateRoom,
+      child: Icon(atLimit ? Icons.lock_outline : Icons.add),
+    );
   }
 }

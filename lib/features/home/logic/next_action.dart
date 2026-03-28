@@ -12,6 +12,7 @@ enum NextActionType {
   completeRoomSetup,
   defineRedThread,
   resolveCoherence,
+  findWhite,
   completeColourPlan,
   lockFurniture,
   allDone,
@@ -37,9 +38,10 @@ class NextAction {
 /// 1. Complete room setup (missing direction, moods, or hero colour)
 /// 2. Define Red Thread (3+ rooms, no thread colours)
 /// 3. Resolve coherence (rooms not connected to thread)
-/// 4. Complete 70/20/10 plan (hero set but beta/surprise missing)
-/// 5. Lock furniture (rooms with no locked items)
-/// 6. All done
+/// 4. Find the right white (rooms with hero but no white selected)
+/// 5. Complete 70/20/10 plan (hero set but beta/surprise missing)
+/// 6. Lock furniture (rooms with no locked items)
+/// 7. All done
 NextAction computeNextAction({
   required List<Room> rooms,
   required CoherenceReport? coherenceReport,
@@ -90,7 +92,19 @@ NextAction computeNextAction({
     );
   }
 
-  // Priority 4: complete 70/20/10 plan
+  // Priority 4: find the right white
+  for (final room in rooms) {
+    if (room.heroColourHex != null && room.wallColourHex == null) {
+      return NextAction(
+        type: NextActionType.findWhite,
+        title: 'Find the right white for ${room.name}',
+        subtitle: 'The right white ties your palette together',
+        route: '/explore/white-finder?roomId=${room.id}',
+      );
+    }
+  }
+
+  // Priority 5: complete 70/20/10 plan
   for (final room in rooms) {
     if (room.heroColourHex != null &&
         (room.betaColourHex == null || room.surpriseColourHex == null)) {
@@ -103,7 +117,7 @@ NextAction computeNextAction({
     }
   }
 
-  // Priority 5: lock furniture
+  // Priority 6: lock furniture
   for (final room in rooms) {
     if (!(roomHasFurniture[room.id] ?? false)) {
       return NextAction(

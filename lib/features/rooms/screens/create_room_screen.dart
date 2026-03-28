@@ -4,10 +4,13 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:palette/core/analytics/analytics_events.dart';
+import 'package:palette/core/constants/app_constants.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/database/palette_database.dart';
+import 'package:palette/features/subscription/screens/paywall_screen.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
@@ -160,6 +163,17 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
 
     final roomRepo = ref.read(roomRepositoryProvider);
     final roomCount = await roomRepo.roomCount();
+    final tier = ref.read(subscriptionTierProvider);
+
+    // C1: Enforce free room limit — redirect to paywall on 3rd room
+    if (tier == SubscriptionTier.free &&
+        roomCount >= AppConstants.maxFreeRooms) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        context.push('/paywall');
+      }
+      return;
+    }
 
     final id = const Uuid().v4();
     await roomRepo.insertRoom(
@@ -184,7 +198,57 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
       'is_renter_mode': _isRenterMode,
     });
 
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    Navigator.of(context).pop();
+
+    // S5: After 2nd room creation, show trial prompt
+    final newRoomCount = roomCount + 1;
+    if (tier == SubscriptionTier.free &&
+        newRoomCount == AppConstants.maxFreeRooms) {
+      // Short delay so the pop animation completes before showing paywall
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        _showTrialPaywall(context);
+      }
+      return;
+    }
+
+    // S6: Project Pass trigger — 4+ rooms within first week
+    if (tier == SubscriptionTier.free &&
+        newRoomCount >= AppConstants.projectPassRoomThreshold) {
+      final allRooms = await roomRepo.getAllRooms();
+      if (allRooms.isNotEmpty) {
+        final firstRoomDate = allRooms
+            .map((r) => r.createdAt)
+            .reduce((a, b) => a.isBefore(b) ? a : b);
+        final daysSinceFirst = DateTime.now().difference(firstRoomDate).inDays;
+        if (daysSinceFirst <= AppConstants.projectPassWindowDays) {
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+          if (mounted) {
+            _showProjectPassPaywall(context);
+          }
+        }
+      }
+    }
+  }
+
+  void _showTrialPaywall(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => const PaywallScreen(triggerSource: 'second_room_trial'),
+      ),
+    );
+  }
+
+  void _showProjectPassPaywall(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder:
+            (_) => const PaywallScreen(triggerSource: 'project_pass_trigger'),
+      ),
+    );
   }
 
   @override

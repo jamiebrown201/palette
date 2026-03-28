@@ -145,7 +145,10 @@ void main() {
 
       final result = computeRoomPaintRecommendations(
         allPaints: paints,
-        room: makeRoom(heroColourHex: '#D4C4A8', budget: BudgetBracket.affordable),
+        room: makeRoom(
+          heroColourHex: '#D4C4A8',
+          budget: BudgetBracket.affordable,
+        ),
       );
 
       // Expensive paint (£60/L) should be excluded for affordable budget (max £25/L)

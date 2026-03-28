@@ -8,7 +8,10 @@ abstract final class AppConstants {
   static const int minRedThreadColours = 2;
   static const int maxRedThreadColours = 4;
 
+  static const int maxFreeRooms = 2;
   static const int maxFreeMoodboards = 1;
+  static const int projectPassRoomThreshold = 4;
+  static const int projectPassWindowDays = 7;
 
   static const double deltaECloseMatchThreshold = 25.0;
   static const double deltaEModerateMatchThreshold = 40.0;

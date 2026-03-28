@@ -212,7 +212,7 @@ class _VisualHero extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [PaletteColours.softCream, PaletteColours.warmWhite],
+              colors: [PaletteColours.softCream, PaletteColours.softGoldLight],
             ),
           ),
           clipBehavior: Clip.antiAlias,
@@ -237,9 +237,7 @@ class _VisualHero extends StatelessWidget {
                   opacity: opacityAnimation.value,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: PaletteColours.cardBackground.withValues(
-                        alpha: 0.7,
-                      ),
+                      color: PaletteColours.softCream.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Center(
@@ -371,13 +369,13 @@ class _PlaceholderPreview extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              _placeholderSwatch(const Color(0xFFD4B896)),
+              _placeholderSwatch(PaletteColours.softGoldLight),
               const SizedBox(width: 8),
-              _placeholderSwatch(const Color(0xFF8FAE8B)),
+              _placeholderSwatch(PaletteColours.sageGreen),
               const SizedBox(width: 8),
-              _placeholderSwatch(const Color(0xFFC9A96E)),
+              _placeholderSwatch(PaletteColours.softGold),
               const SizedBox(width: 8),
-              _placeholderSwatch(const Color(0xFF8B6F5E)),
+              _placeholderSwatch(PaletteColours.sageGreenDark),
             ],
           ),
           const SizedBox(height: 12),

@@ -122,6 +122,12 @@ class _RoomDetailContent extends ConsumerWidget {
               ],
             ),
 
+            // "Why This Room Works" card — spec position #2
+            if (room.heroColourHex != null && room.direction != null) ...[
+              const SizedBox(height: 16),
+              _WhyThisRoomWorksCard(room: room),
+            ],
+
             // Wall context row (can't-paint renters)
             if (config.showWallAsFixedContext &&
                 room.wallColourHex != null) ...[
@@ -237,10 +243,6 @@ class _RoomDetailContent extends ConsumerWidget {
               const SizedBox(height: 24),
               _PaintRecommendationsSection(room: room),
             ],
-
-            // Why this room works card
-            if (room.heroColourHex != null && room.direction != null)
-              _WhyThisRoomWorksCard(room: room),
 
             // Room colour psychology tip
             _RoomPsychologyTip(roomName: room.name),
