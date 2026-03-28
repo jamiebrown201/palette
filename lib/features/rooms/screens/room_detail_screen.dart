@@ -209,6 +209,23 @@ class _RoomDetailContent extends ConsumerWidget {
               _ColourHarmonyInsight(room: room),
             ],
 
+            // Room Preview colour-block mockup
+            if (room.heroColourHex != null &&
+                room.betaColourHex != null &&
+                room.surpriseColourHex != null) ...[
+              const SizedBox(height: 24),
+              const SectionHeader(title: 'Room Preview'),
+              const SizedBox(height: 4),
+              Text(
+                "Your room's colour balance",
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: PaletteColours.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _RoomPreviewMockup(room: room),
+            ],
+
             // Why this room works card
             if (room.heroColourHex != null && room.direction != null)
               _WhyThisRoomWorksCard(room: room),
@@ -687,6 +704,116 @@ class _ColourHarmonyInsight extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Colour-blocked room preview showing the 70/20/10 proportions
+/// using the actual selected colours. Addresses the Visualisation Gap.
+class _RoomPreviewMockup extends ConsumerWidget {
+  const _RoomPreviewMockup({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(roomModeConfigProvider(room.isRenterMode));
+    final heroHex = room.heroColourHex!;
+    final betaHex = room.betaColourHex!;
+    final surpriseHex = room.surpriseColourHex!;
+
+    // Check for a dash/thread colour
+    final threadHexesAsync = ref.watch(threadHexesProvider);
+    final dashHex = threadHexesAsync.whenOrNull(
+      data: (hexes) => hexes.isNotEmpty ? hexes.first : null,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // 70% Hero band
+          _PreviewBand(
+            hex: heroHex,
+            label: config.previewHeroLabel,
+            proportion: '70%',
+            height: 100,
+          ),
+          // 20% Beta band
+          _PreviewBand(
+            hex: betaHex,
+            label: config.previewBetaLabel,
+            proportion: '20%',
+            height: 56,
+          ),
+          // 10% Surprise band
+          _PreviewBand(
+            hex: surpriseHex,
+            label: config.previewSurpriseLabel,
+            proportion: '10%',
+            height: 36,
+          ),
+          // Optional dash line for Red Thread
+          if (dashHex != null)
+            Container(
+              height: 6,
+              color: Color(int.parse(dashHex.replaceFirst('#', '0xFF'))),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PreviewBand extends StatelessWidget {
+  const _PreviewBand({
+    required this.hex,
+    required this.label,
+    required this.proportion,
+    required this.height,
+  });
+
+  final String hex;
+  final String label;
+  final String proportion;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final colour = Color(int.parse(hex.replaceFirst('#', '0xFF')));
+    // Use white or dark text depending on luminance
+    final textColour =
+        colour.computeLuminance() > 0.5
+            ? PaletteColours.textPrimary
+            : Colors.white;
+
+    return Container(
+      height: height,
+      color: colour,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: textColour,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            proportion,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: textColour.withValues(alpha: 0.7),
+            ),
+          ),
         ],
       ),
     );

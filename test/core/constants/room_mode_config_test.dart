@@ -127,6 +127,38 @@ void main() {
         'furnishings and textiles',
       );
     });
+
+    test('has textile-focused preview labels', () {
+      expect(
+        RoomModeConfig.renterCantPaint.previewHeroLabel,
+        'Rug, sofa or bedding',
+      );
+      expect(
+        RoomModeConfig.renterCantPaint.previewBetaLabel,
+        'Cushions & throws',
+      );
+      expect(
+        RoomModeConfig.renterCantPaint.previewSurpriseLabel,
+        'Art & accessories',
+      );
+    });
+  });
+
+  group('RoomModeConfig preview labels', () {
+    test('owner has room-surface preview labels', () {
+      expect(RoomModeConfig.owner.previewHeroLabel, 'Walls & curtains');
+      expect(RoomModeConfig.owner.previewBetaLabel, 'Sofa & rug');
+      expect(RoomModeConfig.owner.previewSurpriseLabel, 'Cushions & art');
+    });
+
+    test('renterCanPaint has fixed-walls preview labels', () {
+      expect(RoomModeConfig.renterCanPaint.previewHeroLabel, 'Fixed walls');
+      expect(RoomModeConfig.renterCanPaint.previewBetaLabel, 'Furnishings');
+      expect(
+        RoomModeConfig.renterCanPaint.previewSurpriseLabel,
+        'Accents & throws',
+      );
+    });
   });
 
   group('RenterConstraints', () {

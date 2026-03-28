@@ -1000,7 +1000,7 @@ As more filters, badges, room matches, and recommendation contexts appear (espec
 | 1E.6 Branded Term Consistency         | Not started | P1       |
 | 1E.7 Capture Tab Resolution           | Not started | P1       |
 | 1E.8 Red Thread Flow Visualisation    | Partial     | P0       |
-| 1E.9 Room Preview Colour-Block Mockup | Not started | P1       |
+| 1E.9 Room Preview Colour-Block Mockup | Done        | P1       |
 | 1E.10 Applied State System            | Not started | P2       |
 
 ---
@@ -1734,7 +1734,7 @@ _Updated March 2026._
 | 1E.6 Branded Term Consistency         | Not started | P1       | Systematic pass — plain-English subtitles under branded terms      |
 | 1E.7 Capture Tab Resolution           | Not started | P1       | Ship minimal camera MVP (Option B). Do NOT remove Capture tab.     |
 | 1E.8 Red Thread Flow Visualisation    | Partial     | P0       | Floor plan painter exists but NOT the node-and-edge flow diagram described in spec |
-| 1E.9 Room Preview Colour-Block Mockup | Not started | P1       | Zero-cost visualisation                                            |
+| 1E.9 Room Preview Colour-Block Mockup | Done        | P1       | Zero-cost visualisation                                            |
 | 1E.10 Applied State System            | Not started | P2       | Prerequisite for Phase 2 density                                   |
 
 ### Phase 2A: Not started

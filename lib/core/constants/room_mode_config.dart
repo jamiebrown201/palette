@@ -30,6 +30,9 @@ class RoomModeConfig {
     required this.finderSwatchAction,
     required this.moodSentenceTemplate,
     required this.redThreadMedium,
+    required this.previewHeroLabel,
+    required this.previewBetaLabel,
+    required this.previewSurpriseLabel,
   });
 
   /// The single decision point for mode selection.
@@ -69,6 +72,9 @@ class RoomModeConfig {
     finderSwatchAction: 'Buy this paint',
     moodSentenceTemplate: '',
     redThreadMedium: 'paint and furnishings',
+    previewHeroLabel: 'Walls & curtains',
+    previewBetaLabel: 'Sofa & rug',
+    previewSurpriseLabel: 'Cushions & art',
   );
 
   static const renterCanPaint = RoomModeConfig._(
@@ -96,6 +102,9 @@ class RoomModeConfig {
         'paint and furnishings you can update '
         'within your rental',
     redThreadMedium: 'paint and furnishings',
+    previewHeroLabel: 'Fixed walls',
+    previewBetaLabel: 'Furnishings',
+    previewSurpriseLabel: 'Accents & throws',
   );
 
   static const renterCantPaint = RoomModeConfig._(
@@ -123,6 +132,9 @@ class RoomModeConfig {
         'all through furniture and textiles '
         'you can take with you',
     redThreadMedium: 'furnishings and textiles',
+    previewHeroLabel: 'Rug, sofa or bedding',
+    previewBetaLabel: 'Cushions & throws',
+    previewSurpriseLabel: 'Art & accessories',
   );
 
   // ---------------------------------------------------------------------------
@@ -164,4 +176,9 @@ class RoomModeConfig {
 
   // --- Red Thread ---
   final String redThreadMedium;
+
+  // --- Room Preview colour-block labels ---
+  final String previewHeroLabel;
+  final String previewBetaLabel;
+  final String previewSurpriseLabel;
 }
