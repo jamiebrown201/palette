@@ -8,6 +8,7 @@ import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/colour/palette_family.dart';
 import 'package:palette/core/colour/palette_feedback.dart';
 import 'package:palette/core/colour/undertone.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
@@ -542,8 +543,14 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your Palette Story',
+          'Your ${BrandedTerms.paletteStory}',
           style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        Text(
+          BrandedTerms.paletteStorySubtitle,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: PaletteColours.textSecondary),
         ),
         const SizedBox(height: 12),
         Container(

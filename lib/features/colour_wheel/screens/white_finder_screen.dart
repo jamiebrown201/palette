@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/lab_colour.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
@@ -146,13 +147,16 @@ class _WhiteFinderContent extends StatelessWidget {
                           color: PaletteColours.softGoldLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-                          'DNA Match',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.labelSmall?.copyWith(
-                            color: PaletteColours.softGold,
-                            fontWeight: FontWeight.w600,
+                        child: Tooltip(
+                          message: BrandedTerms.dnaMatchSubtitle,
+                          child: Text(
+                            BrandedTerms.dnaMatch,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall?.copyWith(
+                              color: PaletteColours.softGold,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -434,7 +438,7 @@ class _DnaHint extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Your Colour DNA leans $toneLabel — $whiteTypes undertone '
+              'Your ${BrandedTerms.colourDna} leans $toneLabel — $whiteTypes undertone '
               'whites will harmonise with your palette.',
               style: Theme.of(context).textTheme.bodySmall,
             ),

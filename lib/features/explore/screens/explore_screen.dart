@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/section_header.dart';
@@ -66,8 +67,8 @@ class ExploreScreen extends ConsumerWidget {
             icon: Icons.linear_scale,
             iconColor: const Color(0xFF8B3A3A),
             iconBg: const Color(0xFFF0E0E0),
-            title: 'Red Thread',
-            subtitle: 'Plan colour flow across your whole home',
+            title: BrandedTerms.redThread,
+            subtitle: BrandedTerms.redThreadSubtitle,
             onTap: () => context.push('/red-thread'),
           ),
           const SizedBox(height: 12),
@@ -78,8 +79,8 @@ class ExploreScreen extends ConsumerWidget {
                   icon: Icons.auto_awesome,
                   iconColor: PaletteColours.softGoldDark,
                   iconBg: PaletteColours.softGoldLight,
-                  title: 'Colour DNA',
-                  subtitle: 'Take the quiz to discover your palette',
+                  title: BrandedTerms.colourDna,
+                  subtitle: '${BrandedTerms.colourDnaSubtitle} — take the quiz',
                   onTap: () => context.push('/onboarding'),
                 );
               }
@@ -335,7 +336,7 @@ class _DnaMiniCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Colour DNA',
+                      '${BrandedTerms.colourDna} \u2022 ${BrandedTerms.colourDnaSubtitle}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: PaletteColours.textSecondary,
                       ),

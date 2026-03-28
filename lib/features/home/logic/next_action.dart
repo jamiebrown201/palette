@@ -1,3 +1,4 @@
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
@@ -67,8 +68,8 @@ NextAction computeNextAction({
   if (rooms.length >= 3 && threadColours.isEmpty) {
     return const NextAction(
       type: NextActionType.defineRedThread,
-      title: 'Define your Red Thread',
-      subtitle: 'Connect your rooms with 2-4 unifying colours',
+      title: 'Define your ${BrandedTerms.redThread}',
+      subtitle: '${BrandedTerms.redThreadSubtitle} — pick 2-4 unifying colours',
       route: '/red-thread',
     );
   }

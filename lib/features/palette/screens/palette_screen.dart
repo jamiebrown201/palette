@@ -10,6 +10,7 @@ import 'package:palette/core/colour/colour_suggestions.dart';
 import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/colour/palette_feedback.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
@@ -58,7 +59,8 @@ class _PaletteScreenState extends ConsumerState<PaletteScreen> {
       await Share.shareXFiles(
         [XFile.fromData(bytes, mimeType: 'image/png', name: 'colour-dna.png')],
         // ignore: require_trailing_commas
-        text: 'I just discovered my Colour DNA! Take the quiz to find yours.',
+        text:
+            'I just discovered my ${BrandedTerms.colourDna}! Take the quiz to find yours.',
       );
     } finally {
       if (mounted) setState(() => _isSharing = false);
@@ -83,7 +85,7 @@ class _PaletteScreenState extends ConsumerState<PaletteScreen> {
           if (dnaResult.valueOrNull != null)
             IconButton(
               onPressed: _isSharing ? null : _shareColourDna,
-              tooltip: 'Share My Colour DNA',
+              tooltip: 'Share My ${BrandedTerms.colourDna}',
               icon:
                   _isSharing
                       ? const SizedBox(
@@ -135,7 +137,7 @@ class _NoPaletteView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Take the Colour DNA quiz to generate your personalised palette',
+              'Take the ${BrandedTerms.colourDna} quiz to discover ${BrandedTerms.colourDnaSubtitle.toLowerCase()}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: PaletteColours.textSecondary,
               ),

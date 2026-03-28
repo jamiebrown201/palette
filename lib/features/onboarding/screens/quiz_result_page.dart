@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
@@ -108,7 +109,7 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
       await Share.shareXFiles(
         [XFile.fromData(bytes, mimeType: 'image/png', name: 'colour-dna.png')],
         text:
-            'I just discovered my Colour DNA! '
+            'I just discovered my ${BrandedTerms.colourDna}! '
             'Take the quiz to find yours: https://palette.app/quiz',
       );
     } finally {
@@ -190,8 +191,17 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
                         FadeTransition(
                           opacity: _headerFade,
                           child: Text(
-                            'My Colour DNA',
+                            'My ${BrandedTerms.colourDna}',
                             style: Theme.of(context).textTheme.displaySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        FadeTransition(
+                          opacity: _headerFade,
+                          child: Text(
+                            BrandedTerms.colourDnaSubtitle,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: PaletteColours.textSecondary),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -442,7 +452,9 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
                           )
                           : const Icon(Icons.share_outlined),
                   label: Text(
-                    _isSharing ? 'Preparing...' : 'Share My Colour DNA',
+                    _isSharing
+                        ? 'Preparing...'
+                        : 'Share My ${BrandedTerms.colourDna}',
                   ),
                 ),
                 const SizedBox(height: 12),

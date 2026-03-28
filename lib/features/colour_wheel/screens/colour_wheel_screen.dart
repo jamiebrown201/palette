@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/colour_relationships.dart';
 import 'package:palette/core/colour/lab_colour.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
@@ -787,14 +788,18 @@ class _PaintMatchSection extends ConsumerWidget {
                                             6,
                                           ),
                                         ),
-                                        child: Text(
-                                          'DNA',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall?.copyWith(
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w700,
-                                            color: PaletteColours.softGold,
+                                        child: Tooltip(
+                                          message:
+                                              BrandedTerms.dnaMatchSubtitle,
+                                          child: Text(
+                                            'DNA',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall?.copyWith(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w700,
+                                              color: PaletteColours.softGold,
+                                            ),
                                           ),
                                         ),
                                       ),

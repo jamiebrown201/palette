@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/core/theme/palette_colours.dart';
@@ -97,9 +98,9 @@ class ProfileScreen extends ConsumerWidget {
                     return _ProfileRow(
                       icon: Icons.auto_awesome,
                       iconColor: PaletteColours.softGold,
-                      title: 'Colour DNA',
+                      title: BrandedTerms.colourDna,
                       subtitle:
-                          '$label \u2022 ${dna.colourHexes.length} colours',
+                          '${BrandedTerms.colourDnaSubtitle} \u2022 $label',
                       trailing: const Icon(
                         Icons.chevron_right,
                         color: PaletteColours.textTertiary,
@@ -114,7 +115,7 @@ class ProfileScreen extends ConsumerWidget {
                 _ProfileRow(
                   icon: Icons.refresh,
                   iconColor: PaletteColours.sageGreen,
-                  title: 'Retake Colour DNA Quiz',
+                  title: 'Retake ${BrandedTerms.colourDna} Quiz',
                   onTap: () {
                     ref.read(quizNotifierProvider.notifier).reset();
                     ref.read(hasCompletedOnboardingProvider.notifier).state =

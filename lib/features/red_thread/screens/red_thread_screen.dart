@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/colour/colour_suggestions.dart';
 import 'package:palette/core/constants/app_constants.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
@@ -57,7 +58,8 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
       await Share.shareXFiles(
         [XFile.fromData(bytes, mimeType: 'image/png', name: 'red-thread.png')],
         // ignore: require_trailing_commas
-        text: 'My Red Thread whole-house colour plan.',
+        text:
+            'My ${BrandedTerms.redThread} — ${BrandedTerms.redThreadSubtitle.toLowerCase()}.',
       );
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -80,7 +82,7 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'Red Thread — Whole-House Colour Plan',
+                      '${BrandedTerms.redThread} — ${BrandedTerms.redThreadSubtitle}',
                       style: pw.TextStyle(
                         fontSize: 22,
                         fontWeight: pw.FontWeight.bold,
@@ -269,7 +271,19 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Red Thread'),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(BrandedTerms.redThread),
+            Text(
+              BrandedTerms.redThreadSubtitle,
+              style: TextStyle(
+                fontSize: 12,
+                color: PaletteColours.textSecondary,
+              ),
+            ),
+          ],
+        ),
         actions: [
           if (!(ref.watch(subscriptionTierProvider) >= SubscriptionTier.plus))
             IconButton(
@@ -333,7 +347,7 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
             upgradeMessage:
                 rooms.length >= 3
                     ? 'See how your rooms connect'
-                    : 'Create 3+ rooms, then upgrade to see your Red Thread',
+                    : 'Create 3+ rooms, then upgrade to see your ${BrandedTerms.redThread}',
             child: threadsAsync.when(
               data:
                   (threads) => templatesAsync.when(
@@ -401,7 +415,7 @@ class _RedThreadContent extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'The Red Thread works best when you have 3 or more rooms '
+                'The ${BrandedTerms.redThread} works best when you have 3 or more rooms '
                 'with colour plans assigned.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: PaletteColours.textSecondary,
@@ -1004,7 +1018,7 @@ class _DnaSuggestions extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Suggested from your Colour DNA',
+            'Suggested from your ${BrandedTerms.colourDna}',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: PaletteColours.sageGreenDark,
               fontWeight: FontWeight.w600,

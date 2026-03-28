@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/onboarding/logic/quiz_notifier.dart';
@@ -142,7 +143,7 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                    : const Text('See My Colour DNA'),
+                    : const Text('See My ${BrandedTerms.colourDna}'),
           ),
           const SizedBox(height: 32),
         ],

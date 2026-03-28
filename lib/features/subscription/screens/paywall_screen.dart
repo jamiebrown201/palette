@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/providers/app_providers.dart';
@@ -53,7 +54,7 @@ class PaywallScreen extends ConsumerWidget {
               tier: SubscriptionTier.free,
               isCurrent: currentTier == SubscriptionTier.free,
               features: const [
-                'Colour DNA quiz & shareable result',
+                '${BrandedTerms.colourDna} quiz & shareable result',
                 'View your palette',
                 'Unlimited room profiles',
                 'Colour Wheel & White Finder',
@@ -75,8 +76,8 @@ class PaywallScreen extends ConsumerWidget {
                 'Everything in Free, plus:',
                 'Edit & customise your palette',
                 'Light direction recommendations',
-                '70/20/10 colour planner',
-                'Red Thread whole-house flow',
+                '${BrandedTerms.seventyTwentyTen} colour planner — ${BrandedTerms.seventyTwentyTenSubtitle}',
+                '${BrandedTerms.redThread} — ${BrandedTerms.redThreadSubtitle}',
                 'Export room plans as PDF',
               ],
               onSelect: () {

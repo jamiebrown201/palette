@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/progress_bar.dart';
@@ -50,9 +51,9 @@ class HomeScreen extends ConsumerWidget {
                 if (dna == null) {
                   return _ActionCard(
                     icon: Icons.auto_awesome,
-                    title: 'Discover Your Colour DNA',
+                    title: 'Discover Your ${BrandedTerms.colourDna}',
                     subtitle:
-                        'Take a quick quiz to unlock your personal palette',
+                        '${BrandedTerms.colourDnaSubtitle} — take a quick quiz',
                     actionLabel: 'Start Quiz',
                     onAction: () => context.push('/onboarding'),
                   );
@@ -206,12 +207,25 @@ class _ColourDnaCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
-                  Text(
-                    'Your Colour DNA',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Your ${BrandedTerms.colourDna}',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        BrandedTerms.colourDnaSubtitle,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
                   ),
                   const Spacer(),
                   Icon(
@@ -693,10 +707,17 @@ class _CoherenceSummary extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Red Thread',
+                      BrandedTerms.redThread,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: accentColour,
+                      ),
+                    ),
+                    Text(
+                      BrandedTerms.redThreadSubtitle,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: accentColour.withValues(alpha: 0.7),
+                        fontSize: 10,
                       ),
                     ),
                     Text(

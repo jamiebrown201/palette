@@ -7,6 +7,7 @@ import 'package:palette/core/colour/colour_suggestions.dart';
 import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/kelvin_simulation.dart';
 import 'package:palette/core/colour/lab_colour.dart';
+import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
@@ -193,7 +194,10 @@ class _RoomDetailContent extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // 70/20/10 Planner
-            const SectionHeader(title: '70/20/10 Colour Plan'),
+            const SectionHeader(
+              title: '${BrandedTerms.seventyTwentyTen} Colour Plan',
+              subtitle: BrandedTerms.seventyTwentyTenSubtitle,
+            ),
             const SizedBox(height: 8),
             PremiumGate(
               requiredTier: SubscriptionTier.plus,
@@ -443,11 +447,23 @@ class _HeroColourSwatch extends ConsumerWidget {
             ),
           ),
           const Spacer(),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: fgSecondary),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: fgSecondary),
+              ),
+              Text(
+                BrandedTerms.heroColourSubtitle,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: fgSecondary.withValues(alpha: 0.7),
+                  fontSize: 10,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -2033,7 +2049,7 @@ class _RoomChecklist extends ConsumerWidget {
         },
       ),
       _ChecklistItem(
-        label: 'Red Thread connected',
+        label: '${BrandedTerms.redThread} connected',
         done: hasRedThread,
         actionLabel: 'Connect',
         onAction: () => context.push('/red-thread'),
