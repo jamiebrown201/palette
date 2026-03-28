@@ -399,7 +399,7 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: _hexToColor(hex),
+                        color: hexToColor(hex),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: PaletteColours.divider),
                       ),
@@ -588,7 +588,7 @@ class _PaletteContentState extends ConsumerState<_PaletteContent> {
             : null;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -913,7 +913,7 @@ class _PaletteStoryCard extends ConsumerWidget {
                           width: 20,
                           height: 20,
                           decoration: BoxDecoration(
-                            color: _hexToColor(hex),
+                            color: hexToColor(hex),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(color: PaletteColours.divider),
                           ),
@@ -1124,9 +1124,4 @@ class _GuidanceRow extends StatelessWidget {
       ],
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

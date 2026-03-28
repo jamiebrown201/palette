@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
@@ -207,27 +208,33 @@ class _ColourDnaCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
                   const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Your ${BrandedTerms.colourDna}',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your ${BrandedTerms.colourDna}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        BrandedTerms.colourDnaSubtitle,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.7),
+                        Text(
+                          BrandedTerms.colourDnaSubtitle,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Icon(
                     Icons.chevron_right,
                     color: Colors.white.withValues(alpha: 0.7),
@@ -243,28 +250,27 @@ class _ColourDnaCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   ...hexes.map(
-                    (hex) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: _hexToColor(hex),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.4),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                    (hex) => Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: hexToColor(hex),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.4),
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -538,7 +544,7 @@ class _RoomProgressCard extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color:
                           room.heroColourHex != null
-                              ? _hexToColor(room.heroColourHex!)
+                              ? hexToColor(room.heroColourHex!)
                               : PaletteColours.warmGrey,
                       shape: BoxShape.circle,
                     ),
@@ -691,7 +697,7 @@ class _CoherenceSummary extends StatelessWidget {
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: _hexToColor(t.hex),
+                          color: hexToColor(t.hex),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: Colors.white.withValues(alpha: 0.6),
@@ -945,13 +951,4 @@ class _DriftPromptCard extends ConsumerWidget {
     return 'Your recent colour choices lean more $leanDescription '
         'than your original DNA. Retake the quiz to refresh your palette.';
   }
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

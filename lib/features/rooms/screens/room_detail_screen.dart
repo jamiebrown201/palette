@@ -431,7 +431,7 @@ class _HeroColourSwatch extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _hexToColor(hex),
+        color: hexToColor(hex),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: PaletteColours.divider),
       ),
@@ -509,7 +509,7 @@ class _WallContextRow extends ConsumerWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: _hexToColor(hex),
+              color: hexToColor(hex),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: PaletteColours.divider),
             ),
@@ -1325,7 +1325,7 @@ class _ColourTierRow extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color:
-                      hex != null ? _hexToColor(hex!) : PaletteColours.warmGrey,
+                      hex != null ? hexToColor(hex!) : PaletteColours.warmGrey,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: PaletteColours.divider),
                 ),
@@ -1467,7 +1467,7 @@ class _TrimWhiteSuggestion extends ConsumerWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: _hexToColor(trim.hex),
+                    color: hexToColor(trim.hex),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: PaletteColours.divider),
                   ),
@@ -1548,7 +1548,7 @@ class _LightSwatchColumn extends StatelessWidget {
       child: Container(
         height: 64,
         decoration: BoxDecoration(
-          color: _hexToColor(hex),
+          color: hexToColor(hex),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: PaletteColours.divider),
         ),
@@ -1588,7 +1588,7 @@ class _FurnitureLockSection extends ConsumerWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: _hexToColor(item.colourHex),
+                        color: hexToColor(item.colourHex),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: PaletteColours.divider),
                       ),
@@ -1717,7 +1717,7 @@ class _FurnitureLockSection extends ConsumerWidget {
                                     width: 36,
                                     height: 36,
                                     decoration: BoxDecoration(
-                                      color: _hexToColor(e.value),
+                                      color: hexToColor(e.value),
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color:
@@ -1951,7 +1951,7 @@ class _LandlordPresetChip extends StatelessWidget {
         width: 20,
         height: 20,
         decoration: BoxDecoration(
-          color: _hexToColor(hex),
+          color: hexToColor(hex),
           shape: BoxShape.circle,
           border: Border.all(color: PaletteColours.divider),
         ),
@@ -1971,11 +1971,6 @@ bool _isLightColour(String hex) {
   final g = (value >> 8) & 0xFF;
   final b = value & 0xFF;
   return (0.299 * r + 0.587 * g + 0.114 * b) > 160;
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }
 
 // ---------------------------------------------------------------------------

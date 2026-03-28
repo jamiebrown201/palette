@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/colour_suggestions.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/models/paint_colour.dart';
@@ -227,7 +228,7 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: _hexToColor(pc.hex),
+            color: hexToColor(pc.hex),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: PaletteColours.divider),
           ),
@@ -263,7 +264,7 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: _hexToColor(pc.hex),
+          color: hexToColor(pc.hex),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(color: PaletteColours.divider),
         ),
@@ -279,9 +280,4 @@ class _SmartPaintColourPickerState extends State<SmartPaintColourPicker> {
       dense: true,
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

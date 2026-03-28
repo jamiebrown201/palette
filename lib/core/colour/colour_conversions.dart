@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' show Color;
 import 'package:palette/core/colour/lab_colour.dart';
 
 /// Colour space conversions using sRGB colour space with D65 illuminant.
@@ -124,6 +125,12 @@ LabColour rgbToLab(int r, int g, int b) {
   // Scale XYZ from 0-100 back to 0-1 range
   final linear = _xyzToLinearRgb(xyz.x / 100, xyz.y / 100, xyz.z / 100);
   return _linearToSrgb(linear.r, linear.g, linear.b);
+}
+
+/// Convert a hex colour string ('#RRGGBB' or 'RRGGBB') to a Flutter [Color].
+Color hexToColor(String hex) {
+  final cleaned = hex.replaceAll('#', '');
+  return Color(int.parse('FF$cleaned', radix: 16));
 }
 
 /// Convert a hex colour string to CIE L*a*b*.

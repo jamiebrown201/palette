@@ -67,7 +67,7 @@ class ColourDetailSheet extends StatelessWidget {
                   width: 120,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: _hexToColor(hex),
+                    color: hexToColor(hex),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: PaletteColours.divider),
                   ),
@@ -302,7 +302,7 @@ class _PaintMatchTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: _hexToColor(colour.hex),
+                  color: hexToColor(colour.hex),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: PaletteColours.divider),
                 ),
@@ -506,7 +506,7 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: _hexToColor(m.colour.hex),
+                        color: hexToColor(m.colour.hex),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: PaletteColours.divider),
                       ),
@@ -560,9 +560,4 @@ class _CrossBrandSectionState extends State<_CrossBrandSection> {
       ],
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

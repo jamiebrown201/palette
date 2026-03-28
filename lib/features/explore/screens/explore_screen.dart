@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/analytics/analytics_events.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
@@ -79,8 +80,8 @@ class ExploreScreen extends ConsumerWidget {
           const SectionHeader(title: 'Your Palette'),
           _ExploreCard(
             icon: Icons.linear_scale,
-            iconColor: const Color(0xFF8B3A3A),
-            iconBg: const Color(0xFFF0E0E0),
+            iconColor: PaletteColours.redThread,
+            iconBg: PaletteColours.redThreadLight,
             title: BrandedTerms.redThread,
             subtitle: BrandedTerms.redThreadSubtitle,
             onTap: () => context.push('/red-thread'),
@@ -334,7 +335,7 @@ class _DnaMiniCard extends StatelessWidget {
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: _hexToColor(hex),
+                    color: hexToColor(hex),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: PaletteColours.divider,
@@ -373,10 +374,5 @@ class _DnaMiniCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static Color _hexToColor(String hex) {
-    final h = hex.replaceFirst('#', '');
-    return Color(int.parse('FF$h', radix: 16));
   }
 }

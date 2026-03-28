@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/colour_suggestions.dart';
 import 'package:palette/core/constants/app_constants.dart';
 import 'package:palette/core/constants/branded_terms.dart';
@@ -1040,7 +1041,7 @@ class _DnaSuggestions extends ConsumerWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: _hexToColor(s.hex),
+                        color: hexToColor(s.hex),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: PaletteColours.divider),
                       ),
@@ -1096,7 +1097,7 @@ class _ThreadSwatch extends StatelessWidget {
         width: 56,
         height: 56,
         decoration: BoxDecoration(
-          color: _hexToColor(hex),
+          color: hexToColor(hex),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: PaletteColours.divider, width: 2),
         ),
@@ -1312,7 +1313,7 @@ class _CoherenceSection extends ConsumerWidget {
                         width: 16,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: _hexToColor(result.matchingThreadHex!),
+                          color: hexToColor(result.matchingThreadHex!),
                           shape: BoxShape.circle,
                           border: Border.all(color: PaletteColours.divider),
                         ),
@@ -1491,7 +1492,7 @@ class _MiniRoomPalette extends StatelessWidget {
                           height: 24,
                           margin: const EdgeInsets.symmetric(horizontal: 2),
                           decoration: BoxDecoration(
-                            color: _hexToColor(hex),
+                            color: hexToColor(hex),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(color: PaletteColours.divider),
                           ),
@@ -1502,11 +1503,6 @@ class _MiniRoomPalette extends StatelessWidget {
       ],
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }
 
 PdfColor _pdfColourFromHex(String hex) {

@@ -44,7 +44,7 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
       _hasDefaultedToDna = true;
       // Use first colour (dominant wall is typically first after trim white)
       final defaultHex = dnaHexes.length > 1 ? dnaHexes[1] : dnaHexes.first;
-      final color = _hexToColor(defaultHex);
+      final color = hexToColor(defaultHex);
       final hsl = HSLColor.fromColor(color);
       if (hsl.saturation > 0.05) {
         _selectedHue = hsl.hue;
@@ -122,7 +122,7 @@ class _ColourWheelScreenState extends ConsumerState<ColourWheelScreen> {
                 dnaHexes: dnaHexes,
                 systemPaletteJson: dna?.systemPaletteJson,
                 onColourTap: (hex) {
-                  final color = _hexToColor(hex);
+                  final color = hexToColor(hex);
                   final hsl = HSLColor.fromColor(color);
                   if (hsl.saturation > 0.05) {
                     setState(() {
@@ -519,7 +519,7 @@ class _ColourSwatchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _hexToColor(hex);
+    final color = hexToColor(hex);
     final lab = hexToLab(hex);
     final undertone =
         lab.b > 5
@@ -665,7 +665,7 @@ class _DnaPaletteRow extends StatelessWidget {
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: _hexToColor(hex),
+                                color: hexToColor(hex),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
                                   color: PaletteColours.divider,
@@ -753,7 +753,7 @@ class _PaintMatchSection extends ConsumerWidget {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: _hexToColor(match.colour.hex),
+                              color: hexToColor(match.colour.hex),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: PaletteColours.divider),
                             ),
@@ -897,11 +897,6 @@ double _deltaE76(LabColour a, LabColour b) {
   final da = a.a - b.a;
   final db = a.b - b.b;
   return sqrt(dl * dl + da * da + db * db);
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }
 
 String _colorToHex(Color color) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
@@ -53,7 +54,7 @@ class MemoryPromptPage extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final card = cards[index];
                 final hex = card['hex'] as String;
-                final colour = _hexToColor(hex);
+                final colour = hexToColor(hex);
                 final familyWeights = (card['familyWeights']
                         as Map<String, dynamic>)
                     .map((k, v) => MapEntry(k, (v as num).toInt()));
@@ -228,9 +229,4 @@ class _ColourMoodCardState extends State<_ColourMoodCard>
       ),
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

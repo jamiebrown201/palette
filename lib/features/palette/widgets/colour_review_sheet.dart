@@ -750,7 +750,7 @@ class _ColourReviewSheetState extends State<ColourReviewSheet>
                       width: 56,
                       height: 56,
                       decoration: BoxDecoration(
-                        color: _hexToColor(hex),
+                        color: hexToColor(hex),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: PaletteColours.divider),
                         boxShadow: [
@@ -919,7 +919,7 @@ class _PairSwatches extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _hexToColor(hexes[i]),
+                  color: hexToColor(hexes[i]),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: PaletteColours.divider),
                   boxShadow: [
@@ -960,7 +960,7 @@ class _LargeComparisonSwatches extends StatelessWidget {
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                color: _hexToColor(hexes[i]),
+                color: hexToColor(hexes[i]),
                 borderRadius: BorderRadius.only(
                   topLeft: i == 0 ? const Radius.circular(10) : Radius.zero,
                   bottomLeft: i == 0 ? const Radius.circular(10) : Radius.zero,
@@ -1002,7 +1002,7 @@ class _PaletteStrip extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: _hexToColor(hex),
+              color: hexToColor(hex),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: PaletteColours.divider),
             ),
@@ -1049,7 +1049,7 @@ class _InsightRow extends StatelessWidget {
                     width: 16,
                     height: 16,
                     decoration: BoxDecoration(
-                      color: _hexToColor(hex),
+                      color: hexToColor(hex),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -1068,9 +1068,4 @@ class _InsightRow extends StatelessWidget {
 Color _textColorForBackground(String hex) {
   final lab = hexToLab(hex);
   return lab.l > 55 ? PaletteColours.textPrimary : Colors.white;
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

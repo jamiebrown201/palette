@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _loadContent() async {
-    await ref.read(quizNotifierProvider.notifier).loadContent();
+    try {
+      await ref.read(quizNotifierProvider.notifier).loadContent();
+    } catch (e) {
+      // Continue with default content if loading fails — the quiz can
+      // still run with fallback data.
+      if (kDebugMode) debugPrint('Quiz content load failed: $e');
+    }
     if (mounted) {
       setState(() => _contentLoaded = true);
       ref.read(analyticsProvider).track(AnalyticsEvents.quizStarted);

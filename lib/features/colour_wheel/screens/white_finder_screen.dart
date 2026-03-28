@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/constants/branded_terms.dart';
@@ -479,7 +480,7 @@ class _WhiteSwatch extends StatelessWidget {
             width: 96,
             height: 64,
             decoration: BoxDecoration(
-              color: _hexToColor(colour.hex),
+              color: hexToColor(colour.hex),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: PaletteColours.divider),
             ),
@@ -532,9 +533,4 @@ class _WhiteSwatch extends StatelessWidget {
       ),
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

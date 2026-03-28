@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
@@ -588,7 +589,7 @@ class _RoleLabelledSwatches extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: _hexToColor(r.$1),
+                    color: hexToColor(r.$1),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: Colors.black.withValues(alpha: 0.08),
@@ -637,7 +638,7 @@ class _PaletteGrid extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: _hexToColor(colours[i]),
+                color: hexToColor(colours[i]),
                 borderRadius: BorderRadius.circular(10),
                 border:
                     surpriseIndices.contains(i)
@@ -665,9 +666,4 @@ class _PaletteGrid extends StatelessWidget {
       ],
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

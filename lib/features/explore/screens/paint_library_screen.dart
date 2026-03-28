@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
@@ -303,7 +304,7 @@ class _PaintColourTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _hexToColor(colour.hex),
+                  color: hexToColor(colour.hex),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: PaletteColours.divider),
                 ),
@@ -458,9 +459,4 @@ class _Badge extends StatelessWidget {
       ),
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }

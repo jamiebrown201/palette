@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/red_thread/logic/floor_plan_template.dart';
 
@@ -43,7 +44,7 @@ class FloorPlanPainter extends CustomPainter {
       final hex = roomColours[zone.id];
       final fillColour =
           hex != null
-              ? _hexToColor(hex)
+              ? hexToColor(hex)
               : PaletteColours.warmGrey.withValues(alpha: 0.3);
 
       canvas
@@ -78,9 +79,4 @@ class FloorPlanPainter extends CustomPainter {
       template != oldDelegate.template ||
       roomColours != oldDelegate.roomColours ||
       threadHexes != oldDelegate.threadHexes;
-
-  static Color _hexToColor(String hex) {
-    final cleaned = hex.replaceAll('#', '');
-    return Color(int.parse('FF$cleaned', radix: 16));
-  }
 }

@@ -19,6 +19,10 @@ abstract final class PaletteColours {
   static const softGoldLight = Color(0xFFDCC799);
   static const softGoldDark = Color(0xFFA88B4A);
 
+  // Red Thread accent
+  static const redThread = Color(0xFF8B3A3A);
+  static const redThreadLight = Color(0xFFF0E0E0);
+
   // Colour Blind Mode accent: blue
   static const accessibleBlue = Color(0xFF5B8DB8);
   static const accessibleBlueLight = Color(0xFF89B4D4);

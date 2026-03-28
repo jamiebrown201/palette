@@ -298,10 +298,9 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                 ),
                 child: Text(
                   _capturedHex,
-                  style: const TextStyle(
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
-                    fontSize: 16,
                     letterSpacing: 1,
                   ),
                 ),

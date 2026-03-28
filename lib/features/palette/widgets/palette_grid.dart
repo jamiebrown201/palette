@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 
 /// A mosaic grid displaying the user's palette colours.
@@ -54,7 +55,7 @@ class _GridTile extends StatelessWidget {
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: _hexToColor(hex),
+            color: hexToColor(hex),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: PaletteColours.divider, width: 0.5),
           ),
@@ -62,9 +63,4 @@ class _GridTile extends StatelessWidget {
       ),
     );
   }
-}
-
-Color _hexToColor(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
 }
