@@ -102,7 +102,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
               .addMessage(
                 AssistantMessage(
                   text:
-                      'I\'m your pocket interior designer. I know your '
+                      "I'm your pocket interior designer. I know your "
                       'rooms, your palette, and your style. Ask me anything '
                       'about your home.',
                   isUser: false,

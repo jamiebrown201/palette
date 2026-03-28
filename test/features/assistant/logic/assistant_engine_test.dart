@@ -60,7 +60,7 @@ void main() {
       });
 
       test('recognises red thread questions', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('How do my rooms connect?');
         expect(response.text, contains('Red Thread'));
       });
@@ -72,13 +72,13 @@ void main() {
       });
 
       test('recognises greetings', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('Hello');
         expect(response.text.toLowerCase(), contains('hello'));
       });
 
       test('handles unknown questions gracefully', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('fdsjklfdsjkl');
         expect(response.text.isNotEmpty, isTrue);
         expect(response.suggestedFollowUps, isNotEmpty);
@@ -145,7 +145,7 @@ void main() {
       });
 
       test('prompts room creation when no rooms exist', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('What colour should I paint?');
         expect(response.text, contains('Create a room'));
       });
@@ -217,7 +217,7 @@ void main() {
       });
 
       test('prompts quiz when no DNA', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('What is my style?');
         expect(response.text, contains('Colour DNA quiz'));
       });
@@ -225,7 +225,7 @@ void main() {
 
     group('general design', () {
       test('explains 70/20/10 rule', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('What is the 70/20/10 rule?');
         expect(response.text, contains('70%'));
         expect(response.text, contains('20%'));
@@ -233,13 +233,13 @@ void main() {
       });
 
       test('explains red thread concept', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('What is a Red Thread?');
         expect(response.text, contains('Red Thread'));
       });
 
       test('explains undertones', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final response = engine.respond('What are undertones?');
         expect(response.text, contains('undertone'));
       });
@@ -256,7 +256,7 @@ void main() {
       });
 
       test('returns generic starters when no rooms', () {
-        final engine = AssistantEngine(const AssistantContext());
+        const engine = AssistantEngine(AssistantContext());
         final starters = engine.starterSuggestions();
         expect(starters, isNotEmpty);
         expect(starters.any((s) => s.contains('70/20/10')), isTrue);

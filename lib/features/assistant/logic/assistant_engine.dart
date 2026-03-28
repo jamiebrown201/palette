@@ -1,5 +1,3 @@
-import 'package:palette/core/colour/colour_conversions.dart';
-import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/locked_furniture.dart';
@@ -323,7 +321,7 @@ class AssistantEngine {
 
       if (paints.isEmpty) {
         buf.writeln(
-          'I couldn\'t find close paint matches in your budget '
+          "I couldn't find close paint matches in your budget "
           'bracket. Try adjusting the budget for more options.',
         );
       }
@@ -350,7 +348,7 @@ class AssistantEngine {
 
         if (lightRec.preferredUndertone == Undertone.warm) {
           buf.writeln(
-            'I\'d recommend warm undertones here \u2014 think '
+            "I'd recommend warm undertones here \u2014 think "
             'earthy creams, soft golds, or muted terracotta.',
           );
         } else if (lightRec.preferredUndertone == Undertone.cool) {
@@ -381,7 +379,7 @@ class AssistantEngine {
             .join(' and ');
         buf.writeln();
         buf.writeln(
-          'You\'ve set a $moodNames mood for this room. '
+          "You've set a $moodNames mood for this room. "
           '${_moodGuidance(room.moods.first)}',
         );
       }
@@ -423,7 +421,7 @@ class AssistantEngine {
         case CompassDirection.north:
           buf.writeln(
             'North-facing rooms get cool, bluish light. '
-            'Avoid cool whites (blue or grey undertone) \u2014 they\'ll '
+            "Avoid cool whites (blue or grey undertone) \u2014 they'll "
             'make the room feel cold. Choose warm whites with a yellow '
             'or pink undertone.',
           );
@@ -469,7 +467,7 @@ class AssistantEngine {
       }
     } else {
       buf.writeln(
-        'Set your room\'s compass direction so I can recommend '
+        "Set your room's compass direction so I can recommend "
         'the right white. The direction your window faces changes how '
         'every white looks throughout the day.',
       );
@@ -477,7 +475,7 @@ class AssistantEngine {
 
     buf.writeln();
     buf.writeln(
-      'Pro tip: Use Sowerby\'s Paper Test \u2014 hold a sheet of '
+      "Pro tip: Use Sowerby's Paper Test \u2014 hold a sheet of "
       'plain printer paper against your wall sample. The contrast reveals '
       'the undertone instantly.',
     );
@@ -500,8 +498,8 @@ class AssistantEngine {
             'Light direction is one of the most important factors in '
             'choosing colours. The same green that looks warm and inviting '
             'in a south-facing room can look cold and dingy facing north.\n\n'
-            '${room != null ? 'Set your ${room.name}\'s compass direction '
-                    'and I\'ll give you specific advice.' : 'Create a room to '
+            '${room != null ? "Set your ${room.name}'s compass direction "
+                    "and I'll give you specific advice." : 'Create a room to '
                     'get personalised light advice.'}',
         isUser: false,
         suggestedFollowUps: const ['What is the 70/20/10 rule?'],
@@ -543,8 +541,8 @@ class AssistantEngine {
         );
         buf.writeln();
         buf.writeln(
-          'You\'ve got the most forgiving light direction. '
-          'Matt finishes work beautifully because you don\'t need '
+          "You've got the most forgiving light direction. "
+          "Matt finishes work beautifully because you don't need "
           'the paint to reflect light for you.',
         );
       case CompassDirection.east:
@@ -555,7 +553,7 @@ class AssistantEngine {
         buf.writeln();
         buf.writeln(
           'If you use this room mainly in the morning, you can '
-          'be bolder with colour. If it\'s an evening room too, '
+          "be bolder with colour. If it's an evening room too, "
           'choose colours that also look good under warm lamps.',
         );
       case CompassDirection.west:
@@ -679,7 +677,7 @@ class AssistantEngine {
         return AssistantMessage(
           text:
               'Your ${room.name} needs a hero colour first. '
-              'Once you\'ve set your 70/20/10 plan, I can diagnose '
+              "Once you've set your 70/20/10 plan, I can diagnose "
               'what the room still needs.',
           isUser: false,
           roomId: room.id,
@@ -703,7 +701,7 @@ class AssistantEngine {
     }
 
     final buf = StringBuffer();
-    buf.writeln('Here\'s what your ${room.name} still needs:');
+    buf.writeln("Here's what your ${room.name} still needs:");
     buf.writeln();
 
     final gaps = report.gaps.take(3);
@@ -721,7 +719,7 @@ class AssistantEngine {
     if (report.dataQuality == DataQuality.minimal) {
       buf.writeln(
         'Add your existing furniture for better recommendations '
-        '\u2014 the more I know about what\'s in the room, the better '
+        "\u2014 the more I know about what's in the room, the better "
         'my advice gets.',
       );
     }
@@ -754,7 +752,7 @@ class AssistantEngine {
       );
     }
 
-    buf.writeln('As ${archetype.displayName}, here\'s your material palette:');
+    buf.writeln("As ${archetype.displayName}, here's your material palette:");
     buf.writeln();
 
     // Archetype family guidance
@@ -772,7 +770,7 @@ class AssistantEngine {
       'per room. Mixing three metals creates visual noise.',
     );
     buf.writeln(
-      '\u2022 Wood tones don\'t need to match exactly, but their '
+      "\u2022 Wood tones don't need to match exactly, but their "
       'undertones should agree (warm with warm, cool with cool).',
     );
     buf.writeln(
@@ -821,7 +819,7 @@ class AssistantEngine {
       return const AssistantMessage(
         text:
             'Complete the Colour DNA quiz to discover your design '
-            'identity. It takes under 3 minutes and I\'ll be able to give '
+            "identity. It takes under 3 minutes and I'll be able to give "
             'you much more personalised advice.',
         isUser: false,
         suggestedFollowUps: ['What is the 70/20/10 rule?'],
@@ -843,7 +841,7 @@ class AssistantEngine {
     buf.writeln();
     buf.writeln(
       '${dna.primaryFamily.description}. '
-      'This means you\'re naturally drawn to these kinds of spaces, '
+      "This means you're naturally drawn to these kinds of spaces, "
       'and your rooms will feel most "you" when they honour this instinct.',
     );
 
@@ -874,7 +872,7 @@ class AssistantEngine {
     if (q.contains('70/20/10') || q.contains('70 20 10')) {
       return const AssistantMessage(
         text:
-            'The 70/20/10 rule divides a room\'s colour into three tiers:\n\n'
+            "The 70/20/10 rule divides a room's colour into three tiers:\n\n"
             '\u2022 70% Hero \u2014 your walls, ceiling, and largest furniture. '
             'This is the colour that sets the overall mood.\n'
             '\u2022 20% Beta \u2014 one large piece plus smaller touches. '
@@ -917,7 +915,7 @@ class AssistantEngine {
             'There\'s no such thing as "just white." Every white has an '
             'undertone \u2014 blue, pink, yellow, or grey \u2014 and the '
             'wrong one can make your room feel clinical or dingy.\n\n'
-            'The key is matching your white\'s undertone to your room\'s '
+            "The key is matching your white's undertone to your room's "
             'light direction:\n'
             '\u2022 North-facing: warm whites (yellow/pink undertone)\n'
             '\u2022 South-facing: any white works; cool whites feel crisp\n'
@@ -941,8 +939,8 @@ class AssistantEngine {
             'harmony as you move from space to space.\n\n'
             'Without it, each room feels like a separate decorating decision. '
             'With it, your home tells a coherent colour story.\n\n'
-            'It doesn\'t mean every room looks the same \u2014 it means '
-            'there\'s a connecting thread. Your hallway cream becomes your '
+            "It doesn't mean every room looks the same \u2014 it means "
+            "there's a connecting thread. Your hallway cream becomes your "
             'living room cushion, your bedroom throw picks up your '
             'kitchen accent.',
         isUser: false,
@@ -978,9 +976,9 @@ class AssistantEngine {
     final name = context.dna?.archetype?.displayName;
     final greeting =
         name != null
-            ? 'Hello! As $name, you\'ve got great instincts. '
+            ? "Hello! As $name, you've got great instincts. "
                 'What can I help you with today?'
-            : 'Hello! I\'m your pocket interior designer. '
+            : "Hello! I'm your pocket interior designer. "
                 'Ask me anything about your home \u2014 colours, materials, '
                 'light, or what to buy next.';
 
@@ -994,7 +992,7 @@ class AssistantEngine {
   AssistantMessage _respondUnknown() {
     return AssistantMessage(
       text:
-          'I\'m best at helping with room colours, materials, '
+          "I'm best at helping with room colours, materials, "
           'light direction, and your whole-home colour story. '
           'Try asking me about one of your rooms.',
       isUser: false,
@@ -1024,7 +1022,7 @@ class AssistantEngine {
       'For a grounded feel, earth tones anchor the space. '
           'Clay, olive, warm stone, or deep moss.',
     RoomMood.dramatic =>
-      'For drama, don\'t be afraid of dark colours. '
+      "For drama, don't be afraid of dark colours. "
           'A deep wall colour with metallic accents creates impact.',
     RoomMood.playful =>
       'For playfulness, mix complementary colours and '
