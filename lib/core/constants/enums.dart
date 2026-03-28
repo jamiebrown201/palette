@@ -213,6 +213,29 @@ extension BudgetBracketX on BudgetBracket {
   };
 }
 
+enum RoomSize { small, medium, large }
+
+extension RoomSizeX on RoomSize {
+  String get displayName => switch (this) {
+    RoomSize.small => 'Small',
+    RoomSize.medium => 'Medium',
+    RoomSize.large => 'Large',
+  };
+
+  String get description => switch (this) {
+    RoomSize.small => 'Up to 10 m² (e.g. box room, small bathroom)',
+    RoomSize.medium => 'About 10–20 m² (e.g. typical bedroom, kitchen)',
+    RoomSize.large => '20 m²+ (e.g. open-plan living, large lounge)',
+  };
+
+  /// Recommended rug sizes for this room bracket.
+  List<RugSize> get recommendedRugSizes => switch (this) {
+    RoomSize.small => [RugSize.small120x170],
+    RoomSize.medium => [RugSize.medium160x230, RugSize.large200x290],
+    RoomSize.large => [RugSize.large200x290, RugSize.extraLarge240x340],
+  };
+}
+
 enum PropertyType { flat, terraced, semiDetached, detached, other }
 
 extension PropertyTypeX on PropertyType {

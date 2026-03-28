@@ -152,7 +152,7 @@ RoomGapReport analyseRoomGaps({
   // --- Gap checks ---
 
   // 1. Rug check — no rug in any tier
-  _checkRug(keepingItems, gaps);
+  _checkRug(keepingItems, gaps, room);
 
   // 2. Lighting checks — no lighting items
   _checkLighting(keepingItems, gaps);
@@ -199,9 +199,15 @@ DataQuality _assessDataQuality(List<LockedFurniture> items) {
   return DataQuality.rich;
 }
 
-void _checkRug(List<LockedFurniture> items, List<RoomGap> gaps) {
+void _checkRug(List<LockedFurniture> items, List<RoomGap> gaps, Room room) {
   final hasRug = items.any((f) => f.category == FurnitureCategory.rug);
   if (!hasRug) {
+    String? blocker;
+    if (items.isEmpty) {
+      blocker = 'Add your existing furniture for better recommendations';
+    } else if (room.roomSize == null && room.areaMetres == null) {
+      blocker = 'Add room dimensions for better rug sizing';
+    }
     gaps.add(
       RoomGap(
         gapType: GapType.rug,
@@ -217,11 +223,9 @@ void _checkRug(List<LockedFurniture> items, List<RoomGap> gaps) {
             '${items.length} other items locked'
           else
             'No furniture locked yet',
+          if (room.roomSize != null) 'Room size: ${room.roomSize!.displayName}',
         ],
-        blocker:
-            items.isEmpty
-                ? 'Add your existing furniture for better recommendations'
-                : null,
+        blocker: blocker,
       ),
     );
   }

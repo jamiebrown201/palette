@@ -25,12 +25,15 @@ class CreateRoomScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
-  static const _totalSteps = 5;
+  static const _totalSteps = 6;
   int _currentStep = 0;
   final _nameController = TextEditingController();
+  final _widthController = TextEditingController();
+  final _lengthController = TextEditingController();
   CompassDirection? _direction;
   UsageTime _usageTime = UsageTime.allDay;
   final _moods = <RoomMood>{};
+  RoomSize? _roomSize;
   BudgetBracket _budget = BudgetBracket.midRange;
   late bool _isRenterMode;
 
@@ -51,6 +54,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     'Which way does the light come in?',
     'When do you use this room?',
     'How should it feel?',
+    'How big is the room?',
     'Budget & ownership',
   ];
 
@@ -63,6 +67,8 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _widthController.dispose();
+    _lengthController.dispose();
     super.dispose();
   }
 
@@ -177,6 +183,8 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     }
 
     final id = const Uuid().v4();
+    final width = double.tryParse(_widthController.text);
+    final length = double.tryParse(_lengthController.text);
     await roomRepo.insertRoom(
       RoomsCompanion.insert(
         id: id,
@@ -187,6 +195,9 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
         budget: _budget,
         isRenterMode: _isRenterMode,
         sortOrder: roomCount,
+        roomSize: Value(_roomSize),
+        widthMetres: Value(width),
+        lengthMetres: Value(length),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
@@ -394,6 +405,14 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
           },
         );
       case 4:
+        return _RoomSizeStep(
+          key: const ValueKey('size'),
+          roomSize: _roomSize,
+          widthController: _widthController,
+          lengthController: _lengthController,
+          onSizeChanged: (v) => setState(() => _roomSize = v),
+        );
+      case 5:
         return _BudgetStep(
           key: const ValueKey('budget'),
           budget: _budget,
@@ -731,6 +750,188 @@ class _MoodStep extends StatelessWidget {
             ),
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _RoomSizeStep extends StatelessWidget {
+  const _RoomSizeStep({
+    required this.roomSize,
+    required this.widthController,
+    required this.lengthController,
+    required this.onSizeChanged,
+    super.key,
+  });
+
+  final RoomSize? roomSize;
+  final TextEditingController widthController;
+  final TextEditingController lengthController;
+  final ValueChanged<RoomSize?> onSizeChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pick an approximate size',
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: PaletteColours.textSecondary),
+        ),
+        const SizedBox(height: 16),
+        ...RoomSize.values.map((size) {
+          final isSelected = roomSize == size;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Material(
+              color:
+                  isSelected
+                      ? PaletteColours.sageGreenLight
+                      : PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => onSizeChanged(size),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color:
+                          isSelected
+                              ? PaletteColours.sageGreen
+                              : PaletteColours.divider,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.square_foot,
+                        color:
+                            isSelected
+                                ? PaletteColours.sageGreenDark
+                                : PaletteColours.textSecondary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              size.displayName,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.copyWith(
+                                fontWeight:
+                                    isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                              ),
+                            ),
+                            Text(
+                              size.description,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color: PaletteColours.textTertiary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isSelected)
+                        const Icon(
+                          Icons.check_circle,
+                          color: PaletteColours.sageGreen,
+                          size: 22,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 16),
+        // Optional manual entry
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: PaletteColours.softCream,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Or enter exact dimensions (optional)',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: PaletteColours.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: widthController,
+                      decoration: InputDecoration(
+                        labelText: 'Width (m)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        isDense: true,
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('×'),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: lengthController,
+                      decoration: InputDecoration(
+                        labelText: 'Length (m)',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        isDense: true,
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Helps us recommend the right rug size',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: PaletteColours.textTertiary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: TextButton(
+            onPressed: () => onSizeChanged(null),
+            child: const Text("I'm not sure — skip"),
+          ),
+        ),
       ],
     );
   }

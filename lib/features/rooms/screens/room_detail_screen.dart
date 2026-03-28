@@ -116,6 +116,11 @@ class _RoomDetailContent extends ConsumerWidget {
                     label: m.displayName,
                   ),
                 ),
+                if (room.roomSize != null)
+                  _InfoChip(
+                    icon: Icons.square_foot_outlined,
+                    label: room.roomSize!.displayName,
+                  ),
                 if (config.modeBadge != null)
                   _InfoChip(
                     icon: Icons.vpn_key_outlined,

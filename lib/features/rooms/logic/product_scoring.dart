@@ -239,8 +239,8 @@ ScoredProduct _computeScores({
   // 6. Material balance (fills texture/material gaps)
   final materialScore = _scoreMaterialBalance(product, lockedFurniture);
 
-  // 7. Scale fit (appropriate for room)
-  final scaleScore = _scoreScale(product);
+  // 7. Scale fit (appropriate for room size)
+  final scaleScore = _scoreScale(product, room);
 
   // 8. Renter suitability
   final renterScore =
@@ -468,11 +468,42 @@ double _scoreMaterialBalance(Product product, List<LockedFurniture> locked) {
   return 0.6;
 }
 
-double _scoreScale(Product product) {
-  // Simplified: all products in our curated catalogue are reasonable sizes.
-  // Full implementation requires room dimensions (Phase 1E).
+double _scoreScale(Product product, Room room) {
+  // For rugs, match rug size bracket to room dimensions.
+  if (product.category == ProductCategory.rug && product.rugSize != null) {
+    final roomSize = room.roomSize;
+    if (roomSize != null) {
+      final recommended = roomSize.recommendedRugSizes;
+      if (recommended.contains(product.rugSize)) return 1.0;
+      // One bracket off = acceptable
+      final rugIndex = RugSize.values.indexOf(product.rugSize!);
+      for (final rec in recommended) {
+        if ((RugSize.values.indexOf(rec) - rugIndex).abs() == 1) return 0.6;
+      }
+      // Too small for large room or too large for small room
+      return 0.2;
+    }
+    // Manual dimensions: compare rug area to room area
+    final area = room.areaMetres;
+    if (area != null) {
+      final rugArea = _rugAreaM2(product.rugSize!);
+      final ratio = rugArea / area;
+      // Ideal: rug covers 30-60% of floor area
+      if (ratio >= 0.25 && ratio <= 0.65) return 1.0;
+      if (ratio >= 0.15 && ratio <= 0.75) return 0.6;
+      return 0.2;
+    }
+  }
+  // Non-rug products or no room size: neutral score.
   return 0.7;
 }
+
+double _rugAreaM2(RugSize size) => switch (size) {
+  RugSize.small120x170 => 1.2 * 1.7,
+  RugSize.medium160x230 => 1.6 * 2.3,
+  RugSize.large200x290 => 2.0 * 2.9,
+  RugSize.extraLarge240x340 => 2.4 * 3.4,
+};
 
 // ── Explanation generation ──
 

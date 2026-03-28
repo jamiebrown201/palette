@@ -17,6 +17,9 @@ class Room {
     this.betaColourHex,
     this.surpriseColourHex,
     this.wallColourHex,
+    this.roomSize,
+    this.widthMetres,
+    this.lengthMetres,
   });
 
   final String id;
@@ -31,8 +34,24 @@ class Room {
   final bool isRenterMode;
   final int sortOrder;
   final String? wallColourHex;
+  final RoomSize? roomSize;
+  final double? widthMetres;
+  final double? lengthMetres;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// Approximate area in m², either from manual entry or size bracket default.
+  double? get areaMetres {
+    if (widthMetres != null && lengthMetres != null) {
+      return widthMetres! * lengthMetres!;
+    }
+    return switch (roomSize) {
+      RoomSize.small => 8.0,
+      RoomSize.medium => 15.0,
+      RoomSize.large => 25.0,
+      null => null,
+    };
+  }
 
   Room copyWith({
     String? id,
@@ -47,6 +66,9 @@ class Room {
     bool? isRenterMode,
     int? sortOrder,
     String? wallColourHex,
+    RoomSize? roomSize,
+    double? widthMetres,
+    double? lengthMetres,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -63,6 +85,9 @@ class Room {
       isRenterMode: isRenterMode ?? this.isRenterMode,
       sortOrder: sortOrder ?? this.sortOrder,
       wallColourHex: wallColourHex ?? this.wallColourHex,
+      roomSize: roomSize ?? this.roomSize,
+      widthMetres: widthMetres ?? this.widthMetres,
+      lengthMetres: lengthMetres ?? this.lengthMetres,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

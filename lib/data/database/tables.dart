@@ -143,6 +143,12 @@ class Rooms extends Table {
   BoolColumn get isRenterMode => boolean()();
   IntColumn get sortOrder => integer()();
   TextColumn get wallColourHex => text().nullable()();
+  TextColumn get roomSize =>
+      text().nullable().map(
+        const EnumNameConverter<RoomSize>(RoomSize.values),
+      )();
+  RealColumn get widthMetres => real().nullable()();
+  RealColumn get lengthMetres => real().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 

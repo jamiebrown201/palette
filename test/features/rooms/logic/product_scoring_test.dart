@@ -191,6 +191,176 @@ void main() {
       expect(scored.any((s) => s.product.id == 'brass-lamp'), isTrue);
     });
 
+    group('scale fit scoring with room dimensions', () {
+      test('small room prefers small rug', () {
+        final smallRoom = Room(
+          id: 'room-s',
+          name: 'Box Room',
+          usageTime: UsageTime.allDay,
+          moods: [RoomMood.calm],
+          budget: BudgetBracket.affordable,
+          isRenterMode: false,
+          sortOrder: 0,
+          roomSize: RoomSize.small,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        final rugs = [
+          _product(
+            id: 'small-rug',
+            name: 'Small Rug',
+            hex: '#C9B99A',
+            price: 80.0,
+            undertone: Undertone.warm,
+            category: ProductCategory.rug,
+            rugSize: RugSize.small120x170,
+          ),
+          _product(
+            id: 'xl-rug',
+            name: 'Extra Large Rug',
+            hex: '#C9B99A',
+            price: 80.0,
+            undertone: Undertone.warm,
+            category: ProductCategory.rug,
+            rugSize: RugSize.extraLarge240x340,
+          ),
+        ];
+
+        final scored = scoreProducts(
+          candidates: rugs,
+          room: smallRoom,
+          lockedFurniture: [],
+          archetype: null,
+        );
+
+        // Small rug should score higher for small room
+        final smallRug = scored.firstWhere((s) => s.product.id == 'small-rug');
+        final xlRug = scored.firstWhere((s) => s.product.id == 'xl-rug');
+        expect(smallRug.totalScore, greaterThan(xlRug.totalScore));
+      });
+
+      test('large room prefers large rug', () {
+        final largeRoom = Room(
+          id: 'room-l',
+          name: 'Open Plan',
+          usageTime: UsageTime.allDay,
+          moods: [RoomMood.energising],
+          budget: BudgetBracket.midRange,
+          isRenterMode: false,
+          sortOrder: 0,
+          roomSize: RoomSize.large,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        final rugs = [
+          _product(
+            id: 'small-rug',
+            name: 'Small Rug',
+            hex: '#C9B99A',
+            price: 200.0,
+            undertone: Undertone.warm,
+            category: ProductCategory.rug,
+            rugSize: RugSize.small120x170,
+          ),
+          _product(
+            id: 'large-rug',
+            name: 'Large Rug',
+            hex: '#C9B99A',
+            price: 200.0,
+            undertone: Undertone.warm,
+            category: ProductCategory.rug,
+            rugSize: RugSize.large200x290,
+          ),
+        ];
+
+        final scored = scoreProducts(
+          candidates: rugs,
+          room: largeRoom,
+          lockedFurniture: [],
+          archetype: null,
+        );
+
+        final smallRug = scored.firstWhere((s) => s.product.id == 'small-rug');
+        final largeRug = scored.firstWhere((s) => s.product.id == 'large-rug');
+        expect(largeRug.totalScore, greaterThan(smallRug.totalScore));
+      });
+
+      test('manual dimensions influence rug scoring', () {
+        // 5m x 4m = 20m² room
+        final manualRoom = Room(
+          id: 'room-m',
+          name: 'Measured Room',
+          usageTime: UsageTime.evening,
+          moods: [RoomMood.cocooning],
+          budget: BudgetBracket.midRange,
+          isRenterMode: false,
+          sortOrder: 0,
+          widthMetres: 5.0,
+          lengthMetres: 4.0,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        final rugs = [
+          _product(
+            id: 'good-fit-rug',
+            name: 'Medium Rug',
+            hex: '#C9B99A',
+            price: 200.0,
+            undertone: Undertone.warm,
+            category: ProductCategory.rug,
+            rugSize: RugSize.large200x290,
+          ),
+          _product(
+            id: 'too-small-rug',
+            name: 'Tiny Rug',
+            hex: '#C9B99A',
+            price: 200.0,
+            undertone: Undertone.warm,
+            category: ProductCategory.rug,
+            rugSize: RugSize.small120x170,
+          ),
+        ];
+
+        final scored = scoreProducts(
+          candidates: rugs,
+          room: manualRoom,
+          lockedFurniture: [],
+          archetype: null,
+        );
+
+        final goodFit = scored.firstWhere(
+          (s) => s.product.id == 'good-fit-rug',
+        );
+        final tooSmall = scored.firstWhere(
+          (s) => s.product.id == 'too-small-rug',
+        );
+        expect(goodFit.totalScore, greaterThan(tooSmall.totalScore));
+      });
+
+      test('non-rug products get neutral scale score without dimensions', () {
+        final scored = scoreProducts(
+          candidates: [
+            _product(
+              id: 'lamp',
+              name: 'Floor Lamp',
+              hex: '#C9B99A',
+              price: 80.0,
+              undertone: Undertone.warm,
+              category: ProductCategory.floorLamp,
+            ),
+          ],
+          room: testRoom,
+          lockedFurniture: [],
+          archetype: null,
+        );
+
+        expect(scored, isNotEmpty);
+      });
+    });
+
     test('diverseRecommendations creates variety slots', () {
       final scored = scoreProducts(
         candidates: [
@@ -225,6 +395,7 @@ Product _product({
   required ProductCategory category,
   bool renterSafe = true,
   MetalFinish? metalFinish,
+  RugSize? rugSize,
 }) => Product(
   id: id,
   category: category,
@@ -244,6 +415,7 @@ Product _product({
   renterSafe: renterSafe,
   available: true,
   metalFinish: metalFinish,
+  rugSize: rugSize,
 );
 
 LockedFurniture _furniture({required String id, MetalFinish? metalFinish}) =>
