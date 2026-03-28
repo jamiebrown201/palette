@@ -118,6 +118,10 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
+            // AI Design Assistant CTA (Phase 3.2)
+            _DesignAssistantCard(),
+            const SizedBox(height: 12),
+
             // Mini Palette Strip (spec 1B.1)
             _MiniPaletteStrip(),
             const SizedBox(height: 12),
@@ -827,6 +831,72 @@ class _CoherenceSummary extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Shared widgets (kept from previous version)
 // ---------------------------------------------------------------------------
+
+class _DesignAssistantCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/assistant'),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: PaletteColours.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: PaletteColours.shadowLevel2,
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: PaletteColours.sageGreen,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.auto_awesome,
+                color: PaletteColours.textOnAccent,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Design Assistant',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Ask me anything about your home',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: PaletteColours.textTertiary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _ActionCard extends StatelessWidget {
   const _ActionCard({

@@ -262,6 +262,8 @@ class _RoomDetailContent extends ConsumerWidget {
               _RoomPreviewMockup(room: room),
               const SizedBox(height: 12),
               _VisualiserCta(room: room),
+              const SizedBox(height: 12),
+              _AssistantCta(room: room),
             ],
 
             // Paint recommendations for this room
@@ -4806,4 +4808,55 @@ void _showRoomEditSheet(BuildContext context, WidgetRef ref, Room room) {
               ),
         ),
   );
+}
+
+/// CTA card for the AI Design Assistant (Phase 3.2).
+class _AssistantCta extends StatelessWidget {
+  const _AssistantCta({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    final prompt = Uri.encodeComponent(
+      'What colour should I paint my ${room.name}?',
+    );
+
+    return GestureDetector(
+      onTap: () => context.push('/assistant?prompt=$prompt'),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: PaletteColours.softCream,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: PaletteColours.sageGreenLight),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.auto_awesome,
+              color: PaletteColours.sageGreen,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Ask the Design Assistant about this room',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: PaletteColours.sageGreenDark,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: PaletteColours.sageGreenDark,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

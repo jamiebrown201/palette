@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/analytics/analytics_observer.dart';
+import 'package:palette/features/assistant/screens/assistant_screen.dart';
 import 'package:palette/features/capture/screens/capture_screen.dart';
 import 'package:palette/features/colour_wheel/screens/colour_wheel_screen.dart';
 import 'package:palette/features/colour_wheel/screens/white_finder_screen.dart';
@@ -101,6 +102,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/samples',
         builder: (context, state) => const SampleListScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/assistant',
+        builder:
+            (context, state) => AssistantScreen(
+              initialPrompt: state.uri.queryParameters['prompt'],
+            ),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
