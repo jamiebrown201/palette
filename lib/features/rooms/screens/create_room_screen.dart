@@ -4,9 +4,11 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/database/palette_database.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:uuid/uuid.dart';
@@ -159,9 +161,10 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     final roomRepo = ref.read(roomRepositoryProvider);
     final roomCount = await roomRepo.roomCount();
 
+    final id = const Uuid().v4();
     await roomRepo.insertRoom(
       RoomsCompanion.insert(
-        id: const Uuid().v4(),
+        id: id,
         name: name,
         direction: Value(_direction),
         usageTime: _usageTime,
@@ -173,6 +176,13 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
         updatedAt: DateTime.now(),
       ),
     );
+
+    ref.read(analyticsProvider).track(AnalyticsEvents.roomCreated, {
+      'room_id': id,
+      'room_name': name,
+      'has_direction': _direction != null,
+      'is_renter_mode': _isRenterMode,
+    });
 
     if (mounted) Navigator.of(context).pop();
   }

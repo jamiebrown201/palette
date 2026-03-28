@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/analytics/analytics_observer.dart';
 import 'package:palette/features/capture/screens/capture_screen.dart';
 import 'package:palette/features/colour_wheel/screens/colour_wheel_screen.dart';
 import 'package:palette/features/colour_wheel/screens/white_finder_screen.dart';
@@ -16,6 +17,7 @@ import 'package:palette/features/red_thread/screens/red_thread_screen.dart';
 import 'package:palette/features/rooms/screens/room_detail_screen.dart';
 import 'package:palette/features/rooms/screens/room_list_screen.dart';
 import 'package:palette/features/subscription/screens/paywall_screen.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/routing/app_shell.dart';
 
@@ -32,6 +34,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
+    observers: [AnalyticsObserver(ref.read(analyticsProvider))],
     // Gracefully handle unknown routes (e.g. malformed deep links)
     errorBuilder: (context, state) => const HomeScreen(),
     redirect: (context, state) {

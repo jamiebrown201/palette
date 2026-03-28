@@ -1,25 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 
-class PaywallScreen extends ConsumerWidget {
-  const PaywallScreen({super.key});
+class PaywallScreen extends ConsumerStatefulWidget {
+  const PaywallScreen({this.triggerSource, super.key});
+
+  /// Where the paywall was opened from (e.g. 'room_detail', 'red_thread').
+  final String? triggerSource;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
+}
+
+class _PaywallScreenState extends ConsumerState<PaywallScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(analyticsProvider).track(AnalyticsEvents.paywallViewed, {
+      if (widget.triggerSource != null) 'trigger_source': widget.triggerSource,
+    });
+  }
+
+  void _dismiss() {
+    ref.read(analyticsProvider).track(AnalyticsEvents.paywallDismissed);
+    context.pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentTier = ref.watch(subscriptionTierProvider);
+
+    // Track tier upgrades.
+    ref.listen<SubscriptionTier>(subscriptionTierProvider, (prev, next) {
+      if (prev != null && prev != next) {
+        ref.read(analyticsProvider).track(AnalyticsEvents.upgradeCompleted, {
+          'tier': next.name,
+        });
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upgrade'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.pop(),
-        ),
+        leading: IconButton(icon: const Icon(Icons.close), onPressed: _dismiss),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -81,6 +110,10 @@ class PaywallScreen extends ConsumerWidget {
                 'Export room plans as PDF',
               ],
               onSelect: () {
+                ref.read(analyticsProvider).track(
+                  AnalyticsEvents.upgradeTapped,
+                  {'tier': 'plus'},
+                );
                 ref.read(subscriptionTierProvider.notifier).state =
                     SubscriptionTier.plus;
                 context.pop();
@@ -102,6 +135,10 @@ class PaywallScreen extends ConsumerWidget {
                 'Paint & Finish Recommender (coming soon)',
               ],
               onSelect: () {
+                ref.read(analyticsProvider).track(
+                  AnalyticsEvents.upgradeTapped,
+                  {'tier': 'pro'},
+                );
                 ref.read(subscriptionTierProvider.notifier).state =
                     SubscriptionTier.pro;
                 context.pop();
@@ -113,6 +150,10 @@ class PaywallScreen extends ConsumerWidget {
             _ProjectPassCard(
               isCurrent: currentTier == SubscriptionTier.projectPass,
               onSelect: () {
+                ref.read(analyticsProvider).track(
+                  AnalyticsEvents.upgradeTapped,
+                  {'tier': 'project_pass'},
+                );
                 ref.read(subscriptionTierProvider.notifier).state =
                     SubscriptionTier.projectPass;
                 context.pop();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/core/theme/palette_colours.dart';
@@ -11,6 +12,7 @@ import 'package:palette/features/onboarding/screens/memory_prompt_page.dart';
 import 'package:palette/features/onboarding/screens/property_context_page.dart';
 import 'package:palette/features/onboarding/screens/quiz_result_page.dart';
 import 'package:palette/features/onboarding/screens/visual_preference_page.dart';
+import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -31,16 +33,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _loadContent() async {
     await ref.read(quizNotifierProvider.notifier).loadContent();
-    if (mounted) setState(() => _contentLoaded = true);
+    if (mounted) {
+      setState(() => _contentLoaded = true);
+      ref.read(analyticsProvider).track(AnalyticsEvents.quizStarted);
+    }
   }
 
   void _skipQuiz() {
+    final stage = ref.read(quizNotifierProvider).stage;
+    ref.read(analyticsProvider).track(AnalyticsEvents.quizSkipped, {
+      'stage': stage.name,
+    });
     ref.read(hasCompletedOnboardingProvider.notifier).state = true;
     context.go('/home');
   }
 
   void _onQuizComplete() {
     final quiz = ref.read(quizNotifierProvider);
+    final analytics = ref.read(analyticsProvider);
+    analytics.track(AnalyticsEvents.quizCompleted);
+    if (quiz.archetype != null) {
+      analytics.track(AnalyticsEvents.archetypeAssigned, {
+        'archetype': quiz.archetype!.name,
+      });
+    }
     ref.read(hasCompletedOnboardingProvider.notifier).state = true;
 
     // Update renter constraints provider for this session.
@@ -59,6 +75,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final quizState = ref.watch(quizNotifierProvider);
+
+    // Track stage transitions.
+    ref.listen<QuizState>(quizNotifierProvider, (prev, next) {
+      if (prev != null && prev.stage != next.stage) {
+        ref.read(analyticsProvider).track(AnalyticsEvents.quizStageCompleted, {
+          'stage': prev.stage.name,
+          'stage_number': prev.stage.index,
+        });
+      }
+    });
 
     if (!_contentLoaded) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

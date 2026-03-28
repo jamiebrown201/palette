@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
@@ -8,6 +9,7 @@ import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/features/explore/data/learn_content.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
+import 'package:palette/providers/analytics_provider.dart';
 
 class ExploreScreen extends ConsumerWidget {
   const ExploreScreen({super.key});
@@ -29,7 +31,13 @@ class ExploreScreen extends ConsumerWidget {
             iconBg: PaletteColours.sageGreenLight,
             title: 'Colour Wheel',
             subtitle: 'See where your palette sits',
-            onTap: () => context.go('/explore/wheel'),
+            onTap: () {
+              ref.read(analyticsProvider).track(
+                AnalyticsEvents.colourWheelOpened,
+                {'context': 'explore'},
+              );
+              context.go('/explore/wheel');
+            },
           ),
           const SizedBox(height: 12),
           _ExploreCard(
@@ -38,7 +46,13 @@ class ExploreScreen extends ConsumerWidget {
             iconBg: PaletteColours.softGoldLight,
             title: 'White Finder',
             subtitle: 'Find the right white for your rooms and light',
-            onTap: () => context.go('/explore/white-finder'),
+            onTap: () {
+              ref.read(analyticsProvider).track(
+                AnalyticsEvents.whiteFinderOpened,
+                {'context': 'explore'},
+              );
+              context.go('/explore/white-finder');
+            },
           ),
           const SizedBox(height: 12),
           _ExploreCard(
