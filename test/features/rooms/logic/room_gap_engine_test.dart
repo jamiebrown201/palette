@@ -304,6 +304,100 @@ void main() {
       expect(report.gaps.any((g) => g.gapType == GapType.coolMaterial), isTrue);
     });
 
+    test('detects artwork gap when enough items but no art', () {
+      final report = analyseRoomGaps(
+        room: _room(),
+        furniture: [
+          _furniture(id: 'f1', category: FurnitureCategory.sofa),
+          _furniture(
+            id: 'f2',
+            name: 'Table',
+            category: FurnitureCategory.table,
+          ),
+          _furniture(id: 'f3', name: 'Rug', category: FurnitureCategory.rug),
+        ],
+        threadColours: [],
+      );
+
+      expect(report.gaps.any((g) => g.gapType == GapType.artwork), isTrue);
+    });
+
+    test('does not detect artwork gap when art item present', () {
+      final report = analyseRoomGaps(
+        room: _room(),
+        furniture: [
+          _furniture(id: 'f1', category: FurnitureCategory.sofa),
+          _furniture(
+            id: 'f2',
+            name: 'Table',
+            category: FurnitureCategory.table,
+          ),
+          _furniture(
+            id: 'f3',
+            name: 'Landscape Print',
+            category: FurnitureCategory.other,
+          ),
+        ],
+        threadColours: [],
+      );
+
+      expect(report.gaps.any((g) => g.gapType == GapType.artwork), isFalse);
+    });
+
+    test('detects mirror gap in north-facing room', () {
+      final report = analyseRoomGaps(
+        room: _room().copyWith(direction: CompassDirection.north),
+        furniture: [
+          _furniture(id: 'f1', category: FurnitureCategory.sofa),
+          _furniture(
+            id: 'f2',
+            name: 'Table',
+            category: FurnitureCategory.table,
+          ),
+          _furniture(id: 'f3', name: 'Rug', category: FurnitureCategory.rug),
+        ],
+        threadColours: [],
+      );
+
+      expect(report.gaps.any((g) => g.gapType == GapType.mirror), isTrue);
+    });
+
+    test('detects mirror gap in small room', () {
+      final report = analyseRoomGaps(
+        room: _room().copyWith(roomSize: RoomSize.small),
+        furniture: [
+          _furniture(id: 'f1', category: FurnitureCategory.sofa),
+          _furniture(
+            id: 'f2',
+            name: 'Table',
+            category: FurnitureCategory.table,
+          ),
+          _furniture(id: 'f3', name: 'Rug', category: FurnitureCategory.rug),
+        ],
+        threadColours: [],
+      );
+
+      expect(report.gaps.any((g) => g.gapType == GapType.mirror), isTrue);
+    });
+
+    test('does not detect mirror gap when mirror present', () {
+      final report = analyseRoomGaps(
+        room: _room().copyWith(direction: CompassDirection.north),
+        furniture: [
+          _furniture(id: 'f1', category: FurnitureCategory.sofa),
+          _furniture(
+            id: 'f2',
+            name: 'Table',
+            category: FurnitureCategory.table,
+          ),
+          _furniture(id: 'f3', name: 'Wall Mirror'),
+        ],
+        threadColours: [],
+      );
+
+      expect(report.gaps.any((g) => g.gapType == GapType.mirror), isFalse);
+    });
+
     test('skips replacing items when checking gaps', () {
       final report = analyseRoomGaps(
         room: _room(),

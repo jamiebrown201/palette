@@ -67,7 +67,10 @@ class ProductRepository {
   static List<ProductCategory> _gapToCategories(GapType gapType) =>
       switch (gapType) {
         GapType.rug => [ProductCategory.rug],
-        GapType.ambientLighting => [ProductCategory.pendantLight],
+        GapType.ambientLighting => [
+          ProductCategory.pendantLight,
+          ProductCategory.plugInPendant,
+        ],
         GapType.taskLighting => [ProductCategory.floorLamp],
         GapType.accentLighting => [ProductCategory.tableLamp],
         GapType.textureContrast => [
@@ -78,10 +81,13 @@ class ProductRepository {
         GapType.accentColour => [
           ProductCategory.cushion,
           ProductCategory.throwBlanket,
+          ProductCategory.artwork,
         ],
         GapType.curtain => [ProductCategory.curtain],
         GapType.throwSoft => [ProductCategory.throwBlanket],
         GapType.cushions => [ProductCategory.cushion],
+        GapType.artwork => [ProductCategory.artwork, ProductCategory.wallDecor],
+        GapType.mirror => [ProductCategory.mirror],
         GapType.warmMaterial => [
           ProductCategory.throwBlanket,
           ProductCategory.cushion,
@@ -90,8 +96,8 @@ class ProductRepository {
         GapType.coolMaterial => [
           ProductCategory.tableLamp,
           ProductCategory.floorLamp,
+          ProductCategory.mirror,
         ],
-        // storage, artwork, mirror have no product categories yet
         _ => [],
       };
 }

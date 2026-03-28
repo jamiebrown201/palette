@@ -63,7 +63,14 @@ class Product {
   bool get isLighting =>
       category == ProductCategory.pendantLight ||
       category == ProductCategory.floorLamp ||
-      category == ProductCategory.tableLamp;
+      category == ProductCategory.tableLamp ||
+      category == ProductCategory.plugInPendant;
+
+  /// Whether this is a wall-based product (artwork, mirror, wall decor).
+  bool get isWallItem =>
+      category == ProductCategory.artwork ||
+      category == ProductCategory.mirror ||
+      category == ProductCategory.wallDecor;
 
   /// The budget bracket this product falls into based on category + price.
   PriceTier get priceTier {
@@ -76,6 +83,12 @@ class Product {
     // Lighting: affordable < £60, mid £60-200, investment > £200
     if (isLighting) {
       if (priceGbp < 60) return PriceTier.affordable;
+      if (priceGbp < 200) return PriceTier.midRange;
+      return PriceTier.investment;
+    }
+    // Artwork & mirrors: affordable < £50, mid £50-200, investment > £200
+    if (isWallItem) {
+      if (priceGbp < 50) return PriceTier.affordable;
       if (priceGbp < 200) return PriceTier.midRange;
       return PriceTier.investment;
     }

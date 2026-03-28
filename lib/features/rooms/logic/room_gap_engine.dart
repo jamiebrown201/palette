@@ -178,7 +178,13 @@ RoomGapReport analyseRoomGaps({
   // 9. Soft furnishing gaps (cushions, throws, curtains)
   _checkSoftFurnishings(keepingItems, gaps);
 
-  // 10. Red Thread connection check
+  // 10. Artwork check — no wall art in the room
+  _checkArtwork(keepingItems, gaps);
+
+  // 11. Mirror check — north-facing or small rooms benefit from a mirror
+  _checkMirror(keepingItems, gaps, room);
+
+  // 12. Red Thread connection check
   _checkRedThread(room, threadColours, gaps);
 
   // Sort by severity desc, then confidence desc
@@ -491,6 +497,66 @@ void _checkSoftFurnishings(List<LockedFurniture> items, List<RoomGap> gaps) {
         );
       }
     }
+  }
+}
+
+void _checkArtwork(List<LockedFurniture> items, List<RoomGap> gaps) {
+  if (items.length < 3) return; // Need enough context
+
+  // Check if any item name or category suggests artwork/prints
+  final hasArt = items.any(
+    (f) =>
+        f.name.toLowerCase().contains('art') ||
+        f.name.toLowerCase().contains('print') ||
+        f.name.toLowerCase().contains('poster') ||
+        f.name.toLowerCase().contains('painting') ||
+        f.name.toLowerCase().contains('picture'),
+  );
+  if (!hasArt) {
+    gaps.add(
+      const RoomGap(
+        gapType: GapType.artwork,
+        severity: GapSeverity.low,
+        confidence: GapConfidence.low,
+        whyItMatters:
+            'Wall art adds personality and creates a vertical focal point. '
+            'It also introduces your accent colour at eye level, which draws '
+            'the eye around the room.',
+        evidence: ['No artwork or prints identified among locked items'],
+      ),
+    );
+  }
+}
+
+void _checkMirror(List<LockedFurniture> items, List<RoomGap> gaps, Room room) {
+  if (items.length < 3) return;
+
+  final hasMirror = items.any((f) => f.name.toLowerCase().contains('mirror'));
+  if (hasMirror) return;
+
+  // Mirrors are especially useful in north-facing or small rooms
+  final isNorthFacing = room.direction == CompassDirection.north;
+  final isSmall = room.roomSize == RoomSize.small;
+
+  if (isNorthFacing || isSmall) {
+    gaps.add(
+      RoomGap(
+        gapType: GapType.mirror,
+        severity: GapSeverity.low,
+        confidence: GapConfidence.medium,
+        whyItMatters:
+            isNorthFacing
+                ? 'A mirror bounces the limited northern light around the room, '
+                    'making the space feel brighter and more open.'
+                : 'A well-placed mirror makes a small room feel larger by creating '
+                    'visual depth and reflecting light.',
+        evidence: [
+          'No mirror identified among locked items',
+          if (isNorthFacing) 'Room faces north (limited natural light)',
+          if (isSmall) 'Room is small',
+        ],
+      ),
+    );
   }
 }
 

@@ -544,6 +544,10 @@ enum ProductCategory {
   cushion,
   throwBlanket,
   curtain,
+  artwork,
+  mirror,
+  plugInPendant,
+  wallDecor,
 }
 
 extension ProductCategoryX on ProductCategory {
@@ -555,6 +559,10 @@ extension ProductCategoryX on ProductCategory {
     ProductCategory.cushion => 'Cushion',
     ProductCategory.throwBlanket => 'Throw',
     ProductCategory.curtain => 'Curtain',
+    ProductCategory.artwork => 'Artwork',
+    ProductCategory.mirror => 'Mirror',
+    ProductCategory.plugInPendant => 'Plug-in pendant',
+    ProductCategory.wallDecor => 'Wall decor',
   };
 
   IconData get icon => switch (this) {
@@ -565,6 +573,10 @@ extension ProductCategoryX on ProductCategory {
     ProductCategory.cushion => Icons.weekend,
     ProductCategory.throwBlanket => Icons.dry_cleaning,
     ProductCategory.curtain => Icons.curtains,
+    ProductCategory.artwork => Icons.image_outlined,
+    ProductCategory.mirror => Icons.flip,
+    ProductCategory.plugInPendant => Icons.power,
+    ProductCategory.wallDecor => Icons.wallpaper,
   };
 
   /// Maps to the lighting sub-category if applicable.
