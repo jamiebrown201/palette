@@ -57,6 +57,9 @@ abstract final class AnalyticsEvents {
 
   // ── Retention ───────────────────────────────────────────────
   static const sessionStarted = 'session_started';
+  static const sessionDuration = 'session_duration';
+  static const daysSinceLastSession = 'days_since_last_session';
+  static const timeOnScreen = 'time_on_screen';
   static const notificationOptIn = 'notification_opt_in';
   static const notificationTapped = 'notification_tapped';
 }

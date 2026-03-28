@@ -10,6 +10,7 @@ import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/features/explore/data/learn_content.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
+import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 
 class ExploreScreen extends ConsumerWidget {
@@ -18,6 +19,28 @@ class ExploreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dnaAsync = ref.watch(latestColourDnaProvider);
+    final roomsAsync = ref.watch(allRoomsProvider);
+    final rooms = roomsAsync.valueOrNull ?? [];
+
+    // Build personalised subtitles when room context exists
+    final contextRoom = rooms.isNotEmpty ? rooms.first : null;
+    final roomNote =
+        contextRoom != null && contextRoom.direction != null
+            ? '${contextRoom.direction!.displayName.toLowerCase()}-facing ${contextRoom.name}'
+            : null;
+
+    final wheelSubtitle =
+        roomNote != null
+            ? 'Explore harmonies for your $roomNote'
+            : 'See where your palette sits';
+    final whiteSubtitle =
+        roomNote != null
+            ? 'Find whites for your $roomNote'
+            : 'Find the right white for your rooms and light';
+    final librarySubtitle =
+        roomNote != null
+            ? 'Recommended paints for your $roomNote'
+            : 'Browse colours from UK paint brands';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Explore')),
@@ -31,7 +54,7 @@ class ExploreScreen extends ConsumerWidget {
             iconColor: PaletteColours.sageGreen,
             iconBg: PaletteColours.sageGreenLight,
             title: 'Colour Wheel',
-            subtitle: 'See where your palette sits',
+            subtitle: wheelSubtitle,
             onTap: () {
               ref.read(analyticsProvider).track(
                 AnalyticsEvents.colourWheelOpened,
@@ -46,7 +69,7 @@ class ExploreScreen extends ConsumerWidget {
             iconColor: PaletteColours.softGoldDark,
             iconBg: PaletteColours.softGoldLight,
             title: 'White Finder',
-            subtitle: 'Find the right white for your rooms and light',
+            subtitle: whiteSubtitle,
             onTap: () {
               ref.read(analyticsProvider).track(
                 AnalyticsEvents.whiteFinderOpened,
@@ -61,7 +84,7 @@ class ExploreScreen extends ConsumerWidget {
             iconColor: PaletteColours.accessibleBlueDark,
             iconBg: PaletteColours.accessibleBlueLight,
             title: 'Paint Library',
-            subtitle: 'Browse colours from UK paint brands',
+            subtitle: librarySubtitle,
             onTap: () => context.go('/explore/paint-library'),
           ),
 

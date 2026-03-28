@@ -27,6 +27,7 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
   String? _brandFilter;
   PaletteFamily? _familyFilter;
   Undertone? _undertoneFilter;
+  _PriceBracket? _priceFilter;
   bool _paletteFilter = false;
 
   @override
@@ -99,6 +100,14 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                   labelBuilder: (u) => u.displayName,
                   onChanged: (v) => setState(() => _undertoneFilter = v),
                 ),
+                const SizedBox(width: 8),
+                _FilterDropdown<_PriceBracket>(
+                  label: 'Price',
+                  value: _priceFilter,
+                  items: _PriceBracket.values,
+                  labelBuilder: (p) => p.label,
+                  onChanged: (v) => setState(() => _priceFilter = v),
+                ),
                 if (_hasFilters) ...[
                   const SizedBox(width: 8),
                   ActionChip(
@@ -108,6 +117,7 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                           _brandFilter = null;
                           _familyFilter = null;
                           _undertoneFilter = null;
+                          _priceFilter = null;
                           _paletteFilter = false;
                           _searchQuery = '';
                         }),
@@ -160,6 +170,7 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
       _brandFilter != null ||
       _familyFilter != null ||
       _undertoneFilter != null ||
+      _priceFilter != null ||
       _paletteFilter ||
       _searchQuery.isNotEmpty;
 
@@ -188,6 +199,15 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
     if (_undertoneFilter != null) {
       filtered =
           filtered.where((c) => c.undertone == _undertoneFilter).toList();
+    }
+
+    if (_priceFilter != null) {
+      filtered =
+          filtered.where((c) {
+            final price = c.approximatePricePerLitre;
+            if (price == null) return false;
+            return _priceFilter!.matches(price);
+          }).toList();
     }
 
     // Compute match data.
@@ -460,4 +480,26 @@ class _Badge extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Price bracket filter (spec 1B.4)
+// ---------------------------------------------------------------------------
+
+enum _PriceBracket {
+  budget,
+  mid,
+  premium;
+
+  String get label => switch (this) {
+    _PriceBracket.budget => '\u00A3',
+    _PriceBracket.mid => '\u00A3\u00A3',
+    _PriceBracket.premium => '\u00A3\u00A3\u00A3',
+  };
+
+  bool matches(double pricePerLitre) => switch (this) {
+    _PriceBracket.budget => pricePerLitre < 25,
+    _PriceBracket.mid => pricePerLitre >= 25 && pricePerLitre <= 50,
+    _PriceBracket.premium => pricePerLitre > 50,
+  };
 }

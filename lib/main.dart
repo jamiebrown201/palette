@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/app.dart';
-import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/analytics/analytics_service.dart';
+import 'package:palette/core/analytics/session_tracker.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/data/database/connection.dart';
@@ -51,7 +51,8 @@ Future<void> main() async {
   );
 
   final analytics = AnalyticsService();
-  analytics.track(AnalyticsEvents.sessionStarted);
+  final sessionTracker = SessionTracker(analytics);
+  await sessionTracker.start();
 
   runApp(
     ProviderScope(

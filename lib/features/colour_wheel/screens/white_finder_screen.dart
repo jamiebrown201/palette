@@ -27,11 +27,13 @@ class WhiteFinderScreen extends ConsumerWidget {
     final whitesAsync = ref.watch(whitesByUndertoneProvider);
     final dna = ref.watch(latestColourDnaProvider).valueOrNull;
 
-    // If accessed from a room, load the room to get direction info
+    // If accessed from a room, load the room to get direction + name
     CompassDirection? roomDirection;
+    String? roomName;
     if (roomId != null) {
       final roomAsync = ref.watch(roomByIdProvider(roomId!));
       roomDirection = roomAsync.valueOrNull?.direction;
+      roomName = roomAsync.valueOrNull?.name;
     }
 
     // Parse system palette for trim white reference
@@ -55,6 +57,7 @@ class WhiteFinderScreen extends ConsumerWidget {
             (grouped) => _WhiteFinderContent(
               grouped: grouped,
               roomDirection: roomDirection,
+              roomName: roomName,
               dnaUndertone: dna?.undertoneTemperature,
               trimWhiteHex: systemPalette?.trimWhite.hex,
             ),
@@ -69,12 +72,14 @@ class _WhiteFinderContent extends StatelessWidget {
   const _WhiteFinderContent({
     required this.grouped,
     this.roomDirection,
+    this.roomName,
     this.dnaUndertone,
     this.trimWhiteHex,
   });
 
   final Map<WhiteUndertone, List<PaintColour>> grouped;
   final CompassDirection? roomDirection;
+  final String? roomName;
   final Undertone? dnaUndertone;
   final String? trimWhiteHex;
 
@@ -100,8 +105,18 @@ class _WhiteFinderContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Room context header when accessed from a room
+          if (roomName != null) ...[
+            _RoomContextHeader(roomName: roomName!, direction: roomDirection),
+            const SizedBox(height: 16),
+          ],
+
           // Paper test tutorial
           const _PaperTestCard(),
+          const SizedBox(height: 16),
+
+          // Badge legend (W/C/N) — dismissible
+          const _BadgeLegend(),
           const SizedBox(height: 24),
 
           if (dnaUndertone != null && dnaUndertone != Undertone.neutral) ...[
@@ -248,6 +263,150 @@ class _WhiteFinderContent extends StatelessWidget {
       return dA.compareTo(dB);
     });
     return sorted;
+  }
+}
+
+class _RoomContextHeader extends StatelessWidget {
+  const _RoomContextHeader({required this.roomName, this.direction});
+
+  final String roomName;
+  final CompassDirection? direction;
+
+  @override
+  Widget build(BuildContext context) {
+    final dirLabel =
+        direction != null
+            ? '${direction!.displayName.toLowerCase()}-facing '
+            : '';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: PaletteColours.accessibleBlueLight,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.meeting_room_outlined,
+            color: PaletteColours.accessibleBlueDark,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Finding whites for your $dirLabel$roomName',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: PaletteColours.accessibleBlueDark,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BadgeLegend extends StatefulWidget {
+  const _BadgeLegend();
+
+  @override
+  State<_BadgeLegend> createState() => _BadgeLegendState();
+}
+
+class _BadgeLegendState extends State<_BadgeLegend> {
+  bool _dismissed = false;
+  bool _showingTooltip = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_dismissed) {
+      // Show small info icon to re-open
+      return Align(
+        alignment: Alignment.centerRight,
+        child: IconButton(
+          icon: const Icon(Icons.info_outline, size: 18),
+          color: PaletteColours.textTertiary,
+          tooltip: 'Show badge legend',
+          onPressed:
+              () => setState(() {
+                _showingTooltip = !_showingTooltip;
+              }),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: PaletteColours.softGold.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Wrap(
+              spacing: 16,
+              runSpacing: 4,
+              children: [
+                _LegendItem(badge: 'W', label: 'Warm undertone'),
+                _LegendItem(badge: 'C', label: 'Cool undertone'),
+                _LegendItem(badge: 'N', label: 'Neutral undertone'),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 16),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            color: PaletteColours.textTertiary,
+            onPressed: () => setState(() => _dismissed = true),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({required this.badge, required this.label});
+
+  final String badge;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            badge,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: PaletteColours.textSecondary,
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: PaletteColours.textSecondary),
+        ),
+      ],
+    );
   }
 }
 
