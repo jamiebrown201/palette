@@ -16,6 +16,7 @@ import 'package:palette/features/moodboards/screens/moodboard_detail_screen.dart
 import 'package:palette/features/moodboards/screens/moodboard_list_screen.dart';
 import 'package:palette/features/onboarding/screens/onboarding_screen.dart';
 import 'package:palette/features/palette/screens/palette_screen.dart';
+import 'package:palette/features/partner/screens/partner_screen.dart';
 import 'package:palette/features/profile/screens/profile_screen.dart';
 import 'package:palette/features/red_thread/screens/red_thread_screen.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
@@ -102,6 +103,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/samples',
         builder: (context, state) => const SampleListScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/partner',
+        builder: (context, state) => const PartnerScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

@@ -391,6 +391,11 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
         icon: Icons.analytics_outlined,
         onTap: () => context.push('/dev/feedback-stats'),
       ),
+      _ScreenEntry(
+        label: 'Partner Mode',
+        icon: Icons.favorite_outline,
+        onTap: () => context.push('/partner'),
+      ),
     ];
 
     return GridView.builder(

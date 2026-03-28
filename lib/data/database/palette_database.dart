@@ -37,13 +37,14 @@ part 'palette_database.g.dart';
     Moodboards,
     MoodboardItems,
     SampleListItems,
+    PartnerProfiles,
   ],
 )
 class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -144,6 +145,10 @@ class PaletteDatabase extends _$PaletteDatabase {
         );
         await m.addColumn(userProfiles, userProfiles.movingDate);
         await m.addColumn(userProfiles, userProfiles.lastPromptDismissedAt);
+      }
+      if (from < 15) {
+        // Partner Mode (Phase 3.3)
+        await m.createTable(partnerProfiles);
       }
     },
   );

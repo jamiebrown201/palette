@@ -479,3 +479,44 @@ class SampleListItems extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+// ---------------------------------------------------------------------------
+// Partner profiles (Phase 3.3 — Partner Mode v1)
+// ---------------------------------------------------------------------------
+
+class PartnerProfiles extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get inviteCode => text()();
+
+  // Partner's Colour DNA (populated when partner completes quiz)
+  TextColumn get archetype =>
+      text().nullable().map(
+        const EnumNameConverter<ColourArchetype>(ColourArchetype.values),
+      )();
+  TextColumn get primaryFamily =>
+      text().nullable().map(
+        const EnumNameConverter<PaletteFamily>(PaletteFamily.values),
+      )();
+  TextColumn get secondaryFamily =>
+      text().nullable().map(
+        const EnumNameConverter<PaletteFamily>(PaletteFamily.values),
+      )();
+  TextColumn get undertone =>
+      text().nullable().map(
+        const EnumNameConverter<Undertone>(Undertone.values),
+      )();
+  TextColumn get saturation =>
+      text().nullable().map(
+        const EnumNameConverter<ChromaBand>(ChromaBand.values),
+      )();
+  TextColumn get colourHexes =>
+      text().nullable().map(const StringListConverter())();
+
+  BoolColumn get hasCompletedQuiz => boolean()();
+  DateTimeColumn get invitedAt => dateTime()();
+  DateTimeColumn get completedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

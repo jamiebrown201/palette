@@ -6,6 +6,7 @@ import 'package:palette/data/repositories/feedback_repository.dart';
 import 'package:palette/data/repositories/moodboard_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/repositories/palette_repository.dart';
+import 'package:palette/data/repositories/partner_repository.dart';
 import 'package:palette/data/repositories/product_repository.dart';
 import 'package:palette/data/repositories/red_thread_repository.dart';
 import 'package:palette/data/repositories/room_repository.dart';
@@ -71,3 +72,7 @@ MoodboardRepository moodboardRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 SampleListRepository sampleListRepository(Ref ref) =>
     SampleListRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+PartnerRepository partnerRepository(Ref ref) =>
+    PartnerRepository(ref.watch(paletteDatabaseProvider));

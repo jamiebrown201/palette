@@ -144,6 +144,27 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
+          // Partner Mode
+          Container(
+            decoration: BoxDecoration(
+              color: PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.divider),
+            ),
+            child: _ProfileRow(
+              icon: Icons.favorite_outline,
+              iconColor: PaletteColours.softGold,
+              title: 'Partner Mode',
+              subtitle: 'Compare design personalities and decorate together',
+              trailing: const Icon(
+                Icons.chevron_right,
+                color: PaletteColours.textTertiary,
+              ),
+              onTap: () => context.push('/partner'),
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // Settings section
           Text(
             'Settings',
