@@ -18,6 +18,7 @@ import 'package:palette/features/red_thread/logic/coherence_checker.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
+import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -134,6 +135,10 @@ class HomeScreen extends ConsumerWidget {
               loading: () => const _LoadingCard(),
               error: (_, __) => const SizedBox.shrink(),
             ),
+            const SizedBox(height: 20),
+
+            // Shopping List summary
+            const _ShoppingListSummary(),
             const SizedBox(height: 20),
 
             // Whole-Home Coherence
@@ -971,5 +976,99 @@ class _DriftPromptCard extends ConsumerWidget {
     final leanDescription = parts.join(', ');
     return 'Your recent colour choices lean more $leanDescription '
         'than your original DNA. Retake the quiz to refresh your palette.';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shopping List summary (Phase 2B.2)
+// ---------------------------------------------------------------------------
+
+class _ShoppingListSummary extends ConsumerWidget {
+  const _ShoppingListSummary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final itemsAsync = ref.watch(shoppingListProvider);
+
+    return itemsAsync.when(
+      data: (items) {
+        if (items.isEmpty) return const SizedBox.shrink();
+
+        final total = items.fold<double>(0, (s, i) => s + i.priceGbp);
+        final retailers = items.map((i) => i.retailer).toSet().length;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SectionHeader(
+              title: 'Shopping List',
+              actionLabel: 'View all',
+              onAction: () => GoRouter.of(context).push('/shopping-list'),
+            ),
+            const SizedBox(height: 4),
+            GestureDetector(
+              onTap: () => GoRouter.of(context).push('/shopping-list'),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: PaletteColours.warmGrey),
+                  boxShadow: const [
+                    BoxShadow(
+                      offset: Offset(0, 2),
+                      blurRadius: 8,
+                      color: Color(0x14000000),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: PaletteColours.sageGreen.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.shopping_bag_outlined,
+                        color: PaletteColours.sageGreen,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${items.length} ${items.length == 1 ? 'item' : 'items'} saved',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '$retailers ${retailers == 1 ? 'retailer' : 'retailers'} · est. £${total.toStringAsFixed(0)}',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: PaletteColours.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: PaletteColours.textTertiary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
   }
 }

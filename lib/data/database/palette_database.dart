@@ -11,6 +11,7 @@ import 'package:palette/data/models/product.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
+import 'package:palette/data/models/shopping_list_item.dart';
 import 'package:palette/data/models/user_profile.dart';
 
 part 'palette_database.g.dart';
@@ -27,13 +28,14 @@ part 'palette_database.g.dart';
     UserProfiles,
     ColourInteractions,
     Products,
+    ShoppingListItems,
   ],
 )
 class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -106,6 +108,10 @@ class PaletteDatabase extends _$PaletteDatabase {
         await m.addColumn(rooms, rooms.roomSize);
         await m.addColumn(rooms, rooms.widthMetres);
         await m.addColumn(rooms, rooms.lengthMetres);
+      }
+      if (from < 10) {
+        // Shopping List (Phase 2B.2)
+        await m.createTable(shoppingListItems);
       }
     },
   );

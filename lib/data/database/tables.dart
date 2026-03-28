@@ -10,6 +10,7 @@ import 'package:palette/data/models/product.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
+import 'package:palette/data/models/shopping_list_item.dart';
 import 'package:palette/data/models/user_profile.dart';
 
 // ---------------------------------------------------------------------------
@@ -344,6 +345,29 @@ class Products extends Table {
   BoolColumn get renterSafe => boolean()();
   BoolColumn get available => boolean()();
   DateTimeColumn get lastVerified => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Shopping list items (Phase 2B.2)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(ShoppingListItem)
+class ShoppingListItems extends Table {
+  TextColumn get id => text()();
+  TextColumn get productId => text()();
+  TextColumn get roomId => text()();
+  TextColumn get roomName => text()();
+  TextColumn get productName => text()();
+  TextColumn get brand => text()();
+  TextColumn get retailer => text()();
+  RealColumn get priceGbp => real()();
+  TextColumn get affiliateUrl => text()();
+  TextColumn get primaryColourHex => text()();
+  TextColumn get categoryName => text()();
+  DateTimeColumn get addedAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -35,6 +35,7 @@ import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/room_story.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
@@ -269,7 +270,10 @@ class _RoomDetailContent extends ConsumerWidget {
                 requiredTier: SubscriptionTier.pro,
                 upgradeMessage:
                     'Get personalised product recommendations for every room',
-                child: _ProductRecommendationsSection(roomId: room.id),
+                child: _ProductRecommendationsSection(
+                  roomId: room.id,
+                  roomName: room.name,
+                ),
               ),
             ],
 
@@ -3298,9 +3302,13 @@ class _SeverityBadge extends StatelessWidget {
 // ── "Complete the Room" Product Recommendations ──
 
 class _ProductRecommendationsSection extends ConsumerStatefulWidget {
-  const _ProductRecommendationsSection({required this.roomId});
+  const _ProductRecommendationsSection({
+    required this.roomId,
+    required this.roomName,
+  });
 
   final String roomId;
+  final String roomName;
 
   @override
   ConsumerState<_ProductRecommendationsSection> createState() =>
@@ -3370,9 +3378,11 @@ class _ProductRecommendationsSectionState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SectionHeader(
+            SectionHeader(
               title: 'Complete the room',
               subtitle: 'Personalised product recommendations',
+              actionLabel: 'Shopping list',
+              onAction: () => GoRouter.of(context).push('/shopping-list'),
             ),
             // Commission disclosure
             Padding(
@@ -3426,6 +3436,7 @@ class _ProductRecommendationsSectionState
                   slot: entry.$1,
                   scoredProduct: entry.$2,
                   roomId: widget.roomId,
+                  roomName: widget.roomName,
                 ),
               ),
             ),
@@ -3489,11 +3500,13 @@ class _ProductCard extends ConsumerWidget {
     required this.slot,
     required this.scoredProduct,
     required this.roomId,
+    required this.roomName,
   });
 
   final RecommendationSlot slot;
   final ScoredProduct scoredProduct;
   final String roomId;
+  final String roomName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -3678,24 +3691,35 @@ class _ProductCard extends ConsumerWidget {
             ),
           ),
 
-          // Buy button
+          // Buy + Save buttons
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () => _openAffiliateLink(context, ref, product),
-                icon: const Icon(Icons.open_in_new, size: 16),
-                label: Text('Buy from ${product.retailer}'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: PaletteColours.sageGreen,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            child: Row(
+              children: [
+                // Save to list
+                _SaveToListButton(
+                  product: product,
+                  roomId: roomId,
+                  roomName: roomName,
+                ),
+                const SizedBox(width: 8),
+                // Buy
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => _openAffiliateLink(context, ref, product),
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: Text('Buy from ${product.retailer}'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: PaletteColours.sageGreen,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
@@ -3781,6 +3805,84 @@ class _SlotBadge extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _SaveToListButton extends ConsumerWidget {
+  const _SaveToListButton({
+    required this.product,
+    required this.roomId,
+    required this.roomName,
+  });
+
+  final Product product;
+  final String roomId;
+  final String roomName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inListAsync = ref.watch(
+      isInShoppingListProvider((productId: product.id, roomId: roomId)),
+    );
+    final isInList = inListAsync.valueOrNull ?? false;
+
+    return OutlinedButton.icon(
+      onPressed: isInList ? null : () => _addToList(context, ref),
+      icon: Icon(isInList ? Icons.check : Icons.add_shopping_cart, size: 16),
+      label: Text(isInList ? 'Saved' : 'Save'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor:
+            isInList ? PaletteColours.textTertiary : PaletteColours.sageGreen,
+        side: BorderSide(
+          color: isInList ? PaletteColours.warmGrey : PaletteColours.sageGreen,
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  Future<void> _addToList(BuildContext context, WidgetRef ref) async {
+    final repo = ref.read(shoppingListRepositoryProvider);
+    final companion = ShoppingListItemsCompanion.insert(
+      id: _uuid.v4(),
+      productId: product.id,
+      roomId: roomId,
+      roomName: roomName,
+      productName: product.name,
+      brand: product.brand,
+      retailer: product.retailer,
+      priceGbp: product.priceGbp,
+      affiliateUrl: product.affiliateUrl,
+      primaryColourHex: product.primaryColourHex,
+      categoryName: product.category.displayName,
+      addedAt: DateTime.now(),
+    );
+    await repo.addItem(companion);
+
+    // Invalidate the in-list check so the button updates
+    ref.invalidate(
+      isInShoppingListProvider((productId: product.id, roomId: roomId)),
+    );
+
+    ref.read(analyticsProvider).track('product_rec_saved', {
+      'product_id': product.id,
+      'product_category': product.category.name,
+      'room_id': roomId,
+    });
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${product.name} added to shopping list'),
+          action: SnackBarAction(
+            label: 'View list',
+            onPressed: () => GoRouter.of(context).push('/shopping-list'),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 }
 

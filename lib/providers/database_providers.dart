@@ -7,6 +7,7 @@ import 'package:palette/data/repositories/palette_repository.dart';
 import 'package:palette/data/repositories/product_repository.dart';
 import 'package:palette/data/repositories/red_thread_repository.dart';
 import 'package:palette/data/repositories/room_repository.dart';
+import 'package:palette/data/repositories/shopping_list_repository.dart';
 import 'package:palette/data/repositories/user_profile_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -51,3 +52,7 @@ ColourInteractionRepository colourInteractionRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 ProductRepository productRepository(Ref ref) =>
     ProductRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+ShoppingListRepository shoppingListRepository(Ref ref) =>
+    ShoppingListRepository(ref.watch(paletteDatabaseProvider));
