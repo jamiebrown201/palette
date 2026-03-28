@@ -464,7 +464,7 @@ class _PlusTierCard extends StatelessWidget {
         border: Border.all(color: PaletteColours.premiumGold, width: 2),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x14000000),
+            color: PaletteColours.shadowLevel1,
             blurRadius: 12,
             offset: Offset(0, 4),
           ),

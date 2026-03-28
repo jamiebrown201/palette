@@ -40,6 +40,14 @@ abstract final class PaletteColours {
   static const statusInfo = Color(0xFF8FAE8B);
   static const statusNeutral = Color(0xFFE8E4DE);
 
+  // Destructive actions (accessible — no red/green)
+  static const destructive = Color(0xFF8B5E3C); // warm brown
+  static const destructiveLight = Color(0xFFF5EDE6); // swipe background
+
+  // Shadows (card depth system)
+  static const shadowLevel1 = Color(0x14000000); // 8% black
+  static const shadowLevel2 = Color(0x1F000000); // 12% black
+
   // Surfaces
   static const cardBackground = Color(0xFFFFFFFF);
   static const divider = Color(0xFFE8E4DE);

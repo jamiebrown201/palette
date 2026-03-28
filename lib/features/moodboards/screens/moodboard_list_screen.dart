@@ -30,7 +30,7 @@ class MoodboardListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           roomId != null ? 'Room Moodboards' : 'My Moodboards',
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         backgroundColor: PaletteColours.warmWhite,
         surfaceTintColor: Colors.transparent,
@@ -143,7 +143,7 @@ class MoodboardListScreen extends ConsumerWidget {
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
                 style: FilledButton.styleFrom(
-                  backgroundColor: Colors.red.shade700,
+                  backgroundColor: PaletteColours.destructive,
                 ),
                 child: const Text('Delete'),
               ),

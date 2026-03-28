@@ -3553,7 +3553,7 @@ class _PaintCostSummary extends StatelessWidget {
           BoxShadow(
             offset: Offset(0, 1),
             blurRadius: 4,
-            color: Color(0x0A000000),
+            color: PaletteColours.shadowLevel1,
           ),
         ],
       ),
@@ -3705,14 +3705,14 @@ class _GapCard extends StatelessWidget {
                   BoxShadow(
                     offset: Offset(0, 4),
                     blurRadius: 12,
-                    color: Color(0x1F000000),
+                    color: PaletteColours.shadowLevel2,
                   ),
                 ]
                 : const [
                   BoxShadow(
                     offset: Offset(0, 2),
                     blurRadius: 4,
-                    color: Color(0x14000000),
+                    color: PaletteColours.shadowLevel1,
                   ),
                 ],
       ),
@@ -4092,7 +4092,7 @@ class _ProductCard extends ConsumerWidget {
           BoxShadow(
             offset: Offset(0, 2),
             blurRadius: 8,
-            color: Color(0x14000000),
+            color: PaletteColours.shadowLevel1,
           ),
         ],
       ),

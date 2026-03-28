@@ -10,7 +10,7 @@ void main() {
 
   group('WallColourOverlay', () {
     /// Create a small test PNG image with uniform colour.
-    Future<Uint8List> _createTestImage(Color colour, {int size = 4}) async {
+    Future<Uint8List> createTestImage(Color colour, {int size = 4}) async {
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(
         recorder,
@@ -28,7 +28,7 @@ void main() {
     }
 
     test('generates non-empty output from valid input', () async {
-      final input = await _createTestImage(Colors.white);
+      final input = await createTestImage(Colors.white);
       final result = await WallColourOverlay.generate(
         photoBytes: input,
         wallColour: const Color(0xFF8FAE8B), // sage green
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('output is valid PNG when colour applied', () async {
-      final input = await _createTestImage(Colors.white);
+      final input = await createTestImage(Colors.white);
       final result = await WallColourOverlay.generate(
         photoBytes: input,
         wallColour: Colors.red,
@@ -54,7 +54,7 @@ void main() {
     });
 
     test('respects opacity parameter', () async {
-      final input = await _createTestImage(Colors.white);
+      final input = await createTestImage(Colors.white);
       final lowOpacity = await WallColourOverlay.generate(
         photoBytes: input,
         wallColour: Colors.blue,
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('handles dark input images', () async {
-      final input = await _createTestImage(Colors.black);
+      final input = await createTestImage(Colors.black);
       final result = await WallColourOverlay.generate(
         photoBytes: input,
         wallColour: Colors.green,

@@ -146,7 +146,7 @@ class _PromptCardContentState extends ConsumerState<_PromptCardContent> {
                     onPressed: () => _handleOptIn(false),
                     child: Text(
                       'Not now',
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: accentColor.withValues(alpha: 0.7),
                       ),
                     ),

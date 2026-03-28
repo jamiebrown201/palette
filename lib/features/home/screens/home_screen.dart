@@ -474,7 +474,7 @@ class _NextActionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x1F000000),
+            color: PaletteColours.shadowLevel2,
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -1069,7 +1069,7 @@ class _ShoppingListSummary extends ConsumerWidget {
                     BoxShadow(
                       offset: Offset(0, 2),
                       blurRadius: 8,
-                      color: Color(0x14000000),
+                      color: PaletteColours.shadowLevel1,
                     ),
                   ],
                 ),
@@ -1154,7 +1154,7 @@ class _SampleListSummary extends ConsumerWidget {
                 BoxShadow(
                   offset: Offset(0, 2),
                   blurRadius: 8,
-                  color: Color(0x14000000),
+                  color: PaletteColours.shadowLevel1,
                 ),
               ],
             ),

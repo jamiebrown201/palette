@@ -6,40 +6,40 @@ void main() {
   group('VisualiserCreditsNotifier', () {
     test('pro tier starts with 25 credits', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.pro);
-      expect(notifier.debugState, 25);
+      expect(notifier.state, 25);
     });
 
     test('plus tier starts with 5 credits', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.plus);
-      expect(notifier.debugState, 5);
+      expect(notifier.state, 5);
     });
 
     test('free tier starts with 0 credits', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.free);
-      expect(notifier.debugState, 0);
+      expect(notifier.state, 0);
     });
 
     test('project pass starts with 25 credits', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.projectPass);
-      expect(notifier.debugState, 25);
+      expect(notifier.state, 25);
     });
 
     test('useCredit deducts one credit', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.pro);
       expect(notifier.useCredit(), isTrue);
-      expect(notifier.debugState, 24);
+      expect(notifier.state, 24);
     });
 
     test('useCredit fails when no credits remain', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.free);
       expect(notifier.useCredit(), isFalse);
-      expect(notifier.debugState, 0);
+      expect(notifier.state, 0);
     });
 
     test('useComparisonCredits deducts two credits', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.plus);
       expect(notifier.useComparisonCredits(), isTrue);
-      expect(notifier.debugState, 3);
+      expect(notifier.state, 3);
     });
 
     test('useComparisonCredits fails when fewer than 2 credits', () {
@@ -48,21 +48,21 @@ void main() {
       for (var i = 0; i < 4; i++) {
         notifier.useCredit();
       }
-      expect(notifier.debugState, 1);
+      expect(notifier.state, 1);
       expect(notifier.useComparisonCredits(), isFalse);
-      expect(notifier.debugState, 1);
+      expect(notifier.state, 1);
     });
 
     test('addCredits increases balance', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.free);
       notifier.addCredits(10);
-      expect(notifier.debugState, 10);
+      expect(notifier.state, 10);
     });
 
     test('addCredits stacks with existing balance', () {
       final notifier = VisualiserCreditsNotifier(SubscriptionTier.pro);
       notifier.addCredits(10);
-      expect(notifier.debugState, 35);
+      expect(notifier.state, 35);
     });
 
     test('canUseCredit reflects balance', () {

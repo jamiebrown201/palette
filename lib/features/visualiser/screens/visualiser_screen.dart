@@ -474,7 +474,7 @@ class _VisualiserScreenState extends ConsumerState<VisualiserScreen> {
                   ),
                   if (_comparisonMode) ...[
                     const SizedBox(width: 12),
-                    const Text('vs', style: TextStyle(fontSize: 16)),
+                    Text('vs', style: Theme.of(context).textTheme.bodyLarge),
                     const SizedBox(width: 12),
                     _ColourPickButton(
                       colour: _comparisonColour,
@@ -575,6 +575,28 @@ class _VisualiserScreenState extends ConsumerState<VisualiserScreen> {
                   ),
                 ),
               ],
+
+              // Privacy notice
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.privacy_tip_outlined,
+                    size: 14,
+                    color: PaletteColours.textTertiary,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Your room photo is processed locally on your device '
+                      'and is not stored or sent to any server.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: PaletteColours.textTertiary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 32),
             ],

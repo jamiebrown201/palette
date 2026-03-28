@@ -45,4 +45,4 @@ class VisualiserCreditsNotifier extends StateNotifier<int> {
 }
 
 /// Tracks whether a visualisation is currently being generated.
-final visualiserLoadingProvider = StateProvider<bool>((_) => false);
+final visualiserLoadingProvider = StateProvider.autoDispose<bool>((_) => false);

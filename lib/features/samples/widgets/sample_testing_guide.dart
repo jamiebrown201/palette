@@ -231,10 +231,9 @@ class _GuideStep extends StatelessWidget {
             child: Center(
               child: Text(
                 number,
-                style: const TextStyle(
+                style: theme.textTheme.labelMedium?.copyWith(
                   color: PaletteColours.textOnAccent,
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
                 ),
               ),
             ),

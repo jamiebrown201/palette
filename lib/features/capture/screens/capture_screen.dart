@@ -789,7 +789,11 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.ac_unit, size: 16, color: Color(0xFF6BA3D6)),
+              const Icon(
+                Icons.ac_unit,
+                size: 16,
+                color: PaletteColours.statusPositive,
+              ),
               Expanded(
                 child: SliderTheme(
                   data: SliderThemeData(
@@ -813,7 +817,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
               const Icon(
                 Icons.wb_sunny_outlined,
                 size: 16,
-                color: Color(0xFFC9A96E),
+                color: PaletteColours.softGold,
               ),
             ],
           ),

@@ -87,9 +87,9 @@ class _SampleListScreenState extends ConsumerState<SampleListScreen> {
                   ref.read(sampleListRepositoryProvider).clearAll();
                   Navigator.pop(ctx);
                 },
-                child: Text(
+                child: const Text(
                   'Clear all',
-                  style: TextStyle(color: Colors.red.shade700),
+                  style: TextStyle(color: PaletteColours.destructive),
                 ),
               ),
             ],
@@ -465,10 +465,13 @@ class _SampleItemCard extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
-          color: Colors.red.shade50,
+          color: PaletteColours.destructiveLight,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(Icons.delete_outline, color: Colors.red.shade700),
+        child: const Icon(
+          Icons.delete_outline,
+          color: PaletteColours.destructive,
+        ),
       ),
       onDismissed: (_) {
         ref.read(sampleListRepositoryProvider).removeSample(item.id);

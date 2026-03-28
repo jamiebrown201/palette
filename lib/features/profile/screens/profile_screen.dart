@@ -111,7 +111,13 @@ class ProfileScreen extends ConsumerWidget {
                       onTap: () => context.push('/palette'),
                     );
                   },
-                  loading: () => const SizedBox.shrink(),
+                  loading:
+                      () => const _ProfileRow(
+                        icon: Icons.palette_outlined,
+                        iconColor: PaletteColours.warmGrey,
+                        title: BrandedTerms.colourDna,
+                        subtitle: 'Loading...',
+                      ),
                   error:
                       (_, __) => _ProfileRow(
                         icon: Icons.warning_amber_rounded,

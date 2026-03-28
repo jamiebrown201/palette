@@ -141,7 +141,17 @@ class ExploreScreen extends ConsumerWidget {
                 onTap: () => context.push('/palette'),
               );
             },
-            loading: () => const SizedBox(height: 64),
+            loading:
+                () => const SizedBox(
+                  height: 64,
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
             error:
                 (_, __) => const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
