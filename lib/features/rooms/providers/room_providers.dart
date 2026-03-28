@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/room.dart';
+import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
+import 'package:palette/features/rooms/logic/product_scoring.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/providers/database_providers.dart';
@@ -53,4 +55,41 @@ final roomGapReportProvider = FutureProvider.family<RoomGapReport, String>((
     furniture: furniture,
     threadColours: threadColours,
   );
+});
+
+/// Product recommendations for the primary gap in a room.
+///
+/// Scores products from the catalogue against the room's context, locked
+/// furniture, colour plan, and user's archetype. Returns diverse slots
+/// (recommended, best value, something different, safe choice).
+final roomProductRecsProvider = FutureProvider.family<
+  List<(RecommendationSlot, ScoredProduct)>,
+  String
+>((ref, roomId) async {
+  final report = await ref.watch(roomGapReportProvider(roomId).future);
+  if (!report.hasGaps || report.primaryGap == null) return [];
+
+  final room = await ref.watch(roomByIdProvider(roomId).future);
+  if (room == null) return [];
+
+  final furniture = await ref.watch(furnitureForRoomProvider(roomId).future);
+  final productRepo = ref.watch(productRepositoryProvider);
+  final dna = await ref.watch(latestColourDnaProvider.future);
+
+  final candidates = await productRepo.getForGapType(
+    report.primaryGap!.gapType,
+    renterSafeOnly: room.isRenterMode,
+  );
+
+  if (candidates.isEmpty) return [];
+
+  final scored = scoreProducts(
+    candidates: candidates,
+    room: room,
+    lockedFurniture: furniture,
+    archetype: dna?.archetype,
+    limit: 10,
+  );
+
+  return diverseRecommendations(scored: scored);
 });

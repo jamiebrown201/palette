@@ -17,6 +17,7 @@ import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
+import 'package:palette/data/models/product.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
 import 'package:palette/features/onboarding/models/dna_anchors.dart';
@@ -27,6 +28,7 @@ import 'package:palette/features/red_thread/providers/red_thread_providers.dart'
 import 'package:palette/features/rooms/data/room_colour_psychology.dart';
 import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
+import 'package:palette/features/rooms/logic/product_scoring.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/room_story.dart';
@@ -34,6 +36,7 @@ import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 const _uuid = Uuid();
@@ -252,6 +255,19 @@ class _RoomDetailContent extends ConsumerWidget {
                 room.surpriseColourHex != null) ...[
               const SizedBox(height: 24),
               _RoomGapSection(roomId: room.id),
+            ],
+
+            // "Complete the Room" product recommendations (Pro)
+            if (room.heroColourHex != null &&
+                room.betaColourHex != null &&
+                room.surpriseColourHex != null) ...[
+              const SizedBox(height: 24),
+              PremiumGate(
+                requiredTier: SubscriptionTier.pro,
+                upgradeMessage:
+                    'Get personalised product recommendations for every room',
+                child: _ProductRecommendationsSection(roomId: room.id),
+              ),
             ],
 
             // Room colour psychology tip
@@ -3244,6 +3260,439 @@ class _SeverityBadge extends StatelessWidget {
           color: colour,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+}
+
+// ── "Complete the Room" Product Recommendations ──
+
+class _ProductRecommendationsSection extends ConsumerWidget {
+  const _ProductRecommendationsSection({required this.roomId});
+
+  final String roomId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recsAsync = ref.watch(roomProductRecsProvider(roomId));
+    final gapAsync = ref.watch(roomGapReportProvider(roomId));
+    final theme = Theme.of(context);
+
+    return recsAsync.when(
+      loading:
+          () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (recs) {
+        if (recs.isEmpty) {
+          return gapAsync.when(
+            data: (report) {
+              if (!report.hasGaps) return const SizedBox.shrink();
+              return _NoProductsMessage(gap: report.primaryGap);
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          );
+        }
+
+        final gapTitle = gapAsync.valueOrNull?.primaryGap?.title;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionHeader(
+              title: 'Complete the room',
+              subtitle: 'Personalised product recommendations',
+            ),
+            // Commission disclosure
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'We may earn a commission if you buy through these links. '
+                'This never affects which products we recommend.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: PaletteColours.textTertiary,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+            if (gapTitle != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.sageGreen.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.lightbulb_outline,
+                        size: 16,
+                        color: PaletteColours.sageGreenDark,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          gapTitle,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: PaletteColours.sageGreenDark,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ...recs.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ProductCard(slot: entry.$1, scoredProduct: entry.$2),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _NoProductsMessage extends StatelessWidget {
+  const _NoProductsMessage({this.gap});
+
+  final RoomGap? gap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (gap == null) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeader(
+          title: 'Complete the room',
+          subtitle: 'Personalised product recommendations',
+        ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: PaletteColours.softCream,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'We need more information about this room to give you '
+                'great recommendations.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: PaletteColours.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Add your existing furniture to improve results.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: PaletteColours.sageGreenDark,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProductCard extends StatelessWidget {
+  const _ProductCard({required this.slot, required this.scoredProduct});
+
+  final RecommendationSlot slot;
+  final ScoredProduct scoredProduct;
+
+  @override
+  Widget build(BuildContext context) {
+    final product = scoredProduct.product;
+    final theme = Theme.of(context);
+    final productColour = hexToColor(product.primaryColourHex);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.warmGrey),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(0, 2),
+            blurRadius: 8,
+            color: Color(0x14000000),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Slot badge + colour swatch header
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: PaletteColours.softCream.withValues(alpha: 0.5),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                // Colour swatch
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: productColour,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: PaletteColours.warmGrey,
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name,
+                        style: theme.textTheme.titleSmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '${product.brand} · ${product.category.displayName}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Slot badge
+                _SlotBadge(slot: slot),
+              ],
+            ),
+          ),
+
+          // Body: reasons + price
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Primary reason
+                Text(
+                  scoredProduct.primaryReason,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Secondary reason
+                Text(
+                  scoredProduct.secondaryReason,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+                ),
+                // Finish note
+                if (scoredProduct.finishNote != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    scoredProduct.finishNote!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.textTertiary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+                // Material note
+                if (scoredProduct.materialNote != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    scoredProduct.materialNote!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.textTertiary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+                // Tradeoff note
+                if (scoredProduct.tradeoffNote != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        size: 12,
+                        color: PaletteColours.softGold,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          scoredProduct.tradeoffNote!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: PaletteColours.softGold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // Footer: price + confidence + buy button
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+            child: Row(
+              children: [
+                // Price
+                Text(
+                  '£${product.priceGbp.toStringAsFixed(0)}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  product.retailer,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textTertiary,
+                  ),
+                ),
+                const Spacer(),
+                // Confidence label
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.sageGreen.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    scoredProduct.confidenceLabel,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: PaletteColours.sageGreenDark,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Buy button
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => _openAffiliateLink(context, product),
+                icon: const Icon(Icons.open_in_new, size: 16),
+                label: Text('Buy from ${product.retailer}'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: PaletteColours.sageGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openAffiliateLink(BuildContext context, Product product) async {
+    final uri = Uri.tryParse(product.affiliateUrl);
+    if (uri == null) return;
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not open link')));
+      }
+    }
+  }
+}
+
+class _SlotBadge extends StatelessWidget {
+  const _SlotBadge({required this.slot});
+
+  final RecommendationSlot slot;
+
+  @override
+  Widget build(BuildContext context) {
+    final (colour, icon) = switch (slot) {
+      RecommendationSlot.recommended => (
+        PaletteColours.sageGreen,
+        Icons.star_rounded,
+      ),
+      RecommendationSlot.bestValue => (
+        PaletteColours.softGold,
+        Icons.savings_outlined,
+      ),
+      RecommendationSlot.somethingDifferent => (
+        PaletteColours.accessibleBlue,
+        Icons.auto_awesome,
+      ),
+      RecommendationSlot.safeChoice => (
+        PaletteColours.textSecondary,
+        Icons.verified_outlined,
+      ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: colour.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: colour),
+          const SizedBox(width: 4),
+          Text(
+            slot.displayName,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: colour,
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+            ),
+          ),
+        ],
       ),
     );
   }
