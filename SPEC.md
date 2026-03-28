@@ -124,11 +124,11 @@ Each Colour DNA archetype defines preferred finishes and materials (already capt
 
 | Archetype Family                                     | Preferred Metals                             | Preferred Woods                    | Preferred Fabrics                      | Avoid                            |
 | ---------------------------------------------------- | -------------------------------------------- | ---------------------------------- | -------------------------------------- | -------------------------------- |
-| Warm archetypes (Cocooner, Earthkeeper, Golden Hour) | Antique brass, brushed gold, matte black     | Honey oak, walnut, weathered pine  | Linen, bouclé, chunky knit, velvet     | Chrome, high-gloss, acrylic      |
-| Cool archetypes (Northern Light, Mineral)            | Brushed nickel, polished chrome, matte black | White oak, ash, light birch        | Cotton, smooth linen, light wool       | Brass, copper, dark stained wood |
-| Rich archetypes (Curator, Bloomsbury, Archive)       | Aged brass, dark bronze, matte black         | Dark walnut, mahogany, ebony stain | Velvet, heavy linen, tapestry, leather | Chrome, plastic, light pine      |
-| Nature archetypes (Rewild, Patina, Bohemian)         | Matte black, copper, aged brass              | Reclaimed wood, teak, bamboo       | Jute, rattan, raw linen, cotton        | Chrome, high-gloss, synthetic    |
-| Bold archetypes (Signal Fire, Prism)                 | Polished brass, chrome, copper               | Any with strong grain contrast     | Velvet, silk, bold-pattern cotton      | Muted finishes, weathered looks  |
+| Warm archetypes (Cocooner, Golden Hour, Velvet Whisper) | Antique brass, brushed gold, matte black     | Honey oak, walnut, weathered pine  | Linen, bouclé, chunky knit, velvet     | Chrome, high-gloss, acrylic      |
+| Cool archetypes (Monochrome Modernist, Minimalist, Midnight Architect) | Brushed nickel, polished chrome, matte black | White oak, ash, light birch | Cotton, smooth linen, light wool | Brass, copper, dark stained wood |
+| Rich archetypes (Curator, Storyteller, Dramatist)       | Aged brass, dark bronze, matte black         | Dark walnut, mahogany, ebony stain | Velvet, heavy linen, tapestry, leather | Chrome, plastic, light pine      |
+| Nature archetypes (Nature Lover, Romantic)               | Matte black, copper, aged brass              | Reclaimed wood, teak, bamboo       | Jute, rattan, raw linen, cotton        | Chrome, high-gloss, synthetic    |
+| Bold archetypes (Brightener, Colour Optimist, Maximalist) | Polished brass, chrome, copper             | Any with strong grain contrast     | Velvet, silk, bold-pattern cotton      | Muted finishes, weathered looks  |
 | Soft archetypes (Romantic)                           | Rose gold, brushed gold, antique brass       | Light oak, painted white wood      | Velvet, silk, sheer linen              | Industrial metals, raw concrete  |
 
 **The Wood Tone Harmony Check:**
@@ -231,7 +231,7 @@ Four quick selections: property type, property era, current stage, and tenure (O
 **Colour Archetypes (implemented):**
 The engine maps quiz responses to one of 14 colour archetypes, each a personality-driven identity with a name, description, and curated colour set:
 
-- The Cocooner, The Earthkeeper, The Golden Hour, The Northern Light, The Curator, The Romantic, The Rewild, The Signal Fire, The Patina, The Mineral, The Bloomsbury, The Archive, The Prism, The Bohemian
+- The Cocooner, The Golden Hour, The Curator, The Monochrome Modernist, The Romantic, The Colour Optimist, The Nature Lover, The Storyteller, The Velvet Whisper, The Maximalist, The Brightener, The Dramatist, The Midnight Architect, The Minimalist
 
 Each archetype defines a structured "system palette" with functional roles: trimWhite, dominantWalls, supportingWalls, deepAnchor, accentPops, and spineColour. This role-based structure ensures every generated palette has the right balance for real-room application.
 
@@ -942,13 +942,7 @@ The subtitle appears in smaller, lighter text directly below or beside the brand
 
 The Capture tab (Tab 3) currently leads to a "Coming Soon" screen. An empty tab in the primary navigation damages perceived app quality and user trust.
 
-**Resolution options (choose one):**
-
-Option A (recommended): **Temporarily restructure to 4 tabs.** Remove the Capture tab entirely. Use Home, Rooms, Explore, Profile. When Colour Capture ships (Phase 1D), reintroduce the tab.
-
-Option B: **Ship a minimal Colour Capture MVP.** A basic camera-to-colour extraction (photograph, identify dominant colour, show 3 closest paint matches). No palette integration, no clash warnings. Enough to make the tab functional and valuable.
-
-Option C: **Repurpose the tab temporarily.** Replace "Capture" with "Inspiration" or "My Moodboard" until Capture ships.
+**Decision: Keep the 5-tab layout. Ship a minimal Colour Capture MVP (Option B).** A basic camera-to-colour extraction (photograph, identify dominant colour, show 3 closest paint matches). No palette integration, no clash warnings. Enough to make the tab functional and valuable. Do NOT remove the Capture tab.
 
 ---
 
@@ -1000,12 +994,12 @@ As more filters, badges, room matches, and recommendation contexts appear (espec
 | ------------------------------------- | ----------- | -------- |
 | 1E.1 Analytics Instrumentation        | Not started | P0       |
 | 1E.2 A/B Testing Infrastructure       | Not started | P1       |
-| 1E.3 Blurred Premium Previews         | Not started | P0       |
-| 1E.4 Paywall Visual Redesign          | Not started | P0       |
-| 1E.5 Visual Polish Pass               | Not started | P1       |
+| 1E.3 Blurred Premium Previews         | Done        | P0       |
+| 1E.4 Paywall Visual Redesign          | Partial     | P0       |
+| 1E.5 Visual Polish Pass               | Partial     | P1       |
 | 1E.6 Branded Term Consistency         | Not started | P1       |
 | 1E.7 Capture Tab Resolution           | Not started | P1       |
-| 1E.8 Red Thread Flow Visualisation    | Not started | P0       |
+| 1E.8 Red Thread Flow Visualisation    | Partial     | P0       |
 | 1E.9 Room Preview Colour-Block Mockup | Not started | P1       |
 | 1E.10 Applied State System            | Not started | P2       |
 
@@ -1690,15 +1684,15 @@ Online: AI Visualiser, product recommendations (requires catalogue sync), web im
 
 _Updated March 2026._
 
-### Phase 1A: ~95% complete (native app)
+### Phase 1A: Complete (native app)
 
 | Feature                         | Status | Notes                                                                             |
 | ------------------------------- | ------ | --------------------------------------------------------------------------------- |
-| 1.1 Colour DNA Onboarding (app) | Done   | 14 archetypes, system palette roles, DNA drift detection                          |
-| 1.2 My Palette                  | Done   | Palette Story, feedback engine, paint name display throughout                     |
-| 1.4 Room Profiles               | Done   | 70/20/10, furniture lock (basic), renter mode (basic), light sim, room psychology |
-| 1.5 Colour Wheel & White Finder | Done   | Zoomable wheel, undertone toggle, DNA overlay, context-aware whites               |
-| 1.6 The Red Thread              | Done   | Templates, adjacency list, coherence check, PDF export                            |
+| 1.1 Colour DNA Onboarding (app) | Done   | 14 archetypes, system palette roles, DNA drift detection. Note: archetype names updated from original spec — see archetype definitions in code for current names. |
+| 1.2 My Palette                  | Done   | Palette Story, feedback engine, paint name display, buy-this-paint links, cross-brand comparison |
+| 1.4 Room Profiles               | Done   | 70/20/10, furniture lock (basic), renter mode (basic), light sim, room psychology. Note: room dimensions (small/medium/large picker) NOT yet implemented. |
+| 1.5 Colour Wheel & White Finder | Done   | Zoomable wheel, undertone toggle, DNA overlay, context-aware whites, Neutral Finder for renters |
+| 1.6 The Red Thread              | Done   | Templates, adjacency list, coherence check, PDF export, floor plan painter        |
 
 ### Phase 1B: Complete
 
@@ -1728,20 +1722,20 @@ _Updated March 2026._
 | 1D.3 Sample Ordering               | Not started      |                                                 |
 | 1D.4 Re-engagement & Notifications | Not started      |                                                 |
 
-### Phase 1E: Not started (NEW, NEXT PRIORITY)
+### Phase 1E: In progress (NEXT PRIORITY)
 
-| Feature                               | Status      | Priority | Notes                                          |
-| ------------------------------------- | ----------- | -------- | ---------------------------------------------- |
-| 1E.1 Analytics Instrumentation        | Not started | P0       | Must ship before anything else                 |
-| 1E.2 A/B Testing Infrastructure       | Not started | P1       | PostHog feature flags                          |
-| 1E.3 Blurred Premium Previews         | Not started | P0       | Primary conversion lever                       |
-| 1E.4 Paywall Visual Redesign          | Not started | P0       | Outcome-led, user's own data                   |
-| 1E.5 Visual Polish Pass               | Not started | P1       | Typography, contrast, depth, accent discipline |
-| 1E.6 Branded Term Consistency         | Not started | P1       | Systematic pass                                |
-| 1E.7 Capture Tab Resolution           | Not started | P1       | Remove tab or ship minimal MVP                 |
-| 1E.8 Red Thread Flow Visualisation    | Not started | P0       | Most impactful remaining gap                   |
-| 1E.9 Room Preview Colour-Block Mockup | Not started | P1       | Zero-cost visualisation                        |
-| 1E.10 Applied State System            | Not started | P2       | Prerequisite for Phase 2 density               |
+| Feature                               | Status      | Priority | Notes                                                              |
+| ------------------------------------- | ----------- | -------- | ------------------------------------------------------------------ |
+| 1E.1 Analytics Instrumentation        | Not started | P0       | Must ship before anything else                                     |
+| 1E.2 A/B Testing Infrastructure       | Not started | P1       | PostHog feature flags                                              |
+| 1E.3 Blurred Premium Previews         | Done        | P0       | PremiumGate widget with blur + CTA. Used on Light Dir, 70/20/10, Red Thread |
+| 1E.4 Paywall Visual Redesign          | Partial     | P0       | Outcome-led headline + price anchoring done. Missing: hero animation with user's room data, social proof |
+| 1E.5 Visual Polish Pass               | Partial     | P1       | Typography + theme defined. Missing: WCAG contrast audit, three-level depth system |
+| 1E.6 Branded Term Consistency         | Not started | P1       | Systematic pass — plain-English subtitles under branded terms      |
+| 1E.7 Capture Tab Resolution           | Not started | P1       | Ship minimal camera MVP (Option B). Do NOT remove Capture tab.     |
+| 1E.8 Red Thread Flow Visualisation    | Partial     | P0       | Floor plan painter exists but NOT the node-and-edge flow diagram described in spec |
+| 1E.9 Room Preview Colour-Block Mockup | Not started | P1       | Zero-cost visualisation                                            |
+| 1E.10 Applied State System            | Not started | P2       | Prerequisite for Phase 2 density                                   |
 
 ### Phase 2A: Not started
 
@@ -1796,6 +1790,11 @@ These emerged during Phase 1A and 1B implementation and strengthen the core prod
 - **RoomModeConfig Strategy Pattern** (single config object replaces scattered if/else renter branches)
 - **Renter Constraint System** (5 home-level constraints: paint, drill, flooring, temporary, reversible)
 - **Neutral Finder** (White Finder variant for can't-paint renters, textile-focused neutrals)
+- **Smart Paint Colour Picker** (reusable context-aware paint selection widget with room-aware suggestions)
+- **Colour Plan Harmony Analysis** (analyses harmony between hero/beta/surprise colours, produces verdicts)
+- **Era Affinities** (property era influences archetype scoring during onboarding)
+- **DNA Anchors** (structured palette anchors for suggestion generation)
+- **Colour Suggestions Engine** (context-aware suggestion generation with PickerContext and PickerRole)
 
 ---
 
