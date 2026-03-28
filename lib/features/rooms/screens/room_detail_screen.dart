@@ -206,6 +206,19 @@ class _RoomDetailContent extends ConsumerWidget {
               const SizedBox(height: 24),
             ],
 
+            // Lighting Planner CTA (Phase 4)
+            OutlinedButton.icon(
+              onPressed:
+                  () => context.push('/lighting-planner?roomId=${room.id}'),
+              icon: const Icon(Icons.lightbulb_outline, size: 16),
+              label: const Text('Lighting Planner'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: PaletteColours.softGoldDark,
+                side: const BorderSide(color: PaletteColours.softGold),
+              ),
+            ),
+            const SizedBox(height: 20),
+
             // Furniture Lock
             SectionHeader(
               key: _furnitureSectionKey,

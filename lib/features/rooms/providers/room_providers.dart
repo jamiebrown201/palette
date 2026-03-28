@@ -3,6 +3,7 @@ import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
+import 'package:palette/features/rooms/logic/lighting_planner.dart';
 import 'package:palette/features/rooms/logic/product_scoring.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
@@ -122,6 +123,36 @@ final seasonalSuggestionsProvider = FutureProvider<List<SeasonalSuggestion>>((
     catalogue: catalogue,
     season: season,
     threadColourHexes: threadColours.map((t) => t.hex).toList(),
+  );
+});
+
+/// Lighting plan for a specific room.
+///
+/// Analyses locked furniture to determine which of the three lighting
+/// layers (ambient, task, accent) are covered, and recommends products
+/// from the catalogue for any missing layers.
+final lightingPlanProvider = FutureProvider.family<LightingPlan, String>((
+  ref,
+  roomId,
+) async {
+  final room = await ref.watch(roomByIdProvider(roomId).future);
+  if (room == null) {
+    return const LightingPlan(
+      roomName: '',
+      layers: [],
+      summary: 'Room not found',
+      layersCovered: 0,
+      layersTotal: 3,
+    );
+  }
+  final furniture = await ref.watch(furnitureForRoomProvider(roomId).future);
+  final productRepo = ref.watch(productRepositoryProvider);
+  final catalogue = await productRepo.getAllProducts();
+
+  return generateLightingPlan(
+    room: room,
+    furniture: furniture,
+    catalogue: catalogue,
   );
 });
 

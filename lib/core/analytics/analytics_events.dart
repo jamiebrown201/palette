@@ -105,6 +105,10 @@ abstract final class AnalyticsEvents {
   static const movingDateSet = 'moving_date_set';
   static const notificationFrequencyChanged = 'notification_frequency_changed';
 
+  // ── Lighting Planner (Phase 4) ────────────────────────────
+  static const lightingPlannerViewed = 'lighting_planner_viewed';
+  static const lightingLayerTapped = 'lighting_layer_tapped';
+
   // ── AI Room Visualiser (3.1) ──────────────────────────────
   static const visualiserOpened = 'visualiser_opened';
   static const visualiserPhotoSelected = 'visualiser_photo_selected';

@@ -7,6 +7,7 @@ import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/core/widgets/premium_gate.dart';
 import 'package:palette/features/notifications/providers/notification_providers.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/onboarding/providers/quiz_providers.dart';
@@ -144,23 +145,27 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
-          // Partner Mode
-          Container(
-            decoration: BoxDecoration(
-              color: PaletteColours.cardBackground,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: PaletteColours.divider),
-            ),
-            child: _ProfileRow(
-              icon: Icons.favorite_outline,
-              iconColor: PaletteColours.softGold,
-              title: 'Partner Mode',
-              subtitle: 'Compare design personalities and decorate together',
-              trailing: const Icon(
-                Icons.chevron_right,
-                color: PaletteColours.textTertiary,
+          // Partner Mode (requires Pro — spec 3.3)
+          PremiumGate(
+            requiredTier: SubscriptionTier.pro,
+            upgradeMessage: 'Upgrade to Pro to unlock Partner Mode',
+            child: Container(
+              decoration: BoxDecoration(
+                color: PaletteColours.cardBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: PaletteColours.divider),
               ),
-              onTap: () => context.push('/partner'),
+              child: _ProfileRow(
+                icon: Icons.favorite_outline,
+                iconColor: PaletteColours.softGold,
+                title: 'Partner Mode',
+                subtitle: 'Compare design personalities and decorate together',
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: PaletteColours.textTertiary,
+                ),
+                onTap: () => context.push('/partner'),
+              ),
             ),
           ),
           const SizedBox(height: 24),
