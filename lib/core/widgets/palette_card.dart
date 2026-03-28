@@ -26,18 +26,10 @@ class PaletteCard extends StatelessWidget {
   List<BoxShadow> get _shadows => switch (depth) {
     CardDepth.flush => const [],
     CardDepth.subtle => const [
-      BoxShadow(
-        color: Color(0x14000000),
-        blurRadius: 4,
-        offset: Offset(0, 2),
-      ),
+      BoxShadow(color: Color(0x14000000), blurRadius: 4, offset: Offset(0, 2)),
     ],
     CardDepth.elevated => const [
-      BoxShadow(
-        color: Color(0x1F000000),
-        blurRadius: 12,
-        offset: Offset(0, 4),
-      ),
+      BoxShadow(color: Color(0x1F000000), blurRadius: 12, offset: Offset(0, 4)),
     ],
   };
 

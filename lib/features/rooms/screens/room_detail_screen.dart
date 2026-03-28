@@ -21,10 +21,12 @@ import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.d
 import 'package:palette/features/onboarding/models/dna_anchors.dart';
 import 'package:palette/features/onboarding/models/system_palette.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
+import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/rooms/data/room_colour_psychology.dart';
 import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
+import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/room_story.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
@@ -228,6 +230,12 @@ class _RoomDetailContent extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _RoomPreviewMockup(room: room),
+            ],
+
+            // Paint recommendations for this room
+            if (room.heroColourHex != null) ...[
+              const SizedBox(height: 24),
+              _PaintRecommendationsSection(room: room),
             ],
 
             // Why this room works card
@@ -2259,6 +2267,207 @@ class _WhyThisRoomWorksCard extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Paint Recommendations for this Room
+// ---------------------------------------------------------------------------
+
+class _PaintRecommendationsSection extends ConsumerWidget {
+  const _PaintRecommendationsSection({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recsAsync = ref.watch(roomPaintRecommendationsProvider(room));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: 'Paint for this room',
+          actionLabel: 'Browse all',
+          onAction: () => context.push('/explore/paint-library'),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          room.direction != null
+              ? 'Matched to your hero colour and '
+                  '${room.direction!.displayName.toLowerCase()}-facing light'
+              : 'Matched to your hero colour',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: PaletteColours.textSecondary),
+        ),
+        const SizedBox(height: 12),
+        recsAsync.when(
+          data: (recs) {
+            if (recs.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: PaletteColours.softCream,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'No paint matches found for this room yet. '
+                  'Try adjusting your hero colour or budget bracket.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children:
+                  recs
+                      .map(
+                        (rec) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _PaintRecommendationCard(
+                            recommendation: rec,
+                            roomName: room.name,
+                          ),
+                        ),
+                      )
+                      .toList(),
+            );
+          },
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              ),
+          error:
+              (_, __) => Text(
+                'Could not load paint recommendations.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: PaletteColours.textSecondary,
+                ),
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PaintRecommendationCard extends ConsumerWidget {
+  const _PaintRecommendationCard({
+    required this.recommendation,
+    required this.roomName,
+  });
+
+  final RoomPaintRecommendation recommendation;
+  final String roomName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final paint = recommendation.paint;
+    final matchPercent = deltaEToMatchPercentage(recommendation.deltaE);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: PaletteColours.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Colour swatch
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: hexToColor(paint.hex),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: PaletteColours.divider, width: 0.5),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Paint details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  paint.name,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  paint.brand,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Match percentage + price row
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: PaletteColours.sageGreenLight.withValues(
+                          alpha: 0.4,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${matchPercent.round()}% match',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: PaletteColours.sageGreenDark,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (paint.approximatePricePerLitre != null) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        '~£${paint.approximatePricePerLitre!.toStringAsFixed(0)}/L',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: PaletteColours.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  recommendation.reason,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                    fontSize: 11,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Buy button
+          BuyThisPaintButton(
+            brand: paint.brand,
+            colourCode: paint.code,
+            colourName: paint.name,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // Contextual Tool Links
 // ---------------------------------------------------------------------------
 

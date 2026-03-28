@@ -1741,7 +1741,7 @@ _Updated March 2026._
 
 | Feature                                    | Status      | Notes                            |
 | ------------------------------------------ | ----------- | -------------------------------- |
-| 2A.0 Paint Recommendations (existing data) | Not started | Quick win, 1-2 weeks             |
+| 2A.0 Paint Recommendations (existing data) | Done        | Room-context paint recs in Room Detail — hero match, direction undertone, budget filter |
 | 2A.1 Expanded Furniture Lock               | Not started | Photo-first, progressive capture |
 | 2A.2 Room Gap Engine                       | Not started | Core diagnostic concept          |
 | 2A.3 Product Catalogue (manual curation)   | Not started | 250 items across 3 categories    |
