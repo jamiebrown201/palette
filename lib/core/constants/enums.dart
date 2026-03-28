@@ -508,3 +508,214 @@ extension WhiteUndertoneX on WhiteUndertone {
     WhiteUndertone.grey => 'Grey undertone',
   };
 }
+
+// ---------------------------------------------------------------------------
+// Product catalogue enums (Phase 2A.3)
+// ---------------------------------------------------------------------------
+
+enum ProductCategory {
+  rug,
+  pendantLight,
+  floorLamp,
+  tableLamp,
+  cushion,
+  throwBlanket,
+  curtain,
+}
+
+extension ProductCategoryX on ProductCategory {
+  String get displayName => switch (this) {
+    ProductCategory.rug => 'Rug',
+    ProductCategory.pendantLight => 'Pendant light',
+    ProductCategory.floorLamp => 'Floor lamp',
+    ProductCategory.tableLamp => 'Table lamp',
+    ProductCategory.cushion => 'Cushion',
+    ProductCategory.throwBlanket => 'Throw',
+    ProductCategory.curtain => 'Curtain',
+  };
+
+  IconData get icon => switch (this) {
+    ProductCategory.rug => Icons.texture,
+    ProductCategory.pendantLight => Icons.light,
+    ProductCategory.floorLamp => Icons.lightbulb_outline,
+    ProductCategory.tableLamp => Icons.desk_outlined,
+    ProductCategory.cushion => Icons.weekend,
+    ProductCategory.throwBlanket => Icons.dry_cleaning,
+    ProductCategory.curtain => Icons.curtains,
+  };
+
+  /// Maps to the lighting sub-category if applicable.
+  LightingSubcategory? get lightingSubcategory => switch (this) {
+    ProductCategory.pendantLight => LightingSubcategory.ambient,
+    ProductCategory.floorLamp => LightingSubcategory.task,
+    ProductCategory.tableLamp => LightingSubcategory.accent,
+    _ => null,
+  };
+}
+
+enum LightingSubcategory { ambient, task, accent }
+
+extension LightingSubcategoryX on LightingSubcategory {
+  String get displayName => switch (this) {
+    LightingSubcategory.ambient => 'Ambient',
+    LightingSubcategory.task => 'Task',
+    LightingSubcategory.accent => 'Accent',
+  };
+}
+
+enum ProductStyle {
+  modern,
+  traditional,
+  scandi,
+  midCentury,
+  industrial,
+  bohemian,
+  minimalist,
+}
+
+extension ProductStyleX on ProductStyle {
+  String get displayName => switch (this) {
+    ProductStyle.modern => 'Modern',
+    ProductStyle.traditional => 'Traditional',
+    ProductStyle.scandi => 'Scandi',
+    ProductStyle.midCentury => 'Mid-century',
+    ProductStyle.industrial => 'Industrial',
+    ProductStyle.bohemian => 'Bohemian',
+    ProductStyle.minimalist => 'Minimalist',
+  };
+}
+
+enum ProductMaterial {
+  woodOak,
+  woodWalnut,
+  woodAsh,
+  woodTeak,
+  woodBirch,
+  woodPine,
+  woodReclaimed,
+  metalBrass,
+  metalAntiqueBrass,
+  metalBrushedGold,
+  metalChrome,
+  metalBrushedNickel,
+  metalMatteBlack,
+  metalCopper,
+  metalBronze,
+  fabricLinen,
+  fabricVelvet,
+  fabricBoucle,
+  fabricCotton,
+  fabricSilk,
+  fabricWool,
+  fabricJute,
+  leather,
+  glass,
+  ceramic,
+  rattan,
+  stone,
+}
+
+extension ProductMaterialX on ProductMaterial {
+  String get displayName => switch (this) {
+    ProductMaterial.woodOak => 'Oak',
+    ProductMaterial.woodWalnut => 'Walnut',
+    ProductMaterial.woodAsh => 'Ash',
+    ProductMaterial.woodTeak => 'Teak',
+    ProductMaterial.woodBirch => 'Birch',
+    ProductMaterial.woodPine => 'Pine',
+    ProductMaterial.woodReclaimed => 'Reclaimed wood',
+    ProductMaterial.metalBrass => 'Brass',
+    ProductMaterial.metalAntiqueBrass => 'Antique brass',
+    ProductMaterial.metalBrushedGold => 'Brushed gold',
+    ProductMaterial.metalChrome => 'Chrome',
+    ProductMaterial.metalBrushedNickel => 'Brushed nickel',
+    ProductMaterial.metalMatteBlack => 'Matte black',
+    ProductMaterial.metalCopper => 'Copper',
+    ProductMaterial.metalBronze => 'Bronze',
+    ProductMaterial.fabricLinen => 'Linen',
+    ProductMaterial.fabricVelvet => 'Velvet',
+    ProductMaterial.fabricBoucle => 'Bouclé',
+    ProductMaterial.fabricCotton => 'Cotton',
+    ProductMaterial.fabricSilk => 'Silk',
+    ProductMaterial.fabricWool => 'Wool',
+    ProductMaterial.fabricJute => 'Jute',
+    ProductMaterial.leather => 'Leather',
+    ProductMaterial.glass => 'Glass',
+    ProductMaterial.ceramic => 'Ceramic',
+    ProductMaterial.rattan => 'Rattan',
+    ProductMaterial.stone => 'Stone',
+  };
+
+  bool get isWood => name.startsWith('wood');
+  bool get isMetal => name.startsWith('metal');
+
+  WoodTone? get asWoodTone => switch (this) {
+    ProductMaterial.woodOak => WoodTone.lightOak,
+    ProductMaterial.woodWalnut => WoodTone.walnut,
+    ProductMaterial.woodAsh => WoodTone.ash,
+    ProductMaterial.woodTeak => WoodTone.teak,
+    ProductMaterial.woodBirch => WoodTone.lightOak,
+    ProductMaterial.woodPine => WoodTone.lightOak,
+    ProductMaterial.woodReclaimed => WoodTone.reclaimed,
+    _ => null,
+  };
+
+  MetalFinish? get asMetalFinish => switch (this) {
+    ProductMaterial.metalBrass => MetalFinish.polishedBrass,
+    ProductMaterial.metalAntiqueBrass => MetalFinish.antiqueBrass,
+    ProductMaterial.metalBrushedGold => MetalFinish.brushedGold,
+    ProductMaterial.metalChrome => MetalFinish.chrome,
+    ProductMaterial.metalBrushedNickel => MetalFinish.brushedNickel,
+    ProductMaterial.metalMatteBlack => MetalFinish.matteBlack,
+    ProductMaterial.metalCopper => MetalFinish.copper,
+    ProductMaterial.metalBronze => MetalFinish.darkBronze,
+    _ => null,
+  };
+
+  Undertone get undertone {
+    if (isWood) return asWoodTone?.undertone ?? Undertone.neutral;
+    if (isMetal) return asMetalFinish?.undertone ?? Undertone.neutral;
+    return switch (this) {
+      ProductMaterial.fabricLinen => Undertone.warm,
+      ProductMaterial.fabricVelvet => Undertone.warm,
+      ProductMaterial.fabricBoucle => Undertone.warm,
+      ProductMaterial.fabricCotton => Undertone.neutral,
+      ProductMaterial.fabricSilk => Undertone.cool,
+      ProductMaterial.fabricWool => Undertone.warm,
+      ProductMaterial.fabricJute => Undertone.warm,
+      ProductMaterial.leather => Undertone.warm,
+      ProductMaterial.glass => Undertone.cool,
+      ProductMaterial.ceramic => Undertone.neutral,
+      ProductMaterial.rattan => Undertone.warm,
+      ProductMaterial.stone => Undertone.cool,
+      _ => Undertone.neutral,
+    };
+  }
+}
+
+enum RugSize { small120x170, medium160x230, large200x290, extraLarge240x340 }
+
+extension RugSizeX on RugSize {
+  String get displayName => switch (this) {
+    RugSize.small120x170 => '120 × 170 cm',
+    RugSize.medium160x230 => '160 × 230 cm',
+    RugSize.large200x290 => '200 × 290 cm',
+    RugSize.extraLarge240x340 => '240 × 340 cm',
+  };
+}
+
+enum PriceTier { affordable, midRange, investment }
+
+extension PriceTierX on PriceTier {
+  String get displayName => switch (this) {
+    PriceTier.affordable => '£',
+    PriceTier.midRange => '££',
+    PriceTier.investment => '£££',
+  };
+
+  BudgetBracket get asBudgetBracket => switch (this) {
+    PriceTier.affordable => BudgetBracket.affordable,
+    PriceTier.midRange => BudgetBracket.midRange,
+    PriceTier.investment => BudgetBracket.investment,
+  };
+}

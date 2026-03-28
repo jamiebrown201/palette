@@ -32,3 +32,40 @@ class RoomMoodListConverter extends TypeConverter<List<RoomMood>, String> {
     return value.map((e) => e.name).join(',');
   }
 }
+
+/// Converts a [List<ProductMaterial>] to/from a comma-separated [String].
+class ProductMaterialListConverter
+    extends TypeConverter<List<ProductMaterial>, String> {
+  const ProductMaterialListConverter();
+
+  @override
+  List<ProductMaterial> fromSql(String fromDb) {
+    if (fromDb.isEmpty) return [];
+    return fromDb
+        .split(',')
+        .map((e) => ProductMaterial.values.byName(e))
+        .toList();
+  }
+
+  @override
+  String toSql(List<ProductMaterial> value) {
+    return value.map((e) => e.name).join(',');
+  }
+}
+
+/// Converts a [List<ProductStyle>] to/from a comma-separated [String].
+class ProductStyleListConverter
+    extends TypeConverter<List<ProductStyle>, String> {
+  const ProductStyleListConverter();
+
+  @override
+  List<ProductStyle> fromSql(String fromDb) {
+    if (fromDb.isEmpty) return [];
+    return fromDb.split(',').map((e) => ProductStyle.values.byName(e)).toList();
+  }
+
+  @override
+  String toSql(List<ProductStyle> value) {
+    return value.map((e) => e.name).join(',');
+  }
+}

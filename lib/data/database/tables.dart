@@ -6,6 +6,7 @@ import 'package:palette/data/models/colour_interaction.dart';
 import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
+import 'package:palette/data/models/product.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
@@ -286,6 +287,57 @@ class ColourInteractions extends Table {
   TextColumn get contextScreen => text()();
   TextColumn get previousHex => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Product catalogue (Phase 2A.3)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(Product)
+class Products extends Table {
+  TextColumn get id => text()();
+  TextColumn get category =>
+      text().map(
+        const EnumNameConverter<ProductCategory>(ProductCategory.values),
+      )();
+  TextColumn get name => text()();
+  TextColumn get brand => text()();
+  TextColumn get retailer => text()();
+  RealColumn get priceGbp => real()();
+  TextColumn get affiliateUrl => text()();
+  TextColumn get imageUrl => text()();
+  TextColumn get primaryColourHex => text()();
+  TextColumn get secondaryColourHex => text().nullable()();
+  TextColumn get undertone =>
+      text().map(const EnumNameConverter<Undertone>(Undertone.values))();
+  TextColumn get materials =>
+      text().map(const ProductMaterialListConverter())();
+  TextColumn get styles => text().map(const ProductStyleListConverter())();
+  TextColumn get textureFeel =>
+      text().map(const EnumNameConverter<TextureFeel>(TextureFeel.values))();
+  TextColumn get visualWeight =>
+      text().map(const EnumNameConverter<VisualWeight>(VisualWeight.values))();
+  TextColumn get finishSheen =>
+      text().map(const EnumNameConverter<FinishSheen>(FinishSheen.values))();
+  TextColumn get woodTone =>
+      text().nullable().map(
+        const EnumNameConverter<WoodTone>(WoodTone.values),
+      )();
+  TextColumn get metalFinish =>
+      text().nullable().map(
+        const EnumNameConverter<MetalFinish>(MetalFinish.values),
+      )();
+  TextColumn get rugSize =>
+      text().nullable().map(const EnumNameConverter<RugSize>(RugSize.values))();
+  RealColumn get widthCm => real().nullable()();
+  RealColumn get heightCm => real().nullable()();
+  RealColumn get depthCm => real().nullable()();
+  BoolColumn get renterSafe => boolean()();
+  BoolColumn get available => boolean()();
+  DateTimeColumn get lastVerified => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

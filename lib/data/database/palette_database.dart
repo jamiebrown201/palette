@@ -7,6 +7,7 @@ import 'package:palette/data/models/colour_interaction.dart';
 import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
+import 'package:palette/data/models/product.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
@@ -25,13 +26,14 @@ part 'palette_database.g.dart';
     RoomAdjacencies,
     UserProfiles,
     ColourInteractions,
+    Products,
   ],
 )
 class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -94,6 +96,10 @@ class PaletteDatabase extends _$PaletteDatabase {
           lockedFurnitureItems,
           lockedFurnitureItems.finishSheen,
         );
+      }
+      if (from < 8) {
+        // Product Catalogue (2A.3)
+        await m.createTable(products);
       }
     },
   );

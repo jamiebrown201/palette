@@ -4,6 +4,7 @@ import 'package:palette/data/repositories/colour_dna_repository.dart';
 import 'package:palette/data/repositories/colour_interaction_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/repositories/palette_repository.dart';
+import 'package:palette/data/repositories/product_repository.dart';
 import 'package:palette/data/repositories/red_thread_repository.dart';
 import 'package:palette/data/repositories/room_repository.dart';
 import 'package:palette/data/repositories/user_profile_repository.dart';
@@ -46,3 +47,7 @@ UserProfileRepository userProfileRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 ColourInteractionRepository colourInteractionRepository(Ref ref) =>
     ColourInteractionRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+ProductRepository productRepository(Ref ref) =>
+    ProductRepository(ref.watch(paletteDatabaseProvider));

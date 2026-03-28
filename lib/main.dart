@@ -8,7 +8,9 @@ import 'package:palette/core/constants/renter_constraints.dart';
 import 'package:palette/data/database/connection.dart';
 import 'package:palette/data/repositories/colour_dna_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
+import 'package:palette/data/repositories/product_repository.dart';
 import 'package:palette/data/repositories/user_profile_repository.dart';
+import 'package:palette/data/services/product_seed_data.dart';
 import 'package:palette/data/services/seed_data_service.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
@@ -23,6 +25,10 @@ Future<void> main() async {
   final paintRepo = PaintColourRepository(db);
   final seedService = SeedDataService(db, paintRepo);
   await seedService.seedIfNeeded();
+
+  // Seed product catalogue on first launch.
+  final productRepo = ProductRepository(db);
+  await seedProducts(productRepo);
 
   // Load persisted user profile to restore state across restarts.
   final profileRepo = UserProfileRepository(db);
