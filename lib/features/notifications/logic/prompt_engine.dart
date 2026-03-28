@@ -1,3 +1,4 @@
+import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/sample_list_item.dart';
 import 'package:palette/data/models/user_profile.dart';
@@ -55,20 +56,21 @@ class PromptEngine {
   const PromptEngine();
 
   /// Returns the highest-priority prompt to show (or null if none).
+  ///
+  /// In-app prompts show regardless of whether the user opted into push
+  /// notifications (`notificationsEnabled`). Only the opt-in card itself is
+  /// gated on that flag. The `notificationFrequency` setting controls how
+  /// often prompts appear (daily = 24 h, weekly = 7 d, off = none).
   InAppPrompt? evaluate({
     required UserProfile profile,
     required List<Room> rooms,
     required List<SampleListItem> samples,
     required DateTime now,
   }) {
-    // If user has opted out, only show the opt-in prompt (never shown yet).
-    final notificationsOff = profile.notificationsEnabled == false;
-
     // 1. Notification opt-in — show after first room completion, once.
     if (profile.notificationsEnabled == null &&
         profile.notificationOptInPromptShownAt == null &&
         rooms.isNotEmpty) {
-      // Check at least one room has a hero colour (= completed first room).
       final hasCompletedRoom = rooms.any((r) => r.heroColourHex != null);
       if (hasCompletedRoom) {
         return const InAppPrompt(
@@ -83,16 +85,23 @@ class PromptEngine {
       }
     }
 
-    // If notifications are off or user hasn't opted in yet, stop here.
-    if (notificationsOff || profile.notificationsEnabled == null) return null;
-
-    // Rate-limit: don't show a prompt if one was dismissed recently (24h).
-    if (profile.lastPromptDismissedAt != null) {
-      final sinceLastDismiss = now.difference(profile.lastPromptDismissedAt!);
-      if (sinceLastDismiss < const Duration(hours: 24)) return null;
+    // If user explicitly set frequency to 'off', suppress all prompts.
+    if (profile.notificationFrequency == NotificationFrequency.off) {
+      return null;
     }
 
-    // 2. Sample follow-up — 3-5 days after ordering.
+    // Rate-limit: respect notificationFrequency setting.
+    // Weekly users: 7-day suppress window. Daily/default: 24 h.
+    if (profile.lastPromptDismissedAt != null) {
+      final sinceLastDismiss = now.difference(profile.lastPromptDismissedAt!);
+      final suppressDuration =
+          profile.notificationFrequency == NotificationFrequency.weekly
+              ? const Duration(days: 7)
+              : const Duration(hours: 24);
+      if (sinceLastDismiss < suppressDuration) return null;
+    }
+
+    // 2. Sample follow-up — 3-14 days after ordering.
     final samplePrompt = _sampleFollowUp(samples, now);
     if (samplePrompt != null) return samplePrompt;
 
@@ -115,6 +124,10 @@ class PromptEngine {
     // 7. Clocks change reminder (late March / late October).
     final clocksPrompt = _clocksChangeReminder(now);
     if (clocksPrompt != null) return clocksPrompt;
+
+    // 8. Inactivity re-engagement (lowest priority).
+    final reEngagePrompt = _reEngagement(profile, now);
+    if (reEngagePrompt != null) return reEngagePrompt;
 
     return null;
   }
@@ -283,5 +296,21 @@ class PromptEngine {
     }
 
     return null;
+  }
+
+  InAppPrompt? _reEngagement(UserProfile profile, DateTime now) {
+    // Use profile.updatedAt as a proxy for last activity.
+    final daysSinceActive = now.difference(profile.updatedAt).inDays;
+    if (daysSinceActive < 14) return null;
+
+    return const InAppPrompt(
+      type: PromptType.reEngagement,
+      title: 'Your rooms miss you',
+      message:
+          'Pop back in and see how your colour plans are shaping up — '
+          'small updates make a big difference.',
+      actionLabel: 'Take a look',
+      route: '/rooms',
+    );
   }
 }

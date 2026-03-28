@@ -7,9 +7,11 @@ import 'package:palette/features/notifications/logic/prompt_engine.dart';
 
 UserProfile _profile({
   bool? notificationsEnabled,
+  NotificationFrequency? notificationFrequency,
   DateTime? notificationOptInPromptShownAt,
   DateTime? lastPromptDismissedAt,
   DateTime? movingDate,
+  DateTime? updatedAt,
 }) {
   return UserProfile(
     id: 'default',
@@ -17,8 +19,9 @@ UserProfile _profile({
     subscriptionTier: SubscriptionTier.free,
     colourBlindMode: false,
     createdAt: DateTime(2026, 1, 1),
-    updatedAt: DateTime(2026, 1, 1),
+    updatedAt: updatedAt ?? DateTime(2026, 3, 15),
     notificationsEnabled: notificationsEnabled,
+    notificationFrequency: notificationFrequency,
     notificationOptInPromptShownAt: notificationOptInPromptShownAt,
     lastPromptDismissedAt: lastPromptDismissedAt,
     movingDate: movingDate,
@@ -93,12 +96,15 @@ void main() {
 
     test('does not show opt-in if no completed rooms', () {
       final prompt = engine.evaluate(
-        profile: _profile(),
+        profile: _profile(updatedAt: DateTime(2026, 6, 14)),
         rooms: [_room(heroColourHex: null)],
         samples: [],
-        now: DateTime(2026, 3, 15),
+        now: DateTime(2026, 6, 15),
       );
 
+      // No completed room → no opt-in. No other prompts should fire either
+      // (no samples, no moving date, no milestone, not Saturday, not seasonal,
+      // recently active so no re-engagement).
       expect(prompt, isNull);
     });
 
@@ -213,8 +219,8 @@ void main() {
     });
 
     test('no weekend prompt on a Tuesday', () {
-      // Tuesday March 17, 2026 at 9am.
-      final tuesday = DateTime(2026, 6, 16, 9); // A Tuesday in June
+      // Tuesday June 16, 2026 at 9am.
+      final tuesday = DateTime(2026, 6, 16, 9);
       expect(tuesday.weekday, DateTime.tuesday);
 
       final prompt = engine.evaluate(
@@ -232,7 +238,8 @@ void main() {
       }
     });
 
-    test('returns null when notifications disabled', () {
+    // BUG 1 fix: declined users still see in-app prompts.
+    test('shows prompts even when notifications disabled (opted out)', () {
       final prompt = engine.evaluate(
         profile: _profile(
           notificationsEnabled: false,
@@ -243,7 +250,60 @@ void main() {
         now: DateTime(2026, 3, 15),
       );
 
+      // Should still show sample follow-up even though push is off.
+      expect(prompt, isNotNull);
+      expect(prompt!.type, PromptType.sampleFollowUp);
+    });
+
+    test('suppresses all prompts when frequency is off', () {
+      final prompt = engine.evaluate(
+        profile: _profile(
+          notificationsEnabled: true,
+          notificationFrequency: NotificationFrequency.off,
+          notificationOptInPromptShownAt: DateTime(2026, 3, 1),
+        ),
+        rooms: [_room()],
+        samples: [_sample(orderedAt: DateTime(2026, 3, 12))],
+        now: DateTime(2026, 3, 15),
+      );
+
       expect(prompt, isNull);
+    });
+
+    // BUG 2 fix: weekly frequency extends suppress window to 7 days.
+    test('weekly frequency extends suppress window to 7 days', () {
+      // Dismissed 2 days ago → within 7-day window for weekly users.
+      final prompt = engine.evaluate(
+        profile: _profile(
+          notificationsEnabled: true,
+          notificationFrequency: NotificationFrequency.weekly,
+          notificationOptInPromptShownAt: DateTime(2026, 3, 1),
+          lastPromptDismissedAt: DateTime(2026, 3, 13),
+        ),
+        rooms: [_room()],
+        samples: [_sample(orderedAt: DateTime(2026, 3, 12))],
+        now: DateTime(2026, 3, 15),
+      );
+
+      expect(prompt, isNull);
+    });
+
+    test('weekly frequency allows prompts after 7 days', () {
+      // Dismissed 8 days ago → outside 7-day window.
+      final prompt = engine.evaluate(
+        profile: _profile(
+          notificationsEnabled: true,
+          notificationFrequency: NotificationFrequency.weekly,
+          notificationOptInPromptShownAt: DateTime(2026, 3, 1),
+          lastPromptDismissedAt: DateTime(2026, 3, 7),
+        ),
+        rooms: [_room()],
+        samples: [_sample(orderedAt: DateTime(2026, 3, 12))],
+        now: DateTime(2026, 3, 15),
+      );
+
+      expect(prompt, isNotNull);
+      expect(prompt!.type, PromptType.sampleFollowUp);
     });
 
     test('rate-limits prompts within 24h of last dismissal', () {
@@ -293,6 +353,41 @@ void main() {
       expect(prompt, isNotNull);
       expect(prompt!.type, PromptType.seasonalRefresh);
       expect(prompt.title, contains('Autumn'));
+    });
+
+    // Re-engagement prompt.
+    test('shows re-engagement after 14 days of inactivity', () {
+      final prompt = engine.evaluate(
+        profile: _profile(
+          notificationsEnabled: true,
+          notificationOptInPromptShownAt: DateTime(2026, 3, 1),
+          updatedAt: DateTime(2026, 5, 1),
+        ),
+        rooms: [_room()],
+        samples: [],
+        now: DateTime(2026, 6, 15), // 45 days since last active
+      );
+
+      expect(prompt, isNotNull);
+      expect(prompt!.type, PromptType.reEngagement);
+    });
+
+    test('no re-engagement if recently active', () {
+      final prompt = engine.evaluate(
+        profile: _profile(
+          notificationsEnabled: true,
+          notificationOptInPromptShownAt: DateTime(2026, 3, 1),
+          updatedAt: DateTime(2026, 6, 14),
+        ),
+        rooms: [_room()],
+        samples: [],
+        now: DateTime(2026, 6, 15), // 1 day since last active — not inactive
+      );
+
+      // Should not be re-engagement (too recent).
+      if (prompt != null) {
+        expect(prompt.type, isNot(PromptType.reEngagement));
+      }
     });
   });
 }

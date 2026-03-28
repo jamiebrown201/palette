@@ -27,13 +27,29 @@ class PromptCard extends ConsumerWidget {
   }
 }
 
-class _PromptCardContent extends ConsumerWidget {
+class _PromptCardContent extends ConsumerStatefulWidget {
   const _PromptCardContent({required this.prompt});
 
   final InAppPrompt prompt;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PromptCardContent> createState() => _PromptCardContentState();
+}
+
+class _PromptCardContentState extends ConsumerState<_PromptCardContent> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(analyticsProvider).track(AnalyticsEvents.promptViewed, {
+        'type': widget.prompt.type.name,
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final prompt = widget.prompt;
     final isOptIn = prompt.type == PromptType.notificationOptIn;
 
     final Color bgColor;
@@ -114,7 +130,7 @@ class _PromptCardContent extends ConsumerWidget {
               children: [
                 if (isOptIn) ...[
                   FilledButton(
-                    onPressed: () => _handleOptIn(ref, true),
+                    onPressed: () => _handleOptIn(true),
                     style: FilledButton.styleFrom(
                       backgroundColor: accentColor,
                       foregroundColor: Colors.white,
@@ -127,7 +143,7 @@ class _PromptCardContent extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   TextButton(
-                    onPressed: () => _handleOptIn(ref, false),
+                    onPressed: () => _handleOptIn(false),
                     child: Text(
                       'Not now',
                       style: TextStyle(
@@ -137,7 +153,7 @@ class _PromptCardContent extends ConsumerWidget {
                   ),
                 ] else ...[
                   FilledButton(
-                    onPressed: () => _handleAction(context, ref),
+                    onPressed: () => _handleAction(context),
                     style: FilledButton.styleFrom(
                       backgroundColor: accentColor,
                       foregroundColor: Colors.white,
@@ -151,7 +167,7 @@ class _PromptCardContent extends ConsumerWidget {
                   if (prompt.dismissible) ...[
                     const SizedBox(width: 8),
                     TextButton(
-                      onPressed: () => _handleDismiss(ref),
+                      onPressed: _handleDismiss,
                       child: Text(
                         'Dismiss',
                         style: TextStyle(
@@ -169,7 +185,7 @@ class _PromptCardContent extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleOptIn(WidgetRef ref, bool enabled) async {
+  Future<void> _handleOptIn(bool enabled) async {
     final repo = ref.read(userProfileRepositoryProvider);
     await repo.setNotificationsEnabled(enabled);
     await repo.markOptInPromptShown();
@@ -181,8 +197,9 @@ class _PromptCardContent extends ConsumerWidget {
     ref.invalidate(currentPromptProvider);
   }
 
-  void _handleAction(BuildContext context, WidgetRef ref) {
-    ref.read(analyticsProvider).track(AnalyticsEvents.notificationTapped, {
+  void _handleAction(BuildContext context) {
+    final prompt = widget.prompt;
+    ref.read(analyticsProvider).track(AnalyticsEvents.promptActioned, {
       'type': prompt.type.name,
     });
 
@@ -191,7 +208,10 @@ class _PromptCardContent extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleDismiss(WidgetRef ref) async {
+  Future<void> _handleDismiss() async {
+    ref.read(analyticsProvider).track(AnalyticsEvents.promptDismissed, {
+      'type': widget.prompt.type.name,
+    });
     await ref.read(userProfileRepositoryProvider).dismissPrompt();
     ref.invalidate(currentPromptProvider);
   }
