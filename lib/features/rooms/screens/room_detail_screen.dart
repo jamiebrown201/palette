@@ -217,6 +217,19 @@ class _RoomDetailContent extends ConsumerWidget {
                 side: const BorderSide(color: PaletteColours.softGold),
               ),
             ),
+            const SizedBox(height: 8),
+
+            // Room Audit CTA (Phase 4)
+            OutlinedButton.icon(
+              onPressed:
+                  () => context.push('/room-audit?roomId=${room.id}'),
+              icon: const Icon(Icons.checklist_outlined, size: 16),
+              label: const Text('Room Audit'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: PaletteColours.softGoldDark,
+                side: const BorderSide(color: PaletteColours.softGold),
+              ),
+            ),
             const SizedBox(height: 20),
 
             // Furniture Lock

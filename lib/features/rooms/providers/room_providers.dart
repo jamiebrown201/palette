@@ -5,6 +5,7 @@ import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/rooms/logic/lighting_planner.dart';
 import 'package:palette/features/rooms/logic/product_scoring.dart';
+import 'package:palette/features/rooms/logic/room_audit.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
@@ -124,6 +125,28 @@ final seasonalSuggestionsProvider = FutureProvider<List<SeasonalSuggestion>>((
     season: season,
     threadColourHexes: threadColours.map((t) => t.hex).toList(),
   );
+});
+
+/// Room audit: evaluates a room against Watson-Smyth's design rules.
+///
+/// Scores texture layering, material balance, lighting layers, colour plan,
+/// metal consistency, wood tone harmony, visual weight, and more.
+final roomAuditProvider = FutureProvider.family<RoomAuditReport, String>((
+  ref,
+  roomId,
+) async {
+  final room = await ref.watch(roomByIdProvider(roomId).future);
+  if (room == null) {
+    return const RoomAuditReport(
+      roomName: '',
+      rules: [],
+      score: 0,
+      totalPossible: 0,
+      summary: 'Room not found',
+    );
+  }
+  final furniture = await ref.watch(furnitureForRoomProvider(roomId).future);
+  return auditRoom(room: room, furniture: furniture);
 });
 
 /// Lighting plan for a specific room.

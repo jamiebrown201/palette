@@ -21,6 +21,7 @@ import 'package:palette/features/profile/screens/profile_screen.dart';
 import 'package:palette/features/red_thread/screens/red_thread_screen.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/features/rooms/screens/lighting_planner_screen.dart';
+import 'package:palette/features/rooms/screens/room_audit_screen.dart';
 import 'package:palette/features/rooms/screens/room_detail_screen.dart';
 import 'package:palette/features/rooms/screens/room_list_screen.dart';
 import 'package:palette/features/samples/screens/sample_list_screen.dart';
@@ -123,6 +124,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/lighting-planner',
         builder:
             (context, state) => LightingPlannerScreen(
+              roomId: state.uri.queryParameters['roomId'] ?? '',
+            ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/room-audit',
+        builder:
+            (context, state) => RoomAuditScreen(
               roomId: state.uri.queryParameters['roomId'] ?? '',
             ),
       ),

@@ -109,6 +109,10 @@ abstract final class AnalyticsEvents {
   static const lightingPlannerViewed = 'lighting_planner_viewed';
   static const lightingLayerTapped = 'lighting_layer_tapped';
 
+  // ── Room Audit (Phase 4) ──────────────────────────────────
+  static const roomAuditViewed = 'room_audit_viewed';
+  static const roomAuditRuleTapped = 'room_audit_rule_tapped';
+
   // ── AI Room Visualiser (3.1) ──────────────────────────────
   static const visualiserOpened = 'visualiser_opened';
   static const visualiserPhotoSelected = 'visualiser_photo_selected';
