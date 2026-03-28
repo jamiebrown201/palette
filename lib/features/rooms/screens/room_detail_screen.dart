@@ -15,6 +15,7 @@ import 'package:palette/core/widgets/premium_gate.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
 import 'package:palette/data/database/palette_database.dart';
+import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
@@ -1587,57 +1588,50 @@ class _FurnitureLockSection extends ConsumerWidget {
 
     return furnitureAsync.when(
       data: (items) {
+        // Quality gate: prompt for more data
+        final weakItems = items.where((i) => !i.hasEnhancedData).length;
         return Column(
           children: [
             ...items.map(
-              (item) => Padding(
+              (item) => _FurnitureItemTile(
+                item: item,
+                onDelete: () async {
+                  final repo = ref.read(roomRepositoryProvider);
+                  await repo.deleteFurniture(item.id);
+                  ref.invalidate(furnitureForRoomProvider(roomId));
+                },
+                onEdit:
+                    () => _showAddFurnitureDialog(
+                      context,
+                      ref,
+                      items.length,
+                      existingItem: item,
+                    ),
+              ),
+            ),
+            if (weakItems > 0)
+              Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: hexToColor(item.colourHex),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: PaletteColours.divider),
-                      ),
-                      child: const Icon(
-                        Icons.lock,
-                        size: 14,
-                        color: Colors.white,
-                      ),
+                    const Icon(
+                      Icons.auto_awesome,
+                      size: 14,
+                      color: PaletteColours.sageGreenDark,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 6),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.name,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w500),
-                          ),
-                          Text(
-                            item.role.displayName,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: PaletteColours.textSecondary),
-                          ),
-                        ],
+                      child: Text(
+                        'Add materials to $weakItems item${weakItems > 1 ? 's' : ''} for better recommendations',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.sageGreenDark,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: () async {
-                        final repo = ref.read(roomRepositoryProvider);
-                        await repo.deleteFurniture(item.id);
-                        ref.invalidate(furnitureForRoomProvider(roomId));
-                      },
                     ),
                   ],
                 ),
               ),
-            ),
             OutlinedButton.icon(
               onPressed:
                   () => _showAddFurnitureDialog(context, ref, items.length),
@@ -1673,212 +1667,739 @@ class _FurnitureLockSection extends ConsumerWidget {
   void _showAddFurnitureDialog(
     BuildContext context,
     WidgetRef ref,
-    int currentCount,
-  ) {
-    final nameController = TextEditingController();
-    var selectedHex = '#D3D3D3';
-    var role = FurnitureRole.beta;
+    int currentCount, {
+    LockedFurniture? existingItem,
+  }) {
+    final nameController = TextEditingController(
+      text: existingItem?.name ?? '',
+    );
+    var selectedHex = existingItem?.colourHex ?? '#D3D3D3';
+    var role = existingItem?.role ?? FurnitureRole.beta;
+    var category = existingItem?.category;
+    var status = existingItem?.status ?? FurnitureStatus.keeping;
+    var material = existingItem?.material;
+    var woodTone = existingItem?.woodTone;
+    var metalFinish = existingItem?.metalFinish;
+    var style = existingItem?.style;
+    var textureFeel = existingItem?.textureFeel;
+    var visualWeight = existingItem?.visualWeight;
+    var finishSheen = existingItem?.finishSheen;
+    var showEnhanced = existingItem?.hasEnhancedData ?? false;
 
-    showDialog<void>(
+    showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder:
           (ctx) => StatefulBuilder(
-            builder:
-                (ctx, setDialogState) => AlertDialog(
-                  title: const Text('Lock Furniture'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Item name',
-                          hintText: 'e.g. Brown leather sofa',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+            builder: (ctx, setDialogState) {
+              return DraggableScrollableSheet(
+                expand: false,
+                initialChildSize: 0.85,
+                minChildSize: 0.5,
+                maxChildSize: 0.95,
+                builder: (ctx, scrollController) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 16,
+                      bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+                    ),
+                    child: ListView(
+                      controller: scrollController,
+                      children: [
+                        // Handle
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: PaletteColours.divider,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Approximate colour',
-                          style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
+                        const SizedBox(height: 16),
+                        Text(
+                          existingItem != null
+                              ? 'Edit Furniture'
+                              : 'Lock Furniture',
+                          style: Theme.of(ctx).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Record what you already own so recommendations work around it.',
+                          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
                             color: PaletteColours.textSecondary,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children:
-                            _commonColours.entries.map((e) {
-                              final isSelected = selectedHex == e.value;
-                              return GestureDetector(
-                                onTap:
-                                    () => setDialogState(
-                                      () => selectedHex = e.value,
-                                    ),
-                                child: Tooltip(
-                                  message: e.key,
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: hexToColor(e.value),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color:
-                                            isSelected
-                                                ? PaletteColours.sageGreen
-                                                : PaletteColours.divider,
-                                        width: isSelected ? 2.5 : 1,
-                                      ),
-                                    ),
-                                    child:
-                                        isSelected
-                                            ? Icon(
-                                              Icons.check,
-                                              size: 16,
-                                              color:
-                                                  _isLightColour(e.value)
-                                                      ? PaletteColours
-                                                          .textPrimary
-                                                      : Colors.white,
-                                            )
-                                            : null,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton.icon(
-                        onPressed: () async {
-                          final allPaints = await ref.read(
-                            allPaintColoursProvider.future,
-                          );
-                          if (!ctx.mounted) return;
-                          final picked =
-                              await showModalBottomSheet<PaintColour>(
-                                context: ctx,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(16),
-                                  ),
-                                ),
-                                builder:
-                                    (_) => SmartPaintColourPicker(
-                                      title: 'Find exact colour',
-                                      paintColours: allPaints,
-                                    ),
-                              );
-                          if (picked != null) {
-                            setDialogState(() => selectedHex = picked.hex);
-                          }
-                        },
-                        icon: const Icon(Icons.palette_outlined, size: 16),
-                        label: const Text('Find exact colour'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: PaletteColours.sageGreenDark,
+                        const SizedBox(height: 20),
+
+                        // --- Minimum viable: name, category, status ---
+                        TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Item name',
+                            hintText: 'e.g. Brown leather sofa',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
-                      ),
-                      // Colour relationship hint
-                      if (heroColourHex != null) ...[
-                        Builder(
-                          builder: (ctx) {
-                            final heroLab = hexToLab(heroColourHex!);
-                            final furnitureLab = hexToLab(selectedHex);
-                            final dE = deltaE2000(heroLab, furnitureLab);
-                            final hint =
-                                dE < 5
-                                    ? 'Very close to your hero — will blend in'
-                                    : dE < 20
-                                    ? 'Tonal variation — cohesive and calm'
-                                    : dE > 45
-                                    ? 'High contrast — will stand out boldly'
-                                    : 'Moderate contrast with your hero';
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.auto_awesome,
-                                    size: 12,
-                                    color: PaletteColours.sageGreenDark,
+                        const SizedBox(height: 16),
+
+                        // Category chips
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Category',
+                            style: Theme.of(ctx).textTheme.labelMedium
+                                ?.copyWith(color: PaletteColours.textSecondary),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children:
+                              FurnitureCategory.values.map((c) {
+                                final isSelected = category == c;
+                                return ChoiceChip(
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(c.icon, size: 16),
+                                      const SizedBox(width: 4),
+                                      Text(c.displayName),
+                                    ],
                                   ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      hint,
-                                      style: Theme.of(
-                                        ctx,
-                                      ).textTheme.bodySmall?.copyWith(
-                                        color: PaletteColours.sageGreenDark,
-                                        fontStyle: FontStyle.italic,
+                                  selected: isSelected,
+                                  selectedColor: PaletteColours.sageGreen
+                                      .withValues(alpha: 0.2),
+                                  onSelected:
+                                      (v) => setDialogState(
+                                        () => category = v ? c : null,
                                       ),
+                                );
+                              }).toList(),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Status
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Status',
+                            style: Theme.of(ctx).textTheme.labelMedium
+                                ?.copyWith(color: PaletteColours.textSecondary),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children:
+                              FurnitureStatus.values.map((s) {
+                                final isSelected = status == s;
+                                return ChoiceChip(
+                                  label: Text(s.displayName),
+                                  selected: isSelected,
+                                  selectedColor: PaletteColours.sageGreen
+                                      .withValues(alpha: 0.2),
+                                  onSelected:
+                                      (v) => setDialogState(() => status = s),
+                                );
+                              }).toList(),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Colour picker
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Approximate colour',
+                            style: Theme.of(ctx).textTheme.labelMedium
+                                ?.copyWith(color: PaletteColours.textSecondary),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children:
+                              _commonColours.entries.map((e) {
+                                final isSelected = selectedHex == e.value;
+                                return GestureDetector(
+                                  onTap:
+                                      () => setDialogState(
+                                        () => selectedHex = e.value,
+                                      ),
+                                  child: Tooltip(
+                                    message: e.key,
+                                    child: Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        color: hexToColor(e.value),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color:
+                                              isSelected
+                                                  ? PaletteColours.sageGreen
+                                                  : PaletteColours.divider,
+                                          width: isSelected ? 2.5 : 1,
+                                        ),
+                                      ),
+                                      child:
+                                          isSelected
+                                              ? Icon(
+                                                Icons.check,
+                                                size: 16,
+                                                color:
+                                                    _isLightColour(e.value)
+                                                        ? PaletteColours
+                                                            .textPrimary
+                                                        : Colors.white,
+                                              )
+                                              : null,
                                     ),
                                   ),
-                                ],
+                                );
+                              }).toList(),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: () async {
+                                final allPaints = await ref.read(
+                                  allPaintColoursProvider.future,
+                                );
+                                if (!ctx.mounted) return;
+                                final picked =
+                                    await showModalBottomSheet<PaintColour>(
+                                      context: ctx,
+                                      isScrollControlled: true,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(16),
+                                        ),
+                                      ),
+                                      builder:
+                                          (_) => SmartPaintColourPicker(
+                                            title: 'Find exact colour',
+                                            paintColours: allPaints,
+                                          ),
+                                    );
+                                if (picked != null) {
+                                  setDialogState(
+                                    () => selectedHex = picked.hex,
+                                  );
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.palette_outlined,
+                                size: 16,
                               ),
-                            );
+                              label: const Text('Find exact colour'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: PaletteColours.sageGreenDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Colour relationship hint
+                        if (heroColourHex != null)
+                          Builder(
+                            builder: (ctx) {
+                              final heroLab = hexToLab(heroColourHex!);
+                              final furnitureLab = hexToLab(selectedHex);
+                              final dE = deltaE2000(heroLab, furnitureLab);
+                              final hint =
+                                  dE < 5
+                                      ? 'Very close to your hero — will blend in'
+                                      : dE < 20
+                                      ? 'Tonal variation — cohesive and calm'
+                                      : dE > 45
+                                      ? 'High contrast — will stand out boldly'
+                                      : 'Moderate contrast with your hero';
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.auto_awesome,
+                                      size: 12,
+                                      color: PaletteColours.sageGreenDark,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        hint,
+                                        style: Theme.of(
+                                          ctx,
+                                        ).textTheme.bodySmall?.copyWith(
+                                          color: PaletteColours.sageGreenDark,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        const SizedBox(height: 16),
+
+                        // Role dropdown
+                        DropdownButtonFormField<FurnitureRole>(
+                          value: role,
+                          decoration: InputDecoration(
+                            labelText: 'Role in room',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          items:
+                              FurnitureRole.values.map((r) {
+                                return DropdownMenuItem(
+                                  value: r,
+                                  child: Text(r.displayName),
+                                );
+                              }).toList(),
+                          onChanged: (v) {
+                            if (v != null) setDialogState(() => role = v);
                           },
                         ),
-                      ],
-                      const SizedBox(height: 16),
-                      DropdownButtonFormField<FurnitureRole>(
-                        value: role,
-                        decoration: InputDecoration(
-                          labelText: 'Role in room',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                        const SizedBox(height: 20),
+
+                        // --- Enhanced section (expandable) ---
+                        InkWell(
+                          onTap:
+                              () => setDialogState(
+                                () => showEnhanced = !showEnhanced,
+                              ),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.auto_awesome,
+                                  size: 16,
+                                  color: PaletteColours.sageGreenDark,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Add material details for better recommendations',
+                                    style: Theme.of(
+                                      ctx,
+                                    ).textTheme.bodyMedium?.copyWith(
+                                      color: PaletteColours.sageGreenDark,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  showEnhanced
+                                      ? Icons.expand_less
+                                      : Icons.expand_more,
+                                  color: PaletteColours.sageGreenDark,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        items:
-                            FurnitureRole.values.map((r) {
-                              return DropdownMenuItem(
-                                value: r,
-                                child: Text(r.displayName),
-                              );
-                            }).toList(),
-                        onChanged: (v) {
-                          if (v != null) setDialogState(() => role = v);
-                        },
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel'),
-                    ),
-                    FilledButton(
-                      onPressed: () async {
-                        final name = nameController.text.trim();
-                        if (name.isEmpty) return;
+                        if (showEnhanced) ...[
+                          const SizedBox(height: 12),
 
-                        final repo = ref.read(roomRepositoryProvider);
-                        await repo.insertFurniture(
-                          LockedFurnitureItemsCompanion.insert(
-                            id: const Uuid().v4(),
-                            roomId: roomId,
-                            name: name,
-                            colourHex: selectedHex,
-                            role: role,
-                            sortOrder: currentCount,
+                          // Material
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Primary material',
+                              style: Theme.of(
+                                ctx,
+                              ).textTheme.labelMedium?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                            ),
                           ),
-                        );
-                        ref.invalidate(furnitureForRoomProvider(roomId));
-                        if (ctx.mounted) Navigator.pop(ctx);
-                      },
-                      child: const Text('Lock'),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                FurnitureMaterial.values.map((m) {
+                                  return ChoiceChip(
+                                    label: Text(m.displayName),
+                                    selected: material == m,
+                                    selectedColor: PaletteColours.sageGreen
+                                        .withValues(alpha: 0.2),
+                                    onSelected:
+                                        (v) => setDialogState(
+                                          () => material = v ? m : null,
+                                        ),
+                                  );
+                                }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Conditional: wood tone
+                          if (material == FurnitureMaterial.wood) ...[
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Wood tone',
+                                style: Theme.of(
+                                  ctx,
+                                ).textTheme.labelMedium?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children:
+                                  WoodTone.values.map((w) {
+                                    return ChoiceChip(
+                                      label: Text(w.displayName),
+                                      selected: woodTone == w,
+                                      selectedColor: PaletteColours.sageGreen
+                                          .withValues(alpha: 0.2),
+                                      onSelected:
+                                          (v) => setDialogState(
+                                            () => woodTone = v ? w : null,
+                                          ),
+                                    );
+                                  }).toList(),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
+                          // Conditional: metal finish
+                          if (material == FurnitureMaterial.metal) ...[
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Metal finish',
+                                style: Theme.of(
+                                  ctx,
+                                ).textTheme.labelMedium?.copyWith(
+                                  color: PaletteColours.textSecondary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children:
+                                  MetalFinish.values.map((mf) {
+                                    return ChoiceChip(
+                                      label: Text(mf.displayName),
+                                      selected: metalFinish == mf,
+                                      selectedColor: PaletteColours.sageGreen
+                                          .withValues(alpha: 0.2),
+                                      onSelected:
+                                          (v) => setDialogState(
+                                            () => metalFinish = v ? mf : null,
+                                          ),
+                                    );
+                                  }).toList(),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
+                          // Style
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Style',
+                              style: Theme.of(
+                                ctx,
+                              ).textTheme.labelMedium?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                FurnitureStyle.values.map((s) {
+                                  return ChoiceChip(
+                                    label: Text(s.displayName),
+                                    selected: style == s,
+                                    selectedColor: PaletteColours.sageGreen
+                                        .withValues(alpha: 0.2),
+                                    onSelected:
+                                        (v) => setDialogState(
+                                          () => style = v ? s : null,
+                                        ),
+                                  );
+                                }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Texture, visual weight, sheen
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Texture feel',
+                              style: Theme.of(
+                                ctx,
+                              ).textTheme.labelMedium?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                TextureFeel.values.map((t) {
+                                  return ChoiceChip(
+                                    label: Text(t.displayName),
+                                    selected: textureFeel == t,
+                                    selectedColor: PaletteColours.sageGreen
+                                        .withValues(alpha: 0.2),
+                                    onSelected:
+                                        (v) => setDialogState(
+                                          () => textureFeel = v ? t : null,
+                                        ),
+                                  );
+                                }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Visual weight',
+                              style: Theme.of(
+                                ctx,
+                              ).textTheme.labelMedium?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                VisualWeight.values.map((vw) {
+                                  return ChoiceChip(
+                                    label: Text(vw.displayName),
+                                    selected: visualWeight == vw,
+                                    selectedColor: PaletteColours.sageGreen
+                                        .withValues(alpha: 0.2),
+                                    onSelected:
+                                        (v) => setDialogState(
+                                          () => visualWeight = v ? vw : null,
+                                        ),
+                                  );
+                                }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Finish / sheen',
+                              style: Theme.of(
+                                ctx,
+                              ).textTheme.labelMedium?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                FinishSheen.values.map((f) {
+                                  return ChoiceChip(
+                                    label: Text(f.displayName),
+                                    selected: finishSheen == f,
+                                    selectedColor: PaletteColours.sageGreen
+                                        .withValues(alpha: 0.2),
+                                    onSelected:
+                                        (v) => setDialogState(
+                                          () => finishSheen = v ? f : null,
+                                        ),
+                                  );
+                                }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: () async {
+                                  final name = nameController.text.trim();
+                                  if (name.isEmpty) return;
+
+                                  final repo = ref.read(roomRepositoryProvider);
+                                  final companion =
+                                      LockedFurnitureItemsCompanion.insert(
+                                        id:
+                                            existingItem?.id ??
+                                            const Uuid().v4(),
+                                        roomId: roomId,
+                                        name: name,
+                                        colourHex: selectedHex,
+                                        role: role,
+                                        sortOrder:
+                                            existingItem?.sortOrder ??
+                                            currentCount,
+                                        category: Value(category),
+                                        status: Value(status),
+                                        material: Value(material),
+                                        woodTone: Value(woodTone),
+                                        metalFinish: Value(metalFinish),
+                                        style: Value(style),
+                                        textureFeel: Value(textureFeel),
+                                        visualWeight: Value(visualWeight),
+                                        finishSheen: Value(finishSheen),
+                                      );
+
+                                  if (existingItem != null) {
+                                    await repo.deleteFurniture(existingItem.id);
+                                  }
+                                  await repo.insertFurniture(companion);
+                                  ref.invalidate(
+                                    furnitureForRoomProvider(roomId),
+                                  );
+                                  if (ctx.mounted) Navigator.pop(ctx);
+                                },
+                                child: Text(
+                                  existingItem != null ? 'Update' : 'Lock',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
+              );
+            },
           ),
+    );
+  }
+}
+
+/// Individual furniture item tile with enhanced display.
+class _FurnitureItemTile extends StatelessWidget {
+  const _FurnitureItemTile({
+    required this.item,
+    required this.onDelete,
+    required this.onEdit,
+  });
+
+  final LockedFurniture item;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: onEdit,
+        borderRadius: BorderRadius.circular(10),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: hexToColor(item.colourHex),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: PaletteColours.divider),
+              ),
+              child:
+                  item.category != null
+                      ? Icon(
+                        item.category!.icon,
+                        size: 16,
+                        color:
+                            _isLightColour(item.colourHex)
+                                ? Colors.black54
+                                : Colors.white,
+                      )
+                      : const Icon(Icons.lock, size: 14, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    item.summaryLine,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (item.status == FurnitureStatus.replacing)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'Replacing',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Colors.amber.shade800,
+                    ),
+                  ),
+                ),
+              ),
+            IconButton(
+              icon: const Icon(Icons.close, size: 18),
+              onPressed: onDelete,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

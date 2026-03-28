@@ -165,6 +165,48 @@ class LockedFurnitureItems extends Table {
       )();
   IntColumn get sortOrder => integer()();
 
+  // Progressive capture: category & status
+  TextColumn get category =>
+      text().nullable().map(
+        const EnumNameConverter<FurnitureCategory>(FurnitureCategory.values),
+      )();
+  TextColumn get status =>
+      text().nullable().map(
+        const EnumNameConverter<FurnitureStatus>(FurnitureStatus.values),
+      )();
+
+  // Enhanced: material & finish details
+  TextColumn get material =>
+      text().nullable().map(
+        const EnumNameConverter<FurnitureMaterial>(FurnitureMaterial.values),
+      )();
+  TextColumn get woodTone =>
+      text().nullable().map(
+        const EnumNameConverter<WoodTone>(WoodTone.values),
+      )();
+  TextColumn get metalFinish =>
+      text().nullable().map(
+        const EnumNameConverter<MetalFinish>(MetalFinish.values),
+      )();
+  TextColumn get style =>
+      text().nullable().map(
+        const EnumNameConverter<FurnitureStyle>(FurnitureStyle.values),
+      )();
+
+  // Advanced: texture & weight
+  TextColumn get textureFeel =>
+      text().nullable().map(
+        const EnumNameConverter<TextureFeel>(TextureFeel.values),
+      )();
+  TextColumn get visualWeight =>
+      text().nullable().map(
+        const EnumNameConverter<VisualWeight>(VisualWeight.values),
+      )();
+  TextColumn get finishSheen =>
+      text().nullable().map(
+        const EnumNameConverter<FinishSheen>(FinishSheen.values),
+      )();
+
   @override
   Set<Column> get primaryKey => {id};
 

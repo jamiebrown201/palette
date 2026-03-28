@@ -1,6 +1,8 @@
 /// All app-wide enumerations for the Palette application.
 library;
 
+import 'package:flutter/material.dart';
+
 enum SubscriptionTier { free, plus, pro, projectPass }
 
 extension SubscriptionTierX on SubscriptionTier {
@@ -279,6 +281,193 @@ extension FurnitureRoleX on FurnitureRole {
     FurnitureRole.hero => 'Hero (70%)',
     FurnitureRole.beta => 'Beta (20%)',
     FurnitureRole.surprise => 'Surprise (10%)',
+  };
+}
+
+enum FurnitureCategory {
+  sofa,
+  bed,
+  table,
+  rug,
+  chair,
+  shelving,
+  lighting,
+  storage,
+  other,
+}
+
+extension FurnitureCategoryX on FurnitureCategory {
+  String get displayName => switch (this) {
+    FurnitureCategory.sofa => 'Sofa',
+    FurnitureCategory.bed => 'Bed',
+    FurnitureCategory.table => 'Table',
+    FurnitureCategory.rug => 'Rug',
+    FurnitureCategory.chair => 'Chair',
+    FurnitureCategory.shelving => 'Shelving',
+    FurnitureCategory.lighting => 'Lighting',
+    FurnitureCategory.storage => 'Storage',
+    FurnitureCategory.other => 'Other',
+  };
+
+  IconData get icon => switch (this) {
+    FurnitureCategory.sofa => Icons.weekend,
+    FurnitureCategory.bed => Icons.bed,
+    FurnitureCategory.table => Icons.table_restaurant,
+    FurnitureCategory.rug => Icons.texture,
+    FurnitureCategory.chair => Icons.chair,
+    FurnitureCategory.shelving => Icons.shelves,
+    FurnitureCategory.lighting => Icons.light,
+    FurnitureCategory.storage => Icons.inventory_2,
+    FurnitureCategory.other => Icons.category,
+  };
+}
+
+enum FurnitureStatus { keeping, mightReplace, replacing, dontHaveYet }
+
+extension FurnitureStatusX on FurnitureStatus {
+  String get displayName => switch (this) {
+    FurnitureStatus.keeping => 'Keeping',
+    FurnitureStatus.mightReplace => 'Might replace',
+    FurnitureStatus.replacing => 'Replacing',
+    FurnitureStatus.dontHaveYet => "I don't have this yet",
+  };
+}
+
+enum FurnitureMaterial {
+  wood,
+  metal,
+  fabric,
+  leather,
+  glass,
+  stone,
+  wickerRattan,
+  plastic,
+}
+
+extension FurnitureMaterialX on FurnitureMaterial {
+  String get displayName => switch (this) {
+    FurnitureMaterial.wood => 'Wood',
+    FurnitureMaterial.metal => 'Metal',
+    FurnitureMaterial.fabric => 'Fabric',
+    FurnitureMaterial.leather => 'Leather',
+    FurnitureMaterial.glass => 'Glass',
+    FurnitureMaterial.stone => 'Stone',
+    FurnitureMaterial.wickerRattan => 'Wicker / Rattan',
+    FurnitureMaterial.plastic => 'Plastic',
+  };
+}
+
+enum WoodTone {
+  lightOak,
+  honeyOak,
+  walnut,
+  darkStain,
+  whitePainted,
+  reclaimed,
+  teak,
+  ash,
+}
+
+extension WoodToneX on WoodTone {
+  String get displayName => switch (this) {
+    WoodTone.lightOak => 'Light oak',
+    WoodTone.honeyOak => 'Honey oak',
+    WoodTone.walnut => 'Walnut',
+    WoodTone.darkStain => 'Dark stain',
+    WoodTone.whitePainted => 'White painted',
+    WoodTone.reclaimed => 'Reclaimed',
+    WoodTone.teak => 'Teak',
+    WoodTone.ash => 'Ash',
+  };
+
+  Undertone get undertone => switch (this) {
+    WoodTone.lightOak => Undertone.neutral,
+    WoodTone.honeyOak => Undertone.warm,
+    WoodTone.walnut => Undertone.warm,
+    WoodTone.darkStain => Undertone.warm,
+    WoodTone.whitePainted => Undertone.cool,
+    WoodTone.reclaimed => Undertone.warm,
+    WoodTone.teak => Undertone.warm,
+    WoodTone.ash => Undertone.cool,
+  };
+}
+
+enum MetalFinish {
+  antiqueBrass,
+  brushedGold,
+  polishedBrass,
+  roseGold,
+  chrome,
+  brushedNickel,
+  matteBlack,
+  copper,
+  darkBronze,
+}
+
+extension MetalFinishX on MetalFinish {
+  String get displayName => switch (this) {
+    MetalFinish.antiqueBrass => 'Antique brass',
+    MetalFinish.brushedGold => 'Brushed gold',
+    MetalFinish.polishedBrass => 'Polished brass',
+    MetalFinish.roseGold => 'Rose gold',
+    MetalFinish.chrome => 'Chrome',
+    MetalFinish.brushedNickel => 'Brushed nickel',
+    MetalFinish.matteBlack => 'Matte black',
+    MetalFinish.copper => 'Copper',
+    MetalFinish.darkBronze => 'Dark bronze',
+  };
+
+  Undertone get undertone => switch (this) {
+    MetalFinish.antiqueBrass => Undertone.warm,
+    MetalFinish.brushedGold => Undertone.warm,
+    MetalFinish.polishedBrass => Undertone.warm,
+    MetalFinish.roseGold => Undertone.warm,
+    MetalFinish.chrome => Undertone.cool,
+    MetalFinish.brushedNickel => Undertone.cool,
+    MetalFinish.matteBlack => Undertone.neutral,
+    MetalFinish.copper => Undertone.warm,
+    MetalFinish.darkBronze => Undertone.warm,
+  };
+}
+
+enum FurnitureStyle { modern, traditional, eclectic }
+
+extension FurnitureStyleX on FurnitureStyle {
+  String get displayName => switch (this) {
+    FurnitureStyle.modern => 'Modern',
+    FurnitureStyle.traditional => 'Traditional',
+    FurnitureStyle.eclectic => 'Eclectic',
+  };
+}
+
+enum TextureFeel { smooth, lowTexture, highTexture, chunky }
+
+extension TextureFeelX on TextureFeel {
+  String get displayName => switch (this) {
+    TextureFeel.smooth => 'Smooth',
+    TextureFeel.lowTexture => 'Low texture',
+    TextureFeel.highTexture => 'High texture',
+    TextureFeel.chunky => 'Chunky',
+  };
+}
+
+enum VisualWeight { light, medium, heavy }
+
+extension VisualWeightX on VisualWeight {
+  String get displayName => switch (this) {
+    VisualWeight.light => 'Light',
+    VisualWeight.medium => 'Medium',
+    VisualWeight.heavy => 'Heavy',
+  };
+}
+
+enum FinishSheen { matte, lowSheen, polished }
+
+extension FinishSheenX on FinishSheen {
+  String get displayName => switch (this) {
+    FinishSheen.matte => 'Matte',
+    FinishSheen.lowSheen => 'Low sheen',
+    FinishSheen.polished => 'Polished',
   };
 }
 

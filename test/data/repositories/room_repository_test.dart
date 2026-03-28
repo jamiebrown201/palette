@@ -142,6 +142,81 @@ void main() {
       expect(furniture.first.role, FurnitureRole.hero);
     });
 
+    test('insertFurniture with enhanced fields', () async {
+      await repo.insertFurniture(
+        LockedFurnitureItemsCompanion.insert(
+          id: 'f-enhanced',
+          roomId: 'r1',
+          name: 'Oak Coffee Table',
+          colourHex: '#D2B48C',
+          role: FurnitureRole.beta,
+          sortOrder: 0,
+          category: const Value(FurnitureCategory.table),
+          status: const Value(FurnitureStatus.keeping),
+          material: const Value(FurnitureMaterial.wood),
+          woodTone: const Value(WoodTone.honeyOak),
+          style: const Value(FurnitureStyle.traditional),
+          textureFeel: const Value(TextureFeel.smooth),
+          visualWeight: const Value(VisualWeight.medium),
+          finishSheen: const Value(FinishSheen.lowSheen),
+        ),
+      );
+
+      final furniture = await repo.getFurnitureForRoom('r1');
+      expect(furniture, hasLength(1));
+      final item = furniture.first;
+      expect(item.name, 'Oak Coffee Table');
+      expect(item.category, FurnitureCategory.table);
+      expect(item.status, FurnitureStatus.keeping);
+      expect(item.material, FurnitureMaterial.wood);
+      expect(item.woodTone, WoodTone.honeyOak);
+      expect(item.style, FurnitureStyle.traditional);
+      expect(item.textureFeel, TextureFeel.smooth);
+      expect(item.visualWeight, VisualWeight.medium);
+      expect(item.finishSheen, FinishSheen.lowSheen);
+      expect(item.hasEnhancedData, isTrue);
+    });
+
+    test('insertFurniture with metal finish', () async {
+      await repo.insertFurniture(
+        LockedFurnitureItemsCompanion.insert(
+          id: 'f-metal',
+          roomId: 'r1',
+          name: 'Floor Lamp',
+          colourHex: '#1A1A1A',
+          role: FurnitureRole.surprise,
+          sortOrder: 0,
+          category: const Value(FurnitureCategory.lighting),
+          status: const Value(FurnitureStatus.keeping),
+          material: const Value(FurnitureMaterial.metal),
+          metalFinish: const Value(MetalFinish.antiqueBrass),
+        ),
+      );
+
+      final item = (await repo.getFurnitureForRoom('r1')).first;
+      expect(item.metalFinish, MetalFinish.antiqueBrass);
+      expect(item.woodTone, isNull);
+      expect(item.hasEnhancedData, isTrue);
+    });
+
+    test('insertFurniture with nullable enhanced fields', () async {
+      await repo.insertFurniture(
+        LockedFurnitureItemsCompanion.insert(
+          id: 'f-basic',
+          roomId: 'r1',
+          name: 'Chair',
+          colourHex: '#FFFFFF',
+          role: FurnitureRole.hero,
+          sortOrder: 0,
+        ),
+      );
+
+      final item = (await repo.getFurnitureForRoom('r1')).first;
+      expect(item.category, isNull);
+      expect(item.material, isNull);
+      expect(item.hasEnhancedData, isFalse);
+    });
+
     test('deleteAllFurnitureForRoom clears room furniture', () async {
       await repo.insertFurniture(
         LockedFurnitureItemsCompanion.insert(

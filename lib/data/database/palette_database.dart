@@ -31,7 +31,7 @@ class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -70,6 +70,30 @@ class PaletteDatabase extends _$PaletteDatabase {
         await m.addColumn(userProfiles, userProfiles.keepingFlooring);
         await m.addColumn(userProfiles, userProfiles.isTemporaryHome);
         await m.addColumn(userProfiles, userProfiles.reversibleOnly);
+      }
+      if (from < 7) {
+        // Expanded Furniture Lock (2A.1)
+        await m.addColumn(lockedFurnitureItems, lockedFurnitureItems.category);
+        await m.addColumn(lockedFurnitureItems, lockedFurnitureItems.status);
+        await m.addColumn(lockedFurnitureItems, lockedFurnitureItems.material);
+        await m.addColumn(lockedFurnitureItems, lockedFurnitureItems.woodTone);
+        await m.addColumn(
+          lockedFurnitureItems,
+          lockedFurnitureItems.metalFinish,
+        );
+        await m.addColumn(lockedFurnitureItems, lockedFurnitureItems.style);
+        await m.addColumn(
+          lockedFurnitureItems,
+          lockedFurnitureItems.textureFeel,
+        );
+        await m.addColumn(
+          lockedFurnitureItems,
+          lockedFurnitureItems.visualWeight,
+        );
+        await m.addColumn(
+          lockedFurnitureItems,
+          lockedFurnitureItems.finishSheen,
+        );
       }
     },
   );
