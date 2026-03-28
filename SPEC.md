@@ -996,7 +996,7 @@ As more filters, badges, room matches, and recommendation contexts appear (espec
 | 1E.2 A/B Testing Infrastructure       | Not started | P1       |
 | 1E.3 Blurred Premium Previews         | Done        | P0       |
 | 1E.4 Paywall Visual Redesign          | Done        | P0       |
-| 1E.5 Visual Polish Pass               | Partial     | P1       |
+| 1E.5 Visual Polish Pass               | Done        | P1       |
 | 1E.6 Branded Term Consistency         | Done        | P1       |
 | 1E.7 Capture Tab Resolution           | Done        | P1       |
 | 1E.8 Red Thread Flow Visualisation    | Done        | P0       |
@@ -1730,7 +1730,7 @@ _Updated March 2026._
 | 1E.2 A/B Testing Infrastructure       | Not started | P1       | PostHog feature flags                                              |
 | 1E.3 Blurred Premium Previews         | Done        | P0       | PremiumGate widget with blur + CTA. Used on Light Dir, 70/20/10, Red Thread |
 | 1E.4 Paywall Visual Redesign          | Done        | P0       | Visual hero with user room data + blur animation, warm accent CTA, outcome-focused tiers, free trial CTA |
-| 1E.5 Visual Polish Pass               | Partial     | P1       | Typography + theme defined. Missing: WCAG contrast audit, three-level depth system |
+| 1E.5 Visual Polish Pass               | Done        | P1       | Card depth system, WCAG contrast fixes, hero colour progress bars implemented |
 | 1E.6 Branded Term Consistency         | Done        | P1       | Systematic pass — plain-English subtitles under branded terms      |
 | 1E.7 Capture Tab Resolution           | Done        | P1       | Camera-to-paint matching MVP shipped                               |
 | 1E.8 Red Thread Flow Visualisation    | Done        | P0       | Floor plan painter exists but NOT the node-and-edge flow diagram described in spec |

@@ -103,10 +103,7 @@ void main() {
               child: CustomPaint(
                 painter: FloorPlanPainter(
                   template: template,
-                  roomColours: {
-                    'living': '#C8B48C',
-                    'kitchen': '#8FAE8B',
-                  },
+                  roomColours: {'living': '#C8B48C', 'kitchen': '#8FAE8B'},
                   threadHexes: ['#C8B48C'],
                   disconnectedZoneIds: {'bedroom'},
                 ),

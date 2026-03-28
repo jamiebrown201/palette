@@ -31,7 +31,7 @@ abstract final class PaletteColours {
   // Text
   static const textPrimary = Color(0xFF2C2C2C);
   static const textSecondary = Color(0xFF6B6B6B);
-  static const textTertiary = Color(0xFF9B9B9B);
+  static const textTertiary = Color(0xFF717171);
   static const textOnAccent = Color(0xFFFFFFFF);
 
   // Status (accessible: no red/green pairings)

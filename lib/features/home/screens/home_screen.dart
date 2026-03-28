@@ -405,56 +405,69 @@ class _NextActionCard extends StatelessWidget {
       NextActionType.allDone => Icons.check_circle_outline,
     };
 
-    return Material(
-      color: PaletteColours.softCream,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: () => context.push(action.route),
+    return Container(
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: PaletteColours.sageGreenLight,
-                  borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1F000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () => context.push(action.route),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: PaletteColours.sageGreenLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 22,
+                    color: PaletteColours.sageGreenDark,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color: PaletteColours.sageGreenDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      action.title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        action.title,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      action.subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: PaletteColours.textSecondary,
+                      const SizedBox(height: 2),
+                      Text(
+                        action.subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: PaletteColours.textTertiary,
-              ),
-            ],
+                const Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: PaletteColours.textTertiary,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -581,6 +594,10 @@ class _RoomProgressCard extends ConsumerWidget {
               SteppedProgressBar(
                 totalSteps: progress.total,
                 currentStep: progress.completed,
+                activeColour:
+                    room.heroColourHex != null
+                        ? hexToColor(room.heroColourHex!)
+                        : null,
               ),
               const SizedBox(height: 4),
               Text(

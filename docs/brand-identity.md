@@ -72,7 +72,7 @@ All values extracted from `lib/core/theme/palette_colours.dart` (`PaletteColours
 | ----------------- | ----------- | ------------------------------------------------ |
 | `textPrimary`     | `#2C2C2C`   | Primary body and heading text                    |
 | `textSecondary`   | `#6B6B6B`   | Secondary descriptions, bodySmall default, unselected nav |
-| `textTertiary`    | `#9B9B9B`   | Disclaimer text, fine print                      |
+| `textTertiary`    | `#717171`   | Disclaimer text, fine print (WCAG AA compliant)  |
 | `textOnAccent`    | `#FFFFFF`   | Text on primary/secondary accent backgrounds     |
 
 ### Status
@@ -239,13 +239,13 @@ Spacing is not defined as a standalone token system. Values are embedded directl
 | 4     | 4     | Floating action button                             |
 | 8     | 8     | Legacy `bottomNavigationBarTheme` (not used; app uses `NavigationBar`) |
 
-### SPEC-Defined Card Depth System (Planned, from 1E.5)
+### Card Depth System (Implemented, from 1E.5)
 
-Not yet implemented in code. The SPEC envisions:
+Three-level depth hierarchy via `CardDepth` enum in `PaletteCard`:
 
-- **Level 0 (flush):** Backgrounds
-- **Level 1 (subtle shadow):** Content cards, informational panels
-- **Level 2 (elevated shadow):** Interactive cards, CTAs, "Next Action" card
+- **Level 0 (flush):** No shadow — backgrounds
+- **Level 1 (subtle):** `offset(0, 2), blur 4, black 8%` — content cards, informational panels
+- **Level 2 (elevated):** `offset(0, 4), blur 12, black 12%` — interactive cards, CTAs, "Next Action" card
 
 ---
 
