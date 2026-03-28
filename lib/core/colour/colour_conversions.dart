@@ -133,6 +133,15 @@ Color hexToColor(String hex) {
   return Color(int.parse('FF$cleaned', radix: 16));
 }
 
+/// Convert a Flutter [Color] to a hex string with '#' prefix.
+String colorToHex(Color c) {
+  return rgbToHex(
+    (c.r * 255).round(),
+    (c.g * 255).round(),
+    (c.b * 255).round(),
+  );
+}
+
 /// Convert a hex colour string to CIE L*a*b*.
 LabColour hexToLab(String hex) {
   final rgb = hexToRgb(hex);

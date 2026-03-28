@@ -23,6 +23,7 @@ import 'package:palette/features/rooms/screens/room_list_screen.dart';
 import 'package:palette/features/samples/screens/sample_list_screen.dart';
 import 'package:palette/features/shopping_list/screens/shopping_list_screen.dart';
 import 'package:palette/features/subscription/screens/paywall_screen.dart';
+import 'package:palette/features/visualiser/screens/visualiser_screen.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/routing/app_shell.dart';
@@ -100,6 +101,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/samples',
         builder: (context, state) => const SampleListScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/visualiser',
+        builder:
+            (context, state) => VisualiserScreen(
+              roomId: state.uri.queryParameters['roomId'],
+              initialColourHex: state.uri.queryParameters['colour'],
+            ),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

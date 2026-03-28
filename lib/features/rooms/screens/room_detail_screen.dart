@@ -38,6 +38,7 @@ import 'package:palette/features/rooms/logic/room_story.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
+import 'package:palette/features/visualiser/providers/visualiser_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
@@ -259,6 +260,8 @@ class _RoomDetailContent extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _RoomPreviewMockup(room: room),
+              const SizedBox(height: 12),
+              _VisualiserCta(room: room),
             ],
 
             // Paint recommendations for this room
@@ -982,6 +985,77 @@ class _PreviewBand extends StatelessWidget {
             proportion,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: textColour.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// CTA card linking to the AI Room Visualiser (Phase 3.1).
+class _VisualiserCta extends ConsumerWidget {
+  const _VisualiserCta({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final credits = ref.watch(visualiserCreditsProvider);
+    final tier = ref.watch(subscriptionTierProvider);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            PaletteColours.premiumGradientStart,
+            PaletteColours.premiumGradientEnd,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'See it in your room',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Photograph your walls and preview your colours',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton(
+            onPressed: () {
+              final hex = room.heroColourHex ?? '';
+              context.push('/visualiser?roomId=${room.id}&colour=$hex');
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: PaletteColours.sageGreenDark,
+            ),
+            child: Text(
+              tier == SubscriptionTier.free
+                  ? 'Unlock'
+                  : credits > 0
+                  ? 'Try it'
+                  : 'Top up',
             ),
           ),
         ],

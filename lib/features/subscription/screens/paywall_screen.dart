@@ -518,6 +518,7 @@ class _PlusTierCard extends StatelessWidget {
           _featureBullet(context, '${BrandedTerms.redThread} whole-home flow'),
           _featureBullet(context, 'Edit & customise your palette'),
           _featureBullet(context, 'Export room plans as PDF'),
+          _featureBullet(context, 'AI Room Visualiser (5 credits/month)'),
           const SizedBox(height: 16),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -643,7 +644,7 @@ class _ProTierCard extends StatelessWidget {
             'Product recommendations per room',
             comingSoon: true,
           ),
-          _featureBullet(context, 'AI Room Visualiser', comingSoon: true),
+          _featureBullet(context, 'AI Room Visualiser (25 credits/month)'),
           _featureBullet(
             context,
             'Paint & Finish Recommender',

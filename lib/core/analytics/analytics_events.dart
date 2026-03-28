@@ -104,4 +104,10 @@ abstract final class AnalyticsEvents {
   static const promptActioned = 'prompt_actioned';
   static const movingDateSet = 'moving_date_set';
   static const notificationFrequencyChanged = 'notification_frequency_changed';
+
+  // ── AI Room Visualiser (3.1) ──────────────────────────────
+  static const visualiserOpened = 'visualiser_opened';
+  static const visualiserPhotoSelected = 'visualiser_photo_selected';
+  static const visualiserGenerated = 'visualiser_generated';
+  static const visualiserCreditsPurchased = 'visualiser_credits_purchased';
 }
