@@ -5,6 +5,8 @@ import 'package:palette/core/analytics/analytics_service.dart';
 import 'package:palette/core/analytics/session_tracker.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/constants/renter_constraints.dart';
+import 'package:palette/core/feature_flags/experiment.dart';
+import 'package:palette/core/feature_flags/feature_flag_service.dart';
 import 'package:palette/data/database/connection.dart';
 import 'package:palette/data/repositories/colour_dna_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
@@ -15,6 +17,7 @@ import 'package:palette/data/services/seed_data_service.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
+import 'package:palette/providers/feature_flag_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,11 +57,16 @@ Future<void> main() async {
   final sessionTracker = SessionTracker(analytics);
   await sessionTracker.start();
 
+  // Initialise A/B testing feature flags (spec 1E.2).
+  final featureFlags = FeatureFlagService(analytics);
+  await featureFlags.initialise(Experiments.all);
+
   runApp(
     ProviderScope(
       overrides: [
         paletteDatabaseProvider.overrideWithValue(db),
         analyticsProvider.overrideWithValue(analytics),
+        featureFlagProvider.overrideWithValue(featureFlags),
         hasCompletedOnboardingProvider.overrideWith(
           (_) => profile.hasCompletedOnboarding,
         ),

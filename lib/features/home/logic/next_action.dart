@@ -42,12 +42,18 @@ class NextAction {
 /// 5. Complete 70/20/10 plan (hero set but beta/surprise missing)
 /// 6. Lock furniture (rooms with no locked items)
 /// 7. All done
+///
+/// The [copyVariant] parameter supports the next-action copy A/B test
+/// (spec 1E.2). Pass 'task_led' for direct imperative copy, or 'outcome_led'
+/// (default/control) for user-outcome-focused language.
 NextAction computeNextAction({
   required List<Room> rooms,
   required CoherenceReport? coherenceReport,
   required List<RedThreadColour> threadColours,
   required Map<String, bool> roomHasFurniture,
+  String copyVariant = 'outcome_led',
 }) {
+  final taskLed = copyVariant == 'task_led';
   // Priority 1: rooms missing core setup
   for (final room in rooms) {
     if (room.direction == null ||
@@ -59,8 +65,12 @@ NextAction computeNextAction({
       if (room.heroColourHex == null) missing.add('hero colour');
       return NextAction(
         type: NextActionType.completeRoomSetup,
-        title: 'Finish setting up ${room.name}',
-        subtitle: 'Missing: ${missing.join(', ')}',
+        title: taskLed
+            ? 'Set ${missing.join(', ')} for ${room.name}'
+            : 'Finish setting up ${room.name}',
+        subtitle: taskLed
+            ? '${missing.length} step${missing.length == 1 ? '' : 's'} remaining'
+            : 'Missing: ${missing.join(', ')}',
         route: '/rooms/${room.id}',
       );
     }
@@ -68,10 +78,14 @@ NextAction computeNextAction({
 
   // Priority 2: define Red Thread
   if (rooms.length >= 3 && threadColours.isEmpty) {
-    return const NextAction(
+    return NextAction(
       type: NextActionType.defineRedThread,
-      title: 'Define your ${BrandedTerms.redThread}',
-      subtitle: '${BrandedTerms.redThreadSubtitle} — pick 2-4 unifying colours',
+      title: taskLed
+          ? 'Pick 2-4 unifying colours'
+          : 'Connect your ${rooms.length} rooms so the house feels cohesive',
+      subtitle: taskLed
+          ? 'Define your ${BrandedTerms.redThread}'
+          : BrandedTerms.redThreadSubtitle,
       route: '/red-thread',
     );
   }

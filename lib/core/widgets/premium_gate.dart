@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/constants/enums.dart';
+import 'package:palette/core/feature_flags/experiment.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/providers/app_providers.dart';
+import 'package:palette/providers/feature_flag_provider.dart';
 
 /// Wraps content that requires a premium subscription.
 ///
@@ -30,6 +32,11 @@ class PremiumGate extends ConsumerWidget {
       return child;
     }
 
+    // A/B test: blur intensity variant (spec 1E.2)
+    final blurSigma = _blurSigmaForVariant(
+      ref.read(featureFlagProvider).variant(Experiments.blurIntensity),
+    );
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -40,7 +47,10 @@ class PremiumGate extends ConsumerWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              imageFilter: ImageFilter.blur(
+                sigmaX: blurSigma,
+                sigmaY: blurSigma,
+              ),
               child: child,
             ),
           ),
@@ -79,5 +89,13 @@ class PremiumGate extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  static double _blurSigmaForVariant(String variant) {
+    return switch (variant) {
+      'heavy' => 14.0,
+      'light' => 4.0,
+      _ => 8.0, // 'medium' (control)
+    };
   }
 }

@@ -7,11 +7,13 @@ import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
+import 'package:palette/core/feature_flags/experiment.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
+import 'package:palette/providers/feature_flag_provider.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({this.triggerSource, super.key});
@@ -78,6 +80,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
       }
     });
 
+    // A/B test: paywall copy variant (spec 1E.2)
+    final flags = ref.read(featureFlagProvider);
+    final copyVariant = flags.variant(Experiments.paywallCopy);
+    flags.trackExposure(Experiments.paywallCopy);
+    flags.trackExposure(Experiments.defaultBillingPeriod);
+
+    final (headline, subtitle) = _paywallCopyForVariant(copyVariant);
+
     return Scaffold(
       backgroundColor: PaletteColours.warmWhite,
       appBar: AppBar(
@@ -96,9 +106,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             ),
             const SizedBox(height: 24),
 
-            // Outcome headline
+            // Outcome headline (A/B tested)
             Text(
-              'Avoid expensive colour mistakes',
+              headline,
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -106,7 +116,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'Get personalised recommendations for every room in your home',
+              subtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: PaletteColours.textSecondary,
               ),
@@ -180,6 +190,27 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
         ),
       ),
     );
+  }
+
+  /// Returns (headline, subtitle) based on the paywall copy A/B variant.
+  (String, String) _paywallCopyForVariant(String variant) {
+    return switch (variant) {
+      'feature_list' => (
+        'Unlock your full design toolkit',
+        'Light-matched recommendations, 70/20/10 planning, and '
+            'whole-home colour flow for every room',
+      ),
+      'social_proof' => (
+        'Join thousands planning with confidence',
+        'Homeowners like you use Palette to avoid costly mistakes '
+            'and create rooms they love',
+      ),
+      // 'outcome_led' (control) and fallback
+      _ => (
+        'Avoid expensive colour mistakes',
+        'Get personalised recommendations for every room in your home',
+      ),
+    };
   }
 }
 

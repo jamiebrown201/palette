@@ -64,6 +64,11 @@ abstract final class AnalyticsEvents {
   static const wholeHomeBundleProductTapped =
       'whole_home_bundle_product_tapped';
 
+  // ── Experiments (A/B Testing) ────────────────────────────────
+  static const experimentAssigned = 'experiment_assigned';
+  static const experimentOverridden = 'experiment_overridden';
+  static const experimentExposure = 'experiment_exposure';
+
   // ── Retention ───────────────────────────────────────────────
   static const sessionStarted = 'session_started';
   static const sessionDuration = 'session_duration';

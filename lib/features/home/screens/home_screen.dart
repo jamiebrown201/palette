@@ -5,6 +5,7 @@ import 'package:palette/core/analytics/analytics_events.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
+import 'package:palette/core/feature_flags/experiment.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/error_card.dart';
 import 'package:palette/core/widgets/progress_bar.dart';
@@ -25,6 +26,7 @@ import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/database_providers.dart';
+import 'package:palette/providers/feature_flag_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -369,11 +371,18 @@ class _NextActionSection extends ConsumerWidget {
 
     if (anyLoading) return const SizedBox.shrink();
 
+    // A/B test: next-action copy variant (spec 1E.2)
+    final copyVariant = ref.read(featureFlagProvider).variant(
+      Experiments.nextActionCopy,
+    );
+    ref.read(featureFlagProvider).trackExposure(Experiments.nextActionCopy);
+
     final action = computeNextAction(
       rooms: rooms,
       coherenceReport: coherenceReport,
       threadColours: threadColours,
       roomHasFurniture: furnitureMap,
+      copyVariant: copyVariant,
     );
 
     return _NextActionCard(action: action);

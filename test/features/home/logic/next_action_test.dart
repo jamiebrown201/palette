@@ -122,6 +122,35 @@ void main() {
       expect(action.type, NextActionType.lockFurniture);
     });
 
+    test('task_led variant uses imperative copy for completeRoomSetup', () {
+      final action = computeNextAction(
+        rooms: [_room(direction: null, heroColourHex: null)],
+        coherenceReport: null,
+        threadColours: [],
+        roomHasFurniture: {},
+        copyVariant: 'task_led',
+      );
+      expect(action.type, NextActionType.completeRoomSetup);
+      expect(action.title, contains('Set'));
+      expect(action.subtitle, contains('remaining'));
+    });
+
+    test('task_led variant uses imperative copy for defineRedThread', () {
+      final rooms = List.generate(
+        3,
+        (i) => _room(id: 'r$i', name: 'Room $i'),
+      );
+      final action = computeNextAction(
+        rooms: rooms,
+        coherenceReport: null,
+        threadColours: [],
+        roomHasFurniture: {'r0': true, 'r1': true, 'r2': true},
+        copyVariant: 'task_led',
+      );
+      expect(action.type, NextActionType.defineRedThread);
+      expect(action.title, contains('Pick'));
+    });
+
     test('returns allDone when everything is complete', () {
       final action = computeNextAction(
         rooms: [

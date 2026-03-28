@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/constants/renter_constraints.dart';
+import 'package:palette/core/feature_flags/experiment.dart';
 import 'package:palette/features/dev/services/qa_seed_service.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
+import 'package:palette/providers/feature_flag_provider.dart';
 
 /// Debug-only QA Mode screen for quick navigation and state control.
 ///
@@ -260,6 +262,19 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
+
+          // === A/B EXPERIMENTS ===
+          Text(
+            'A/B Experiments',
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          ...Experiments.all.map(
+            (experiment) => _ExperimentOverrideTile(experiment: experiment),
+          ),
+          const SizedBox(height: 16),
 
           // === SCREEN NAVIGATOR ===
           Text(
@@ -574,6 +589,44 @@ class _ScreenCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// QA tile to override an A/B experiment variant.
+class _ExperimentOverrideTile extends ConsumerWidget {
+  const _ExperimentOverrideTile({required this.experiment});
+
+  final Experiment experiment;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final flags = ref.read(featureFlagProvider);
+    final current = flags.variant(experiment);
+
+    return ListTile(
+      dense: true,
+      title: Text(experiment.id.replaceAll('_', ' ')),
+      subtitle: Text(experiment.description),
+      trailing: DropdownButton<String>(
+        value: current,
+        underline: const SizedBox.shrink(),
+        items: experiment.variants
+            .map(
+              (v) => DropdownMenuItem(
+                value: v,
+                child: Text(v, style: Theme.of(context).textTheme.bodySmall),
+              ),
+            )
+            .toList(),
+        onChanged: (v) {
+          if (v != null) {
+            flags.overrideVariant(experiment, v, persist: true);
+            // Force rebuild so widgets pick up the change.
+            (context as Element).markNeedsBuild();
+          }
+        },
       ),
     );
   }
