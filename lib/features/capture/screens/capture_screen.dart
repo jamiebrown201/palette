@@ -45,9 +45,9 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
       final colour = await _extractDominantColour(bytes);
       if (!mounted) return;
 
-      final r = colour.r.round();
-      final g = colour.g.round();
-      final b = colour.b.round();
+      final r = (colour.r * 255).round();
+      final g = (colour.g * 255).round();
+      final b = (colour.b * 255).round();
       final hex =
           '#${r.toRadixString(16).padLeft(2, '0')}'
           '${g.toRadixString(16).padLeft(2, '0')}'
