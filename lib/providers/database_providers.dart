@@ -3,6 +3,7 @@ import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/repositories/colour_dna_repository.dart';
 import 'package:palette/data/repositories/colour_interaction_repository.dart';
 import 'package:palette/data/repositories/feedback_repository.dart';
+import 'package:palette/data/repositories/moodboard_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/repositories/palette_repository.dart';
 import 'package:palette/data/repositories/product_repository.dart';
@@ -61,3 +62,7 @@ ShoppingListRepository shoppingListRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 FeedbackRepository feedbackRepository(Ref ref) =>
     FeedbackRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+MoodboardRepository moodboardRepository(Ref ref) =>
+    MoodboardRepository(ref.watch(paletteDatabaseProvider));

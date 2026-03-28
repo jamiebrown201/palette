@@ -11,6 +11,8 @@ import 'package:palette/features/dev/screens/qa_mode_screen.dart';
 import 'package:palette/features/explore/screens/explore_screen.dart';
 import 'package:palette/features/explore/screens/paint_library_screen.dart';
 import 'package:palette/features/home/screens/home_screen.dart';
+import 'package:palette/features/moodboards/screens/moodboard_detail_screen.dart';
+import 'package:palette/features/moodboards/screens/moodboard_list_screen.dart';
 import 'package:palette/features/onboarding/screens/onboarding_screen.dart';
 import 'package:palette/features/palette/screens/palette_screen.dart';
 import 'package:palette/features/profile/screens/profile_screen.dart';
@@ -92,6 +94,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/shopping-list',
         builder: (context, state) => const ShoppingListScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/moodboards',
+        builder:
+            (context, state) => MoodboardListScreen(
+              roomId: state.uri.queryParameters['roomId'],
+            ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/moodboards/:moodboardId',
+        builder:
+            (context, state) => MoodboardDetailScreen(
+              moodboardId: state.pathParameters['moodboardId']!,
+            ),
       ),
       if (kDebugMode) ...[
         GoRoute(

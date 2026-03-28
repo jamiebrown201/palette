@@ -372,9 +372,9 @@ class _NextActionSection extends ConsumerWidget {
     if (anyLoading) return const SizedBox.shrink();
 
     // A/B test: next-action copy variant (spec 1E.2)
-    final copyVariant = ref.read(featureFlagProvider).variant(
-      Experiments.nextActionCopy,
-    );
+    final copyVariant = ref
+        .read(featureFlagProvider)
+        .variant(Experiments.nextActionCopy);
     ref.read(featureFlagProvider).trackExposure(Experiments.nextActionCopy);
 
     final action = computeNextAction(

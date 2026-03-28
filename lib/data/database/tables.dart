@@ -7,6 +7,8 @@ import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
 import 'package:palette/data/models/product.dart';
+import 'package:palette/data/models/moodboard.dart';
+import 'package:palette/data/models/moodboard_item.dart';
 import 'package:palette/data/models/recommendation_feedback.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
@@ -368,6 +370,51 @@ class ShoppingListItems extends Table {
   TextColumn get affiliateUrl => text()();
   TextColumn get primaryColourHex => text()();
   TextColumn get categoryName => text()();
+  DateTimeColumn get addedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Recommendation feedback (Phase 2C.1)
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Moodboards (Phase 1D.2)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(Moodboard)
+class Moodboards extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get roomId => text().nullable().references(Rooms, #id)();
+  TextColumn get roomName => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Moodboard items (Phase 1D.2)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(MoodboardItem)
+class MoodboardItems extends Table {
+  TextColumn get id => text()();
+  TextColumn get moodboardId => text().references(Moodboards, #id)();
+
+  /// 'colour', 'image', or 'product'.
+  TextColumn get type => text()();
+
+  TextColumn get colourHex => text().nullable()();
+  TextColumn get colourName => text().nullable()();
+  TextColumn get imageUrl => text().nullable()();
+  TextColumn get productId => text().nullable()();
+  TextColumn get label => text().nullable()();
+  IntColumn get sortOrder => integer()();
   DateTimeColumn get addedAt => dateTime()();
 
   @override

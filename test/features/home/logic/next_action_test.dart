@@ -136,10 +136,7 @@ void main() {
     });
 
     test('task_led variant uses imperative copy for defineRedThread', () {
-      final rooms = List.generate(
-        3,
-        (i) => _room(id: 'r$i', name: 'Room $i'),
-      );
+      final rooms = List.generate(3, (i) => _room(id: 'r$i', name: 'Room $i'));
       final action = computeNextAction(
         rooms: rooms,
         coherenceReport: null,

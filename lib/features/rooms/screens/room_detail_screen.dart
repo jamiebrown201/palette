@@ -158,6 +158,18 @@ class _RoomDetailContent extends ConsumerWidget {
 
             // Room checklist
             _RoomChecklist(room: room),
+            const SizedBox(height: 12),
+
+            // Moodboard quick link
+            OutlinedButton.icon(
+              onPressed: () => context.push('/moodboards?roomId=${room.id}'),
+              icon: const Icon(Icons.dashboard_customize_outlined, size: 16),
+              label: const Text('Room moodboard'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: PaletteColours.sageGreenDark,
+                side: const BorderSide(color: PaletteColours.sageGreen),
+              ),
+            ),
             const SizedBox(height: 20),
 
             // Light direction (compact) — fully premium-gated

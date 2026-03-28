@@ -612,14 +612,18 @@ class _ExperimentOverrideTile extends ConsumerWidget {
       trailing: DropdownButton<String>(
         value: current,
         underline: const SizedBox.shrink(),
-        items: experiment.variants
-            .map(
-              (v) => DropdownMenuItem(
-                value: v,
-                child: Text(v, style: Theme.of(context).textTheme.bodySmall),
-              ),
-            )
-            .toList(),
+        items:
+            experiment.variants
+                .map(
+                  (v) => DropdownMenuItem(
+                    value: v,
+                    child: Text(
+                      v,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                )
+                .toList(),
         onChanged: (v) {
           if (v != null) {
             flags.overrideVariant(experiment, v, persist: true);

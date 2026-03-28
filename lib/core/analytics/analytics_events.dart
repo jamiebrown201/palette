@@ -69,6 +69,12 @@ abstract final class AnalyticsEvents {
   static const experimentOverridden = 'experiment_overridden';
   static const experimentExposure = 'experiment_exposure';
 
+  // ── Moodboards ──────────────────────────────────────────────
+  static const moodboardCreated = 'moodboard_created';
+  static const moodboardDeleted = 'moodboard_deleted';
+  static const moodboardItemAdded = 'moodboard_item_added';
+  static const moodboardItemRemoved = 'moodboard_item_removed';
+
   // ── Retention ───────────────────────────────────────────────
   static const sessionStarted = 'session_started';
   static const sessionDuration = 'session_duration';

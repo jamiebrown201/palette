@@ -5,6 +5,8 @@ import 'package:palette/data/database/tables.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/colour_interaction.dart';
 import 'package:palette/data/models/locked_furniture.dart';
+import 'package:palette/data/models/moodboard.dart';
+import 'package:palette/data/models/moodboard_item.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
 import 'package:palette/data/models/product.dart';
@@ -31,13 +33,15 @@ part 'palette_database.g.dart';
     Products,
     ShoppingListItems,
     RecommendationFeedbacks,
+    Moodboards,
+    MoodboardItems,
   ],
 )
 class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -118,6 +122,11 @@ class PaletteDatabase extends _$PaletteDatabase {
       if (from < 11) {
         // Recommendation Feedback (Phase 2C.1)
         await m.createTable(recommendationFeedbacks);
+      }
+      if (from < 12) {
+        // Moodboards (Phase 1D.2)
+        await m.createTable(moodboards);
+        await m.createTable(moodboardItems);
       }
     },
   );

@@ -65,12 +65,14 @@ NextAction computeNextAction({
       if (room.heroColourHex == null) missing.add('hero colour');
       return NextAction(
         type: NextActionType.completeRoomSetup,
-        title: taskLed
-            ? 'Set ${missing.join(', ')} for ${room.name}'
-            : 'Finish setting up ${room.name}',
-        subtitle: taskLed
-            ? '${missing.length} step${missing.length == 1 ? '' : 's'} remaining'
-            : 'Missing: ${missing.join(', ')}',
+        title:
+            taskLed
+                ? 'Set ${missing.join(', ')} for ${room.name}'
+                : 'Finish setting up ${room.name}',
+        subtitle:
+            taskLed
+                ? '${missing.length} step${missing.length == 1 ? '' : 's'} remaining'
+                : 'Missing: ${missing.join(', ')}',
         route: '/rooms/${room.id}',
       );
     }
@@ -80,12 +82,14 @@ NextAction computeNextAction({
   if (rooms.length >= 3 && threadColours.isEmpty) {
     return NextAction(
       type: NextActionType.defineRedThread,
-      title: taskLed
-          ? 'Pick 2-4 unifying colours'
-          : 'Connect your ${rooms.length} rooms so the house feels cohesive',
-      subtitle: taskLed
-          ? 'Define your ${BrandedTerms.redThread}'
-          : BrandedTerms.redThreadSubtitle,
+      title:
+          taskLed
+              ? 'Pick 2-4 unifying colours'
+              : 'Connect your ${rooms.length} rooms so the house feels cohesive',
+      subtitle:
+          taskLed
+              ? 'Define your ${BrandedTerms.redThread}'
+              : BrandedTerms.redThreadSubtitle,
       route: '/red-thread',
     );
   }

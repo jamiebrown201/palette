@@ -179,7 +179,9 @@ void main() {
 
       final bundles = generateWholeHomeBundles(
         rooms: [emptyRoom, roomB],
-        adjacencies: [const RoomAdjacency(id: 'adj2', roomIdA: 'r3', roomIdB: 'r2')],
+        adjacencies: [
+          const RoomAdjacency(id: 'adj2', roomIdA: 'r3', roomIdB: 'r2'),
+        ],
         threadHexes: [threadHex],
         catalogue: catalogue,
         furnitureByRoom: {},

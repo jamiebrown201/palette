@@ -110,6 +110,15 @@ class ExploreScreen extends ConsumerWidget {
             onTap: () => context.push('/red-thread'),
           ),
           const SizedBox(height: 12),
+          _ExploreCard(
+            icon: Icons.dashboard_customize_outlined,
+            iconColor: PaletteColours.sageGreenDark,
+            iconBg: PaletteColours.sageGreenLight,
+            title: 'Moodboards',
+            subtitle: 'Collect colours, images, and ideas for your rooms',
+            onTap: () => context.push('/moodboards'),
+          ),
+          const SizedBox(height: 12),
           dnaAsync.when(
             data: (dna) {
               if (dna == null) {
