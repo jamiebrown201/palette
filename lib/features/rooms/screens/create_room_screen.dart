@@ -66,10 +66,11 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     super.dispose();
   }
 
-  bool get _canContinue {
-    if (_currentStep == 0) return _nameController.text.trim().isNotEmpty;
-    return true;
-  }
+  bool get _canContinue => switch (_currentStep) {
+    0 => _nameController.text.trim().isNotEmpty,
+    3 => _moods.isNotEmpty && _moods.length <= 3,
+    _ => true,
+  };
 
   void _next() {
     if (!_canContinue) return;
@@ -677,7 +678,7 @@ class _MoodStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Choose up to 3',
+          'Choose 1–3 moods',
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: PaletteColours.textSecondary),

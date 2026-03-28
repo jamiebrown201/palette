@@ -10,6 +10,7 @@ import 'package:palette/core/constants/app_constants.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/core/widgets/error_card.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
@@ -366,15 +367,15 @@ class _RedThreadScreenState extends ConsumerState<RedThreadScreen> {
                         ),
                     loading:
                         () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(child: Text('Error: $e')),
+                    error: (_, __) => const ErrorCard(),
                   ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (_, __) => const ErrorCard(),
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (_, __) => const ErrorCard(),
       ),
     );
   }
@@ -649,7 +650,7 @@ class _AdjacencySheet extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (_, __) => const ErrorCard(),
           ),
         ),
       ],
@@ -1399,7 +1400,7 @@ class _CoherenceSection extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Text('Error: $e'),
+      error: (_, __) => const ErrorCard(),
     );
   }
 }
@@ -1476,7 +1477,7 @@ class _AdjacentRoomComparison extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Text('Error: $e'),
+      error: (_, __) => const ErrorCard(),
     );
   }
 }

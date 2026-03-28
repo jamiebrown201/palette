@@ -7,6 +7,7 @@ import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
+import 'package:palette/core/widgets/error_card.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
@@ -58,7 +59,7 @@ class WhiteFinderScreen extends ConsumerWidget {
               trimWhiteHex: systemPalette?.trimWhite.hex,
             ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (_, __) => const ErrorCard(),
       ),
     );
   }

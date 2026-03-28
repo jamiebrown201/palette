@@ -3,6 +3,15 @@ import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/repositories/product_repository.dart';
 
+/// Validated UK retailer URLs for affiliate links.
+const _retailerUrls = {
+  'Dunelm': 'https://www.dunelm.com',
+  'John Lewis': 'https://www.johnlewis.com',
+  'Wayfair': 'https://www.wayfair.co.uk',
+  'Habitat': 'https://www.habitat.co.uk',
+  'Pooky': 'https://www.pooky.com',
+};
+
 /// Seeds the product catalogue with curated representative items.
 ///
 /// This is the v1 manual curation. Items are tagged with exact parameters
@@ -491,7 +500,7 @@ ProductsCompanion _rug({
   retailer: Value(brand),
   priceGbp: Value(price),
   affiliateUrl: Value(
-    'https://${brand.toLowerCase().replaceAll(' ', '')}.co.uk',
+    _retailerUrls[brand] ?? 'https://www.google.co.uk/search?q=$name+$brand',
   ),
   imageUrl: const Value(''),
   primaryColourHex: Value(hex),
@@ -531,7 +540,7 @@ ProductsCompanion _light({
   retailer: Value(brand),
   priceGbp: Value(price),
   affiliateUrl: Value(
-    'https://${brand.toLowerCase().replaceAll(' ', '')}.co.uk',
+    _retailerUrls[brand] ?? 'https://www.google.co.uk/search?q=$name+$brand',
   ),
   imageUrl: const Value(''),
   primaryColourHex: Value(hex),
@@ -569,7 +578,7 @@ ProductsCompanion _soft({
   retailer: Value(brand),
   priceGbp: Value(price),
   affiliateUrl: Value(
-    'https://${brand.toLowerCase().replaceAll(' ', '')}.co.uk',
+    _retailerUrls[brand] ?? 'https://www.google.co.uk/search?q=$name+$brand',
   ),
   imageUrl: const Value(''),
   primaryColourHex: Value(hex),

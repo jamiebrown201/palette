@@ -24,7 +24,11 @@ class RoomMoodListConverter extends TypeConverter<List<RoomMood>, String> {
   @override
   List<RoomMood> fromSql(String fromDb) {
     if (fromDb.isEmpty) return [];
-    return fromDb.split(',').map((e) => RoomMood.values.byName(e)).toList();
+    return fromDb
+        .split(',')
+        .map((e) => _safeByName(RoomMood.values, e))
+        .nonNulls
+        .toList();
   }
 
   @override
@@ -43,7 +47,8 @@ class ProductMaterialListConverter
     if (fromDb.isEmpty) return [];
     return fromDb
         .split(',')
-        .map((e) => ProductMaterial.values.byName(e))
+        .map((e) => _safeByName(ProductMaterial.values, e))
+        .nonNulls
         .toList();
   }
 
@@ -61,11 +66,23 @@ class ProductStyleListConverter
   @override
   List<ProductStyle> fromSql(String fromDb) {
     if (fromDb.isEmpty) return [];
-    return fromDb.split(',').map((e) => ProductStyle.values.byName(e)).toList();
+    return fromDb
+        .split(',')
+        .map((e) => _safeByName(ProductStyle.values, e))
+        .nonNulls
+        .toList();
   }
 
   @override
   String toSql(List<ProductStyle> value) {
     return value.map((e) => e.name).join(',');
   }
+}
+
+/// Safely look up an enum value by name, returning null if not found.
+T? _safeByName<T extends Enum>(List<T> values, String name) {
+  for (final v in values) {
+    if (v.name == name) return v;
+  }
+  return null;
 }

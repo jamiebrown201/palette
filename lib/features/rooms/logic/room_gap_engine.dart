@@ -13,6 +13,12 @@ enum GapType {
   ambientLighting,
   textureContrast,
   accentColour,
+  storage,
+  artwork,
+  curtain,
+  throwSoft,
+  cushions,
+  mirror,
   warmMaterial,
   coolMaterial,
   metalClash,
@@ -29,6 +35,12 @@ extension GapTypeX on GapType {
     GapType.ambientLighting => 'Ambient lighting',
     GapType.textureContrast => 'Texture contrast',
     GapType.accentColour => 'Accent colour',
+    GapType.storage => 'Storage solution',
+    GapType.artwork => 'Wall art',
+    GapType.curtain => 'Window dressing',
+    GapType.throwSoft => 'Throw or blanket',
+    GapType.cushions => 'Cushions',
+    GapType.mirror => 'Mirror',
     GapType.warmMaterial => 'Warm material',
     GapType.coolMaterial => 'Cool material',
     GapType.metalClash => 'Metal harmony',
@@ -69,6 +81,12 @@ class RoomGap {
     GapType.ambientLighting => 'Add ambient lighting',
     GapType.textureContrast => 'Introduce texture contrast',
     GapType.accentColour => 'Add your accent colour',
+    GapType.storage => 'Add a storage solution',
+    GapType.artwork => 'Add wall art or prints',
+    GapType.curtain => 'Add a window dressing',
+    GapType.throwSoft => 'Add a throw or blanket',
+    GapType.cushions => 'Layer in some cushions',
+    GapType.mirror => 'Add a mirror for light and depth',
     GapType.warmMaterial => 'Add a warm material',
     GapType.coolMaterial => 'Add a cool material',
     GapType.metalClash => 'Your metals are fighting each other',
@@ -157,7 +175,10 @@ RoomGapReport analyseRoomGaps({
   // 8. Sheen balance check
   _checkSheenBalance(keepingItems, gaps);
 
-  // 9. Red Thread connection check
+  // 9. Soft furnishing gaps (cushions, throws, curtains)
+  _checkSoftFurnishings(keepingItems, gaps);
+
+  // 10. Red Thread connection check
   _checkRedThread(room, threadColours, gaps);
 
   // Sort by severity desc, then confidence desc
@@ -433,6 +454,39 @@ void _checkSheenBalance(List<LockedFurniture> items, List<RoomGap> gaps) {
         evidence: ['$polishedItems items with polished finish'],
       ),
     );
+  }
+}
+
+void _checkSoftFurnishings(List<LockedFurniture> items, List<RoomGap> gaps) {
+  if (items.length < 2) return; // Need some data context
+
+  final categories = items.map((f) => f.category).toSet();
+
+  // Cushion check — no cushions present among at least 3 items
+  if (items.length >= 3 && !categories.contains(FurnitureCategory.other)) {
+    final hasSoftSeating =
+        categories.contains(FurnitureCategory.sofa) ||
+        categories.contains(FurnitureCategory.chair);
+    if (hasSoftSeating) {
+      // Check if any item name suggests cushions (heuristic)
+      final hasCushionLike = items.any(
+        (f) => f.name.toLowerCase().contains('cushion'),
+      );
+      if (!hasCushionLike) {
+        gaps.add(
+          const RoomGap(
+            gapType: GapType.cushions,
+            severity: GapSeverity.low,
+            confidence: GapConfidence.low,
+            whyItMatters:
+                'Cushions add colour, pattern, and comfort to seating. '
+                'They are one of the easiest ways to introduce your accent '
+                'colour without commitment.',
+            evidence: ['Seating present but no cushions identified'],
+          ),
+        );
+      }
+    }
   }
 }
 

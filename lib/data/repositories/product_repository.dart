@@ -59,8 +59,8 @@ class ProductRepository {
         _db.selectOnly(_db.products)
           ..addColumns([countExp])
           ..where(_db.products.available.equals(true));
-    final row = await query.getSingle();
-    return row.read(countExp) ?? 0;
+    final row = await query.getSingleOrNull();
+    return row?.read(countExp) ?? 0;
   }
 
   /// Map gap types to product categories the engine should consider.
@@ -79,6 +79,9 @@ class ProductRepository {
           ProductCategory.cushion,
           ProductCategory.throwBlanket,
         ],
+        GapType.curtain => [ProductCategory.curtain],
+        GapType.throwSoft => [ProductCategory.throwBlanket],
+        GapType.cushions => [ProductCategory.cushion],
         GapType.warmMaterial => [
           ProductCategory.throwBlanket,
           ProductCategory.cushion,
@@ -88,6 +91,7 @@ class ProductRepository {
           ProductCategory.tableLamp,
           ProductCategory.floorLamp,
         ],
+        // storage, artwork, mirror have no product categories yet
         _ => [],
       };
 }

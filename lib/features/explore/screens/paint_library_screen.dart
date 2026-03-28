@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/core/widgets/error_card.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/room.dart';
@@ -147,7 +148,7 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (_, __) => const ErrorCard(),
             ),
           ),
         ],

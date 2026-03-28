@@ -11,6 +11,7 @@ import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
+import 'package:palette/core/widgets/error_card.dart';
 import 'package:palette/core/widgets/premium_gate.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/core/widgets/smart_paint_colour_picker.dart';
@@ -65,11 +66,7 @@ class RoomDetailScreen extends ConsumerWidget {
             appBar: AppBar(),
             body: const Center(child: CircularProgressIndicator()),
           ),
-      error:
-          (e, _) => Scaffold(
-            appBar: AppBar(),
-            body: Center(child: Text('Error: $e')),
-          ),
+      error: (e, _) => Scaffold(appBar: AppBar(), body: const ErrorCard()),
     );
   }
 }
@@ -3197,6 +3194,12 @@ class _GapCard extends StatelessWidget {
     GapType.ambientLighting => Icons.light_outlined,
     GapType.textureContrast => Icons.layers_outlined,
     GapType.accentColour => Icons.color_lens_outlined,
+    GapType.storage => Icons.inventory_2_outlined,
+    GapType.artwork => Icons.image_outlined,
+    GapType.curtain => Icons.curtains_outlined,
+    GapType.throwSoft => Icons.dry_cleaning_outlined,
+    GapType.cushions => Icons.weekend_outlined,
+    GapType.mirror => Icons.crop_square_outlined,
     GapType.warmMaterial => Icons.local_fire_department_outlined,
     GapType.coolMaterial => Icons.ac_unit_outlined,
     GapType.metalClash => Icons.warning_amber_outlined,
