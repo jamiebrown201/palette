@@ -2847,7 +2847,8 @@ class _PaintRecommendationsSection extends ConsumerWidget {
         SectionHeader(
           title: 'Paint for this room',
           actionLabel: 'Browse all',
-          onAction: () => context.push('/explore/paint-library'),
+          onAction:
+              () => context.push('/explore/paint-library?roomId=${room.id}'),
         ),
         const SizedBox(height: 4),
         Text(

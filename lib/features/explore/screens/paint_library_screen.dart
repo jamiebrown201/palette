@@ -5,6 +5,7 @@ import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/error_card.dart';
+import 'package:palette/core/widgets/room_context_badge.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/room.dart';
@@ -14,24 +15,39 @@ import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
+import 'package:palette/providers/applied_state_provider.dart';
 
 class PaintLibraryScreen extends ConsumerStatefulWidget {
-  const PaintLibraryScreen({super.key});
+  const PaintLibraryScreen({this.roomId, super.key});
+
+  final String? roomId;
 
   @override
   ConsumerState<PaintLibraryScreen> createState() => _PaintLibraryScreenState();
 }
 
 class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
-  String _searchQuery = '';
-  String? _brandFilter;
-  PaletteFamily? _familyFilter;
-  Undertone? _undertoneFilter;
-  _PriceBracket? _priceFilter;
-  bool _paletteFilter = false;
+  late final TextEditingController _searchController;
+
+  /// The key for the per-room filter provider (empty string = global).
+  String get _filterKey => widget.roomId ?? '';
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = ref.read(paintLibraryFiltersProvider(_filterKey));
+    _searchController = TextEditingController(text: initial.searchQuery);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final filters = ref.watch(paintLibraryFiltersProvider(_filterKey));
     final allColoursAsync = ref.watch(allPaintColoursProvider);
     final dnaAsync = ref.watch(latestColourDnaProvider);
     final roomsAsync = ref.watch(allRoomsProvider);
@@ -42,16 +58,36 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
       appBar: AppBar(title: const Text('Paint Library')),
       body: Column(
         children: [
+          // Room context badge (when accessed from a room)
+          if (widget.roomId != null) RoomContextBadge(roomId: widget.roomId!),
+
+          // Active filter summary chips
+          if (filters.hasFilters)
+            _AppliedFiltersSummary(
+              filters: filters,
+              onReset: () {
+                ref
+                    .read(paintLibraryFiltersProvider(_filterKey).notifier)
+                    .state = PaintLibraryFilters.empty;
+                _searchController.clear();
+              },
+            ),
+
           // Search bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: TextField(
+              controller: _searchController,
               decoration: const InputDecoration(
                 hintText: 'Search by name...',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(),
               ),
-              onChanged: (v) => setState(() => _searchQuery = v.trim()),
+              onChanged: (v) {
+                ref
+                    .read(paintLibraryFiltersProvider(_filterKey).notifier)
+                    .state = filters.copyWith(searchQuery: v.trim());
+              },
             ),
           ),
           const SizedBox(height: 8),
@@ -66,15 +102,21 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                   FilterChip(
                     avatar: const Icon(Icons.auto_awesome, size: 16),
                     label: const Text('My palette'),
-                    selected: _paletteFilter,
-                    onSelected: (v) => setState(() => _paletteFilter = v),
+                    selected: filters.paletteOnly,
+                    onSelected: (v) {
+                      ref
+                          .read(
+                            paintLibraryFiltersProvider(_filterKey).notifier,
+                          )
+                          .state = filters.copyWith(paletteOnly: v);
+                    },
                     selectedColor: PaletteColours.sageGreenLight,
                   ),
                   const SizedBox(width: 8),
                 ],
                 _FilterDropdown<String>(
                   label: 'Brand',
-                  value: _brandFilter,
+                  value: filters.brand,
                   items: const [
                     'Farrow & Ball',
                     'Dulux',
@@ -82,47 +124,48 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                     'Benjamin Moore',
                     'Crown',
                   ],
-                  onChanged: (v) => setState(() => _brandFilter = v),
+                  onChanged: (v) {
+                    ref
+                        .read(paintLibraryFiltersProvider(_filterKey).notifier)
+                        .state = filters.copyWith(brand: () => v);
+                  },
                 ),
                 const SizedBox(width: 8),
                 _FilterDropdown<PaletteFamily>(
                   label: 'Family',
-                  value: _familyFilter,
+                  value: filters.family,
                   items: PaletteFamily.values,
                   labelBuilder: (f) => f.displayName,
-                  onChanged: (v) => setState(() => _familyFilter = v),
+                  onChanged: (v) {
+                    ref
+                        .read(paintLibraryFiltersProvider(_filterKey).notifier)
+                        .state = filters.copyWith(family: () => v);
+                  },
                 ),
                 const SizedBox(width: 8),
                 _FilterDropdown<Undertone>(
                   label: 'Undertone',
-                  value: _undertoneFilter,
+                  value: filters.undertone,
                   items: Undertone.values,
                   labelBuilder: (u) => u.displayName,
-                  onChanged: (v) => setState(() => _undertoneFilter = v),
+                  onChanged: (v) {
+                    ref
+                        .read(paintLibraryFiltersProvider(_filterKey).notifier)
+                        .state = filters.copyWith(undertone: () => v);
+                  },
                 ),
                 const SizedBox(width: 8),
-                _FilterDropdown<_PriceBracket>(
+                _FilterDropdown<PriceBracketFilter>(
                   label: 'Price',
-                  value: _priceFilter,
-                  items: _PriceBracket.values,
+                  value: filters.priceBracket,
+                  items: PriceBracketFilter.values,
                   labelBuilder: (p) => p.label,
-                  onChanged: (v) => setState(() => _priceFilter = v),
+                  onChanged: (v) {
+                    ref
+                        .read(paintLibraryFiltersProvider(_filterKey).notifier)
+                        .state = filters.copyWith(priceBracket: () => v);
+                  },
                 ),
-                if (_hasFilters) ...[
-                  const SizedBox(width: 8),
-                  ActionChip(
-                    label: const Text('Clear'),
-                    onPressed:
-                        () => setState(() {
-                          _brandFilter = null;
-                          _familyFilter = null;
-                          _undertoneFilter = null;
-                          _priceFilter = null;
-                          _paletteFilter = false;
-                          _searchQuery = '';
-                        }),
-                  ),
-                ],
               ],
             ),
           ),
@@ -136,6 +179,7 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
                 final rooms = roomsAsync.valueOrNull ?? <Room>[];
                 final results = _applyFiltersAndSort(
                   allColours,
+                  filters: filters,
                   dna: dna,
                   rooms: rooms,
                 );
@@ -166,47 +210,40 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
     );
   }
 
-  bool get _hasFilters =>
-      _brandFilter != null ||
-      _familyFilter != null ||
-      _undertoneFilter != null ||
-      _priceFilter != null ||
-      _paletteFilter ||
-      _searchQuery.isNotEmpty;
-
   List<PaintMatchResult> _applyFiltersAndSort(
     List<PaintColour> colours, {
+    required PaintLibraryFilters filters,
     required ColourDnaResult? dna,
     required List<Room> rooms,
   }) {
     var filtered = colours;
 
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
+    if (filters.searchQuery.isNotEmpty) {
+      final query = filters.searchQuery.toLowerCase();
       filtered =
           filtered.where((c) => c.name.toLowerCase().contains(query)).toList();
     }
 
-    if (_brandFilter != null) {
-      filtered = filtered.where((c) => c.brand == _brandFilter).toList();
+    if (filters.brand != null) {
+      filtered = filtered.where((c) => c.brand == filters.brand).toList();
     }
 
-    if (_familyFilter != null) {
+    if (filters.family != null) {
       filtered =
-          filtered.where((c) => c.paletteFamily == _familyFilter).toList();
+          filtered.where((c) => c.paletteFamily == filters.family).toList();
     }
 
-    if (_undertoneFilter != null) {
+    if (filters.undertone != null) {
       filtered =
-          filtered.where((c) => c.undertone == _undertoneFilter).toList();
+          filtered.where((c) => c.undertone == filters.undertone).toList();
     }
 
-    if (_priceFilter != null) {
+    if (filters.priceBracket != null) {
       filtered =
           filtered.where((c) {
             final price = c.approximatePricePerLitre;
             if (price == null) return false;
-            return _priceFilter!.matches(price);
+            return filters.priceBracket!.matches(price);
           }).toList();
     }
 
@@ -227,12 +264,12 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
     );
 
     // Apply palette filter.
-    if (_paletteFilter) {
+    if (filters.paletteOnly) {
       results = results.where((r) => r.isPaletteMatch).toList();
     }
 
     // Sort: palette matches first (by delta-E), then the rest.
-    if (paletteHexes.isNotEmpty && _searchQuery.isEmpty) {
+    if (paletteHexes.isNotEmpty && filters.searchQuery.isEmpty) {
       results.sort((a, b) {
         if (a.isPaletteMatch && !b.isPaletteMatch) return -1;
         if (!a.isPaletteMatch && b.isPaletteMatch) return 1;
@@ -246,6 +283,107 @@ class _PaintLibraryScreenState extends ConsumerState<PaintLibraryScreen> {
     return results;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Applied Filters Summary (persistent chips above results)
+// ---------------------------------------------------------------------------
+
+class _AppliedFiltersSummary extends StatelessWidget {
+  const _AppliedFiltersSummary({required this.filters, required this.onReset});
+
+  final PaintLibraryFilters filters;
+  final VoidCallback onReset;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <Widget>[];
+
+    if (filters.searchQuery.isNotEmpty) {
+      chips.add(_chip(context, '"${filters.searchQuery}"', Icons.search));
+    }
+    if (filters.brand != null) {
+      chips.add(_chip(context, filters.brand!, Icons.palette_outlined));
+    }
+    if (filters.family != null) {
+      chips.add(_chip(context, filters.family!.displayName, Icons.color_lens));
+    }
+    if (filters.undertone != null) {
+      chips.add(
+        _chip(context, filters.undertone!.displayName, Icons.thermostat),
+      );
+    }
+    if (filters.priceBracket != null) {
+      chips.add(
+        _chip(context, filters.priceBracket!.label, Icons.attach_money),
+      );
+    }
+    if (filters.paletteOnly) {
+      chips.add(_chip(context, 'My palette', Icons.auto_awesome));
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.filter_list,
+            size: 16,
+            color: PaletteColours.sageGreenDark,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final chip in chips) ...[chip, const SizedBox(width: 6)],
+                ],
+              ),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: onReset,
+            icon: const Icon(Icons.clear_all, size: 16),
+            label: const Text('Reset'),
+            style: TextButton.styleFrom(
+              foregroundColor: PaletteColours.textSecondary,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 32),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(BuildContext context, String label, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: PaletteColours.sageGreenLight.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: PaletteColours.sageGreenDark),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: PaletteColours.sageGreenDark,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Filter dropdown (unchanged)
+// ---------------------------------------------------------------------------
 
 class _FilterDropdown<T> extends StatelessWidget {
   const _FilterDropdown({
@@ -305,6 +443,10 @@ class _FilterDropdown<T> extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Paint colour tile (unchanged)
+// ---------------------------------------------------------------------------
 
 class _PaintColourTile extends StatelessWidget {
   const _PaintColourTile({required this.result});
@@ -480,26 +622,4 @@ class _Badge extends StatelessWidget {
       ),
     );
   }
-}
-
-// ---------------------------------------------------------------------------
-// Price bracket filter (spec 1B.4)
-// ---------------------------------------------------------------------------
-
-enum _PriceBracket {
-  budget,
-  mid,
-  premium;
-
-  String get label => switch (this) {
-    _PriceBracket.budget => '\u00A3',
-    _PriceBracket.mid => '\u00A3\u00A3',
-    _PriceBracket.premium => '\u00A3\u00A3\u00A3',
-  };
-
-  bool matches(double pricePerLitre) => switch (this) {
-    _PriceBracket.budget => pricePerLitre < 25,
-    _PriceBracket.mid => pricePerLitre >= 25 && pricePerLitre <= 50,
-    _PriceBracket.premium => pricePerLitre > 50,
-  };
 }

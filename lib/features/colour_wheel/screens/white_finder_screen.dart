@@ -8,6 +8,7 @@ import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/error_card.dart';
+import 'package:palette/core/widgets/room_context_badge.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/features/colour_wheel/providers/colour_wheel_providers.dart';
@@ -16,6 +17,7 @@ import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/palette/widgets/colour_detail_sheet.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/providers/app_providers.dart';
+import 'package:palette/providers/applied_state_provider.dart';
 
 class WhiteFinderScreen extends ConsumerWidget {
   const WhiteFinderScreen({this.roomId, super.key});
@@ -56,6 +58,7 @@ class WhiteFinderScreen extends ConsumerWidget {
         data:
             (grouped) => _WhiteFinderContent(
               grouped: grouped,
+              roomId: roomId,
               roomDirection: roomDirection,
               roomName: roomName,
               dnaUndertone: dna?.undertoneTemperature,
@@ -68,9 +71,10 @@ class WhiteFinderScreen extends ConsumerWidget {
   }
 }
 
-class _WhiteFinderContent extends StatelessWidget {
+class _WhiteFinderContent extends ConsumerWidget {
   const _WhiteFinderContent({
     required this.grouped,
+    this.roomId,
     this.roomDirection,
     this.roomName,
     this.dnaUndertone,
@@ -78,13 +82,20 @@ class _WhiteFinderContent extends StatelessWidget {
   });
 
   final Map<WhiteUndertone, List<PaintColour>> grouped;
+  final String? roomId;
   final CompassDirection? roomDirection;
   final String? roomName;
   final Undertone? dnaUndertone;
   final String? trimWhiteHex;
 
+  String get _filterKey => roomId ?? '';
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeFilter = ref.watch(
+      whiteFinderUndertoneFilterProvider(_filterKey),
+    );
+
     // Determine recommended undertone families based on room direction
     final directionRecommended = _getRecommendedWhiteUndertones(roomDirection);
     final dnaRecommended = _getDnaRecommendedWhiteUndertones(dnaUndertone);
@@ -100,22 +111,40 @@ class _WhiteFinderContent extends StatelessWidget {
       });
     }
 
+    // Apply undertone filter
+    final visibleUndertones =
+        activeFilter != null
+            ? orderedUndertones.where((u) => u == activeFilter).toList()
+            : orderedUndertones;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Room context header when accessed from a room
-          if (roomName != null) ...[
-            _RoomContextHeader(roomName: roomName!, direction: roomDirection),
-            const SizedBox(height: 16),
+          // Room context badge when accessed from a room
+          if (roomId != null) ...[
+            RoomContextBadge(roomId: roomId!),
+            const SizedBox(height: 12),
           ],
+
+          // Undertone filter chips (persistent per room session)
+          _UndertoneFilterChips(
+            activeFilter: activeFilter,
+            recommended: recommended,
+            onSelected: (value) {
+              ref
+                  .read(whiteFinderUndertoneFilterProvider(_filterKey).notifier)
+                  .state = value;
+            },
+          ),
+          const SizedBox(height: 12),
 
           // Paper test tutorial
           const _PaperTestCard(),
           const SizedBox(height: 16),
 
-          // Badge legend (W/C/N) — dismissible
+          // Badge legend (W/C/N) dismissible
           const _BadgeLegend(),
           const SizedBox(height: 24),
 
@@ -132,8 +161,8 @@ class _WhiteFinderContent extends StatelessWidget {
             const SizedBox(height: 24),
           ],
 
-          // White groups by undertone (recommended first)
-          ...orderedUndertones.map((undertone) {
+          // White groups by undertone (filtered + recommended first)
+          ...visibleUndertones.map((undertone) {
             var whites = grouped[undertone] ?? [];
             if (whites.isEmpty) return const SizedBox.shrink();
 
@@ -218,9 +247,9 @@ class _WhiteFinderContent extends StatelessWidget {
       CompassDirection.north => {WhiteUndertone.yellow, WhiteUndertone.pink},
       // South: cool undertones work well
       CompassDirection.south => {WhiteUndertone.blue, WhiteUndertone.grey},
-      // East: warm morning → warm whites
+      // East: warm morning -> warm whites
       CompassDirection.east => {WhiteUndertone.yellow, WhiteUndertone.pink},
-      // West: variable → neutral/warm
+      // West: variable -> neutral/warm
       CompassDirection.west => {WhiteUndertone.yellow, WhiteUndertone.grey},
     };
   }
@@ -245,19 +274,15 @@ class _WhiteFinderContent extends StatelessWidget {
     final r = int.parse(cleanHex.substring(0, 2), radix: 16);
     final g = int.parse(cleanHex.substring(2, 4), radix: 16);
     final b = int.parse(cleanHex.substring(4, 6), radix: 16);
-    // Approximate Lab from RGB for trim white
     final trimLab = LabColour(
-      // Simple approximation — L* from luminance
       (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 * 100,
-      0, // We don't need precise a*/b* — just use the paint's own Lab
+      0,
       0,
     );
-    // Use the actual Lab of each white paint vs a rough target
     final sorted = [...whites];
     sorted.sort((a, b2) {
       final labA = LabColour(a.labL, a.labA, a.labB);
       final labB = LabColour(b2.labL, b2.labA, b2.labB);
-      // Sort by delta-E to something close to the trim white
       final dA = deltaE2000(labA, trimLab);
       final dB = deltaE2000(labB, trimLab);
       return dA.compareTo(dB);
@@ -266,47 +291,65 @@ class _WhiteFinderContent extends StatelessWidget {
   }
 }
 
-class _RoomContextHeader extends StatelessWidget {
-  const _RoomContextHeader({required this.roomName, this.direction});
+// ---------------------------------------------------------------------------
+// Undertone filter chips (Applied State System 1E.10)
+// ---------------------------------------------------------------------------
 
-  final String roomName;
-  final CompassDirection? direction;
+class _UndertoneFilterChips extends StatelessWidget {
+  const _UndertoneFilterChips({
+    required this.activeFilter,
+    required this.recommended,
+    required this.onSelected,
+  });
+
+  final WhiteUndertone? activeFilter;
+  final Set<WhiteUndertone> recommended;
+  final ValueChanged<WhiteUndertone?> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final dirLabel =
-        direction != null
-            ? '${direction!.displayName.toLowerCase()}-facing '
-            : '';
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: PaletteColours.accessibleBlueLight,
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          const Icon(
-            Icons.meeting_room_outlined,
-            color: PaletteColours.accessibleBlueDark,
-            size: 20,
+          FilterChip(
+            label: const Text('All'),
+            selected: activeFilter == null,
+            onSelected: (_) => onSelected(null),
+            selectedColor: PaletteColours.sageGreenLight,
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Finding whites for your $dirLabel$roomName',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: PaletteColours.accessibleBlueDark,
-                fontWeight: FontWeight.w500,
+          const SizedBox(width: 8),
+          ...WhiteUndertone.values.map((undertone) {
+            final isRecommended = recommended.contains(undertone);
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                avatar: isRecommended ? const Icon(Icons.star, size: 14) : null,
+                label: Text(undertone.displayName),
+                selected: activeFilter == undertone,
+                onSelected: (_) {
+                  onSelected(activeFilter == undertone ? null : undertone);
+                },
+                selectedColor: PaletteColours.sageGreenLight,
               ),
+            );
+          }),
+          if (activeFilter != null) ...[
+            ActionChip(
+              label: const Text('Reset'),
+              avatar: const Icon(Icons.clear_all, size: 16),
+              onPressed: () => onSelected(null),
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Badge Legend
+// ---------------------------------------------------------------------------
 
 class _BadgeLegend extends StatefulWidget {
   const _BadgeLegend();
@@ -317,7 +360,6 @@ class _BadgeLegend extends StatefulWidget {
 
 class _BadgeLegendState extends State<_BadgeLegend> {
   bool _dismissed = false;
-  bool _showingTooltip = false;
 
   @override
   Widget build(BuildContext context) {
@@ -329,10 +371,7 @@ class _BadgeLegendState extends State<_BadgeLegend> {
           icon: const Icon(Icons.info_outline, size: 18),
           color: PaletteColours.textTertiary,
           tooltip: 'Show badge legend',
-          onPressed:
-              () => setState(() {
-                _showingTooltip = !_showingTooltip;
-              }),
+          onPressed: () => setState(() => _dismissed = false),
         ),
       );
     }
@@ -410,6 +449,10 @@ class _LegendItem extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Paper Test Card
+// ---------------------------------------------------------------------------
+
 class _PaperTestCard extends StatefulWidget {
   const _PaperTestCard();
 
@@ -478,6 +521,10 @@ class _PaperTestCardState extends State<_PaperTestCard> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Direction Hint
+// ---------------------------------------------------------------------------
+
 class _DirectionHint extends StatefulWidget {
   const _DirectionHint({required this.direction, required this.recommended});
 
@@ -495,13 +542,13 @@ class _DirectionHintState extends State<_DirectionHint> {
   Widget build(BuildContext context) {
     final summary = switch (widget.direction) {
       CompassDirection.north =>
-        'Your north-facing room has cool light — choose warm-undertone whites.',
+        'Your north-facing room has cool light -- choose warm-undertone whites.',
       CompassDirection.south =>
-        'Your south-facing room gets generous light — cooler whites work well.',
+        'Your south-facing room gets generous light -- cooler whites work well.',
       CompassDirection.east =>
-        'Your east-facing room gets warm morning light — warm whites complement it.',
+        'Your east-facing room gets warm morning light -- warm whites complement it.',
       CompassDirection.west =>
-        'Your west-facing room gets warm evening light — yellow or grey whites balance it.',
+        'Your west-facing room gets warm evening light -- yellow or grey whites balance it.',
     };
 
     final detail = switch (widget.direction) {
@@ -567,6 +614,10 @@ class _DirectionHintState extends State<_DirectionHint> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// DNA Hint
+// ---------------------------------------------------------------------------
+
 class _DnaHint extends StatelessWidget {
   const _DnaHint({required this.undertone});
 
@@ -599,7 +650,7 @@ class _DnaHint extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Your ${BrandedTerms.colourDna} leans $toneLabel — $whiteTypes undertone '
+              'Your ${BrandedTerms.colourDna} leans $toneLabel -- $whiteTypes undertone '
               'whites will harmonise with your palette.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -609,6 +660,10 @@ class _DnaHint extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// White Grid & Swatch
+// ---------------------------------------------------------------------------
 
 class _WhiteGrid extends StatelessWidget {
   const _WhiteGrid({required this.whites});

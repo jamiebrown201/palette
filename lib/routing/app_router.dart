@@ -159,7 +159,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'paint-library',
-                    builder: (context, state) => const PaintLibraryScreen(),
+                    builder:
+                        (context, state) => PaintLibraryScreen(
+                          roomId: state.uri.queryParameters['roomId'],
+                        ),
                   ),
                 ],
               ),
