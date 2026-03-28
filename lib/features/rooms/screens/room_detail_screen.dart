@@ -27,6 +27,7 @@ import 'package:palette/features/red_thread/providers/red_thread_providers.dart'
 import 'package:palette/features/rooms/data/room_colour_psychology.dart';
 import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
+import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/room_story.dart';
 import 'package:palette/features/rooms/logic/seventy_twenty_ten.dart';
@@ -243,6 +244,14 @@ class _RoomDetailContent extends ConsumerWidget {
             if (room.heroColourHex != null) ...[
               const SizedBox(height: 24),
               _PaintRecommendationsSection(room: room),
+            ],
+
+            // Room gap analysis — "What this room still needs"
+            if (room.heroColourHex != null &&
+                room.betaColourHex != null &&
+                room.surpriseColourHex != null) ...[
+              const SizedBox(height: 24),
+              _RoomGapSection(roomId: room.id),
             ],
 
             // Room colour psychology tip
@@ -2993,6 +3002,252 @@ class _PaintRecommendationCard extends ConsumerWidget {
 
 // Contextual Tool Links
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Room Gap Analysis — "What this room still needs"
+// ---------------------------------------------------------------------------
+
+class _RoomGapSection extends ConsumerWidget {
+  const _RoomGapSection({required this.roomId});
+
+  final String roomId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gapAsync = ref.watch(roomGapReportProvider(roomId));
+    final theme = Theme.of(context);
+
+    return gapAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (report) {
+        if (!report.hasGaps) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionHeader(
+              title: 'What this room still needs',
+              subtitle: 'Based on your colour plan and furniture',
+            ),
+            if (report.dataQuality == DataQuality.none ||
+                report.dataQuality == DataQuality.minimal) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: PaletteColours.textTertiary,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Add your existing furniture for better suggestions',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: PaletteColours.textTertiary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            // Primary gap — most prominent
+            if (report.primaryGap != null) ...[
+              _GapCard(gap: report.primaryGap!, isPrimary: true),
+            ],
+            // Secondary gaps — compact
+            ...report.secondaryGaps.map(
+              (gap) => Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: _GapCard(gap: gap, isPrimary: false),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _GapCard extends StatelessWidget {
+  const _GapCard({required this.gap, required this.isPrimary});
+
+  final RoomGap gap;
+  final bool isPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.warmGrey),
+        boxShadow:
+            isPrimary
+                ? const [
+                  BoxShadow(
+                    offset: Offset(0, 4),
+                    blurRadius: 12,
+                    color: Color(0x1F000000),
+                  ),
+                ]
+                : const [
+                  BoxShadow(
+                    offset: Offset(0, 2),
+                    blurRadius: 4,
+                    color: Color(0x14000000),
+                  ),
+                ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                _iconForGap(gap.gapType),
+                size: 20,
+                color: _colourForSeverity(gap.severity),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      gap.title,
+                      style:
+                          isPrimary
+                              ? theme.textTheme.titleMedium
+                              : theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      gap.whyItMatters,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: PaletteColours.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _ConfidenceBadge(label: gap.confidenceLabel),
+              const SizedBox(width: 8),
+              _SeverityBadge(severity: gap.severity),
+            ],
+          ),
+          if (gap.blocker != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline,
+                  size: 14,
+                  color: PaletteColours.softGold,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    gap.blocker!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.softGold,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  IconData _iconForGap(GapType type) => switch (type) {
+    GapType.rug => Icons.texture,
+    GapType.taskLighting => Icons.desk_outlined,
+    GapType.accentLighting => Icons.light_mode_outlined,
+    GapType.ambientLighting => Icons.light_outlined,
+    GapType.textureContrast => Icons.layers_outlined,
+    GapType.accentColour => Icons.color_lens_outlined,
+    GapType.warmMaterial => Icons.local_fire_department_outlined,
+    GapType.coolMaterial => Icons.ac_unit_outlined,
+    GapType.metalClash => Icons.warning_amber_outlined,
+    GapType.woodClash => Icons.warning_amber_outlined,
+    GapType.sheenBalance => Icons.blur_on_outlined,
+    GapType.redThread => Icons.hub_outlined,
+  };
+
+  Color _colourForSeverity(GapSeverity severity) => switch (severity) {
+    GapSeverity.high => PaletteColours.softGold,
+    GapSeverity.medium => PaletteColours.sageGreen,
+    GapSeverity.low => PaletteColours.textSecondary,
+  };
+}
+
+class _ConfidenceBadge extends StatelessWidget {
+  const _ConfidenceBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: PaletteColours.textSecondary),
+      ),
+    );
+  }
+}
+
+class _SeverityBadge extends StatelessWidget {
+  const _SeverityBadge({required this.severity});
+
+  final GapSeverity severity;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, colour) = switch (severity) {
+      GapSeverity.high => ('High impact', PaletteColours.softGold),
+      GapSeverity.medium => ('Medium impact', PaletteColours.sageGreen),
+      GapSeverity.low => ('Nice to have', PaletteColours.textTertiary),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: colour.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: colour,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
 
 class _ContextualToolLinks extends StatelessWidget {
   const _ContextualToolLinks({required this.room});
