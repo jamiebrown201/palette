@@ -69,6 +69,13 @@ abstract final class AnalyticsEvents {
   static const experimentOverridden = 'experiment_overridden';
   static const experimentExposure = 'experiment_exposure';
 
+  // ── Colour Capture (1D.1) ─────────────────────────────────────
+  static const colourCaptured = 'colour_captured';
+  static const colourCaptureNudged = 'colour_capture_nudged';
+  static const colourCaptureSavedToMoodboard =
+      'colour_capture_saved_to_moodboard';
+  static const colourCaptureSavedToPalette = 'colour_capture_saved_to_palette';
+
   // ── Moodboards ──────────────────────────────────────────────
   static const moodboardCreated = 'moodboard_created';
   static const moodboardDeleted = 'moodboard_deleted';

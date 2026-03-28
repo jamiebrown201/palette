@@ -33,6 +33,17 @@ void main() {
       );
 
       expect(find.text('Closest Paint Matches'), findsNothing);
+      expect(find.text('Nudge warmer / cooler'), findsNothing);
+      expect(find.text('Save This Colour'), findsNothing);
+    });
+
+    testWidgets('does not show save actions in empty state', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(child: MaterialApp(home: CaptureScreen())),
+      );
+
+      expect(find.text('Save to Moodboard'), findsNothing);
+      expect(find.text('Save to Palette (Plus)'), findsNothing);
     });
   });
 }
