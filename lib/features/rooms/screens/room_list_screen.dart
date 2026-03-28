@@ -8,7 +8,6 @@ import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/error_card.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
-import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/providers/app_providers.dart';
 
 class RoomListScreen extends ConsumerWidget {
@@ -46,12 +45,7 @@ class RoomListScreen extends ConsumerWidget {
   }
 
   void _showCreateRoom(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        fullscreenDialog: true,
-        builder: (context) => const CreateRoomScreen(),
-      ),
-    );
+    context.push('/rooms/create');
   }
 }
 

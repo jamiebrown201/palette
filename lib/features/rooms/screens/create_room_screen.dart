@@ -263,107 +263,151 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     );
   }
 
+  /// Whether the user has entered any data worth confirming before discard.
+  bool get _hasUnsavedProgress =>
+      _currentStep > 0 || _nameController.text.trim().isNotEmpty;
+
+  Future<bool> _confirmDiscard() async {
+    if (!_hasUnsavedProgress) return true;
+    final result = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Discard room?'),
+            content: const Text('You\u2019ll lose the progress on this room.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Keep editing'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Discard'),
+              ),
+            ],
+          ),
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLast = _currentStep == _totalSteps - 1;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Room'),
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.close),
+    return PopScope(
+      canPop: !_hasUnsavedProgress,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final shouldDiscard = await _confirmDiscard();
+        if (shouldDiscard && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create Room'),
+          leading: IconButton(
+            onPressed: () async {
+              if (_hasUnsavedProgress) {
+                final shouldDiscard = await _confirmDiscard();
+                if (!shouldDiscard || !mounted) return;
+              }
+              if (mounted) Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.close),
+          ),
         ),
-      ),
-      body: Column(
-        children: [
-          // Progress indicator
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: (_currentStep + 1) / _totalSteps,
-                    minHeight: 6,
-                    backgroundColor: PaletteColours.warmGrey,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      PaletteColours.sageGreen,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    '${_currentStep + 1} of $_totalSteps',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: PaletteColours.textTertiary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Step content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        body: Column(
+          children: [
+            // Progress indicator
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _stepTitles[_currentStep],
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: (_currentStep + 1) / _totalSteps,
+                      minHeight: 6,
+                      backgroundColor: PaletteColours.warmGrey,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        PaletteColours.sageGreen,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    child: _buildStepContent(),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '${_currentStep + 1} of $_totalSteps',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: PaletteColours.textTertiary,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
 
-          // Bottom buttons
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-              child: Row(
-                children: [
-                  if (_currentStep > 0) ...[
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _back,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(color: PaletteColours.divider),
-                        ),
-                        child: const Text('Back'),
-                      ),
+            // Step content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _stepTitles[_currentStep],
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(height: 24),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: _buildStepContent(),
+                    ),
                   ],
-                  Expanded(
-                    flex: _currentStep > 0 ? 2 : 1,
-                    child: FilledButton(
-                      onPressed: _canContinue ? _next : null,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: Text(isLast ? 'Create Room' : 'Continue'),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+
+            // Bottom buttons
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                child: Row(
+                  children: [
+                    if (_currentStep > 0) ...[
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _back,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(
+                              color: PaletteColours.divider,
+                            ),
+                          ),
+                          child: const Text('Back'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      flex: _currentStep > 0 ? 2 : 1,
+                      child: FilledButton(
+                        onPressed: _canContinue ? _next : null,
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(isLast ? 'Create Room' : 'Continue'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

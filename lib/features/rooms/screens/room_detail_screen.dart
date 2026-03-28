@@ -9,6 +9,7 @@ import 'package:palette/core/colour/kelvin_simulation.dart';
 import 'package:palette/core/colour/lab_colour.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
+import 'package:palette/core/constants/room_mode_config.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/core/widgets/error_card.dart';
@@ -255,9 +256,41 @@ class _RoomDetailContent extends ConsumerWidget {
             ],
 
             // Paint & Finish Recommender (Phase 2B.3)
-            if (room.heroColourHex != null && !room.isRenterMode) ...[
-              const SizedBox(height: 24),
-              _PaintFinishSection(room: room),
+            // Show for owners and renters who can paint; explain to
+            // renters who can't paint why the section isn't available.
+            if (room.heroColourHex != null) ...[
+              if (config != RoomModeConfig.renterCantPaint) ...[
+                const SizedBox(height: 24),
+                _PaintFinishSection(room: room),
+              ] else ...[
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: PaletteColours.warmGrey,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        size: 20,
+                        color: PaletteColours.textTertiary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Paint & finish recommendations are hidden '
+                          'because painting isn\u2019t an option in this rental. '
+                          'Consider peel-and-stick or removable wallpaper instead.',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: PaletteColours.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
 
             // Room gap analysis — "What this room still needs"
@@ -319,6 +352,13 @@ class _RoomDetailContent extends ConsumerWidget {
     var usageTime = room.usageTime;
     var budget = room.budget;
     var isRenterMode = room.isRenterMode;
+    var roomSize = room.roomSize;
+    final widthCtrl = TextEditingController(
+      text: room.widthMetres?.toStringAsFixed(1) ?? '',
+    );
+    final lengthCtrl = TextEditingController(
+      text: room.lengthMetres?.toStringAsFixed(1) ?? '',
+    );
 
     showModalBottomSheet<void>(
       context: context,
@@ -333,114 +373,166 @@ class _RoomDetailContent extends ConsumerWidget {
                     24,
                     24 + MediaQuery.of(ctx).viewInsets.bottom,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Edit Room',
-                        style: Theme.of(ctx).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        initialValue: name,
-                        decoration: const InputDecoration(
-                          labelText: 'Room name',
-                          border: OutlineInputBorder(),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Edit Room',
+                          style: Theme.of(ctx).textTheme.titleLarge,
                         ),
-                        onChanged: (v) => name = v,
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<CompassDirection>(
-                        value: direction,
-                        decoration: const InputDecoration(
-                          labelText: 'Window direction',
-                          border: OutlineInputBorder(),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          initialValue: name,
+                          decoration: const InputDecoration(
+                            labelText: 'Room name',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (v) => name = v,
                         ),
-                        items:
-                            CompassDirection.values.map((d) {
-                              return DropdownMenuItem(
-                                value: d,
-                                child: Text(d.displayName),
-                              );
-                            }).toList(),
-                        onChanged: (v) => setSheetState(() => direction = v),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<UsageTime>(
-                        value: usageTime,
-                        decoration: const InputDecoration(
-                          labelText: 'Primary usage time',
-                          border: OutlineInputBorder(),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<CompassDirection>(
+                          value: direction,
+                          decoration: const InputDecoration(
+                            labelText: 'Window direction',
+                            border: OutlineInputBorder(),
+                          ),
+                          items:
+                              CompassDirection.values.map((d) {
+                                return DropdownMenuItem(
+                                  value: d,
+                                  child: Text(d.displayName),
+                                );
+                              }).toList(),
+                          onChanged: (v) => setSheetState(() => direction = v),
                         ),
-                        items:
-                            UsageTime.values.map((t) {
-                              return DropdownMenuItem(
-                                value: t,
-                                child: Text(t.displayName),
-                              );
-                            }).toList(),
-                        onChanged: (v) {
-                          if (v != null) setSheetState(() => usageTime = v);
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<BudgetBracket>(
-                        value: budget,
-                        decoration: const InputDecoration(
-                          labelText: 'Budget bracket',
-                          border: OutlineInputBorder(),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<UsageTime>(
+                          value: usageTime,
+                          decoration: const InputDecoration(
+                            labelText: 'Primary usage time',
+                            border: OutlineInputBorder(),
+                          ),
+                          items:
+                              UsageTime.values.map((t) {
+                                return DropdownMenuItem(
+                                  value: t,
+                                  child: Text(t.displayName),
+                                );
+                              }).toList(),
+                          onChanged: (v) {
+                            if (v != null) setSheetState(() => usageTime = v);
+                          },
                         ),
-                        items:
-                            BudgetBracket.values.map((b) {
-                              return DropdownMenuItem(
-                                value: b,
-                                child: Text(b.displayName),
-                              );
-                            }).toList(),
-                        onChanged: (v) {
-                          if (v != null) setSheetState(() => budget = v);
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      SwitchListTile(
-                        title: const Text('Renter Mode'),
-                        subtitle: const Text(
-                          'Focus on furniture and accessories',
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<RoomSize>(
+                          value: roomSize,
+                          decoration: const InputDecoration(
+                            labelText: 'Room size',
+                            border: OutlineInputBorder(),
+                          ),
+                          items:
+                              RoomSize.values.map((s) {
+                                return DropdownMenuItem(
+                                  value: s,
+                                  child: Text(s.displayName),
+                                );
+                              }).toList(),
+                          onChanged: (v) => setSheetState(() => roomSize = v),
                         ),
-                        value: isRenterMode,
-                        onChanged: (v) => setSheetState(() => isRenterMode = v),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        onPressed: () async {
-                          final repo = ref.read(roomRepositoryProvider);
-                          await repo.updateRoom(
-                            RoomsCompanion(
-                              id: Value(room.id),
-                              name: Value(name),
-                              direction: Value(direction),
-                              usageTime: Value(usageTime),
-                              moods: Value(room.moods),
-                              budget: Value(budget),
-                              isRenterMode: Value(isRenterMode),
-                              heroColourHex: Value(room.heroColourHex),
-                              betaColourHex: Value(room.betaColourHex),
-                              surpriseColourHex: Value(room.surpriseColourHex),
-                              wallColourHex: Value(room.wallColourHex),
-                              sortOrder: Value(room.sortOrder),
-                              createdAt: Value(room.createdAt),
-                              updatedAt: Value(DateTime.now()),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: widthCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Width (m)',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
                             ),
-                          );
-                          ref
-                            ..invalidate(roomByIdProvider(room.id))
-                            ..invalidate(allRoomsProvider);
-                          if (ctx.mounted) Navigator.pop(ctx);
-                        },
-                        child: const Text('Save Changes'),
-                      ),
-                    ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: lengthCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Length (m)',
+                                  border: OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<BudgetBracket>(
+                          value: budget,
+                          decoration: const InputDecoration(
+                            labelText: 'Budget bracket',
+                            border: OutlineInputBorder(),
+                          ),
+                          items:
+                              BudgetBracket.values.map((b) {
+                                return DropdownMenuItem(
+                                  value: b,
+                                  child: Text(b.displayName),
+                                );
+                              }).toList(),
+                          onChanged: (v) {
+                            if (v != null) setSheetState(() => budget = v);
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SwitchListTile(
+                          title: const Text('Renter Mode'),
+                          subtitle: const Text(
+                            'Focus on furniture and accessories',
+                          ),
+                          value: isRenterMode,
+                          onChanged:
+                              (v) => setSheetState(() => isRenterMode = v),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: () async {
+                            final repo = ref.read(roomRepositoryProvider);
+                            final width = double.tryParse(widthCtrl.text);
+                            final length = double.tryParse(lengthCtrl.text);
+                            await repo.updateRoom(
+                              RoomsCompanion(
+                                id: Value(room.id),
+                                name: Value(name),
+                                direction: Value(direction),
+                                usageTime: Value(usageTime),
+                                moods: Value(room.moods),
+                                budget: Value(budget),
+                                isRenterMode: Value(isRenterMode),
+                                roomSize: Value(roomSize),
+                                widthMetres: Value(width),
+                                lengthMetres: Value(length),
+                                heroColourHex: Value(room.heroColourHex),
+                                betaColourHex: Value(room.betaColourHex),
+                                surpriseColourHex: Value(
+                                  room.surpriseColourHex,
+                                ),
+                                wallColourHex: Value(room.wallColourHex),
+                                sortOrder: Value(room.sortOrder),
+                                createdAt: Value(room.createdAt),
+                                updatedAt: Value(DateTime.now()),
+                              ),
+                            );
+                            ref
+                              ..invalidate(roomByIdProvider(room.id))
+                              ..invalidate(allRoomsProvider);
+                            if (ctx.mounted) Navigator.pop(ctx);
+                          },
+                          child: const Text('Save Changes'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
           ),
@@ -4419,6 +4511,13 @@ void _showRoomEditSheet(BuildContext context, WidgetRef ref, Room room) {
   var usageTime = room.usageTime;
   var budget = room.budget;
   var isRenterMode = room.isRenterMode;
+  var roomSize = room.roomSize;
+  final widthCtrl = TextEditingController(
+    text: room.widthMetres?.toStringAsFixed(1) ?? '',
+  );
+  final lengthCtrl = TextEditingController(
+    text: room.lengthMetres?.toStringAsFixed(1) ?? '',
+  );
 
   showModalBottomSheet<void>(
     context: context,
@@ -4433,105 +4532,154 @@ void _showRoomEditSheet(BuildContext context, WidgetRef ref, Room room) {
                   24,
                   24 + MediaQuery.of(ctx).viewInsets.bottom,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Edit Room',
-                      style: Theme.of(ctx).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      initialValue: name,
-                      decoration: const InputDecoration(
-                        labelText: 'Room name',
-                        border: OutlineInputBorder(),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Edit Room',
+                        style: Theme.of(ctx).textTheme.titleLarge,
                       ),
-                      onChanged: (v) => name = v,
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<CompassDirection>(
-                      value: direction,
-                      decoration: const InputDecoration(
-                        labelText: 'Window direction',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        initialValue: name,
+                        decoration: const InputDecoration(
+                          labelText: 'Room name',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (v) => name = v,
                       ),
-                      items:
-                          CompassDirection.values.map((d) {
-                            return DropdownMenuItem(
-                              value: d,
-                              child: Text(d.displayName),
-                            );
-                          }).toList(),
-                      onChanged: (v) => setSheetState(() => direction = v),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<UsageTime>(
-                      value: usageTime,
-                      decoration: const InputDecoration(
-                        labelText: 'Primary usage time',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<CompassDirection>(
+                        value: direction,
+                        decoration: const InputDecoration(
+                          labelText: 'Window direction',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            CompassDirection.values.map((d) {
+                              return DropdownMenuItem(
+                                value: d,
+                                child: Text(d.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) => setSheetState(() => direction = v),
                       ),
-                      items:
-                          UsageTime.values.map((t) {
-                            return DropdownMenuItem(
-                              value: t,
-                              child: Text(t.displayName),
-                            );
-                          }).toList(),
-                      onChanged: (v) {
-                        if (v != null) setSheetState(() => usageTime = v);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<BudgetBracket>(
-                      value: budget,
-                      decoration: const InputDecoration(
-                        labelText: 'Budget bracket',
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<UsageTime>(
+                        value: usageTime,
+                        decoration: const InputDecoration(
+                          labelText: 'Primary usage time',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            UsageTime.values.map((t) {
+                              return DropdownMenuItem(
+                                value: t,
+                                child: Text(t.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) {
+                          if (v != null) setSheetState(() => usageTime = v);
+                        },
                       ),
-                      items:
-                          BudgetBracket.values.map((b) {
-                            return DropdownMenuItem(
-                              value: b,
-                              child: Text(b.displayName),
-                            );
-                          }).toList(),
-                      onChanged: (v) {
-                        if (v != null) setSheetState(() => budget = v);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    SwitchListTile(
-                      title: const Text('Renter Mode'),
-                      subtitle: const Text(
-                        'Focus on furniture and accessories',
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<RoomSize>(
+                        value: roomSize,
+                        decoration: const InputDecoration(
+                          labelText: 'Room size',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            RoomSize.values.map((s) {
+                              return DropdownMenuItem(
+                                value: s,
+                                child: Text(s.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) => setSheetState(() => roomSize = v),
                       ),
-                      value: isRenterMode,
-                      onChanged: (v) => setSheetState(() => isRenterMode = v),
-                    ),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: () async {
-                        final repo = ref.read(roomRepositoryProvider);
-                        await repo.updateRoom(
-                          RoomsCompanion(
-                            id: Value(room.id),
-                            name: Value(name),
-                            direction: Value(direction),
-                            usageTime: Value(usageTime),
-                            moods: Value(room.moods),
-                            budget: Value(budget),
-                            isRenterMode: Value(isRenterMode),
-                            updatedAt: Value(DateTime.now()),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: widthCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Width (m)',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
                           ),
-                        );
-                        if (ctx.mounted) Navigator.of(ctx).pop();
-                      },
-                      child: const Text('Save'),
-                    ),
-                  ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: lengthCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Length (m)',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<BudgetBracket>(
+                        value: budget,
+                        decoration: const InputDecoration(
+                          labelText: 'Budget bracket',
+                          border: OutlineInputBorder(),
+                        ),
+                        items:
+                            BudgetBracket.values.map((b) {
+                              return DropdownMenuItem(
+                                value: b,
+                                child: Text(b.displayName),
+                              );
+                            }).toList(),
+                        onChanged: (v) {
+                          if (v != null) setSheetState(() => budget = v);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        title: const Text('Renter Mode'),
+                        subtitle: const Text(
+                          'Focus on furniture and accessories',
+                        ),
+                        value: isRenterMode,
+                        onChanged: (v) => setSheetState(() => isRenterMode = v),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: () async {
+                          final repo = ref.read(roomRepositoryProvider);
+                          final width = double.tryParse(widthCtrl.text);
+                          final length = double.tryParse(lengthCtrl.text);
+                          await repo.updateRoom(
+                            RoomsCompanion(
+                              id: Value(room.id),
+                              name: Value(name),
+                              direction: Value(direction),
+                              usageTime: Value(usageTime),
+                              moods: Value(room.moods),
+                              budget: Value(budget),
+                              isRenterMode: Value(isRenterMode),
+                              roomSize: Value(roomSize),
+                              widthMetres: Value(width),
+                              lengthMetres: Value(length),
+                              updatedAt: Value(DateTime.now()),
+                            ),
+                          );
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                        },
+                        child: const Text('Save'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
         ),

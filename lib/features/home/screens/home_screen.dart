@@ -6,6 +6,7 @@ import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/core/widgets/error_card.dart';
 import 'package:palette/core/widgets/progress_bar.dart';
 import 'package:palette/core/widgets/section_header.dart';
 import 'package:palette/data/models/product.dart';
@@ -20,7 +21,6 @@ import 'package:palette/features/red_thread/logic/coherence_checker.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
-import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/database_providers.dart';
@@ -77,7 +77,11 @@ class HomeScreen extends ConsumerWidget {
                 );
               },
               loading: () => const _LoadingCard(),
-              error: (_, __) => const SizedBox.shrink(),
+              error:
+                  (_, __) => const ErrorCard(
+                    message:
+                        'Could not load your Colour DNA. Pull down to retry.',
+                  ),
             ),
 
             // Drift prompt
@@ -106,6 +110,10 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
 
+            // Mini Palette Strip (spec 1B.1)
+            _MiniPaletteStrip(),
+            const SizedBox(height: 12),
+
             // My Rooms with progress
             SectionHeader(
               title: 'My Rooms',
@@ -125,19 +133,15 @@ class HomeScreen extends ConsumerWidget {
                     title: 'Create Your First Room',
                     subtitle: 'Get personalised colour recommendations',
                     actionLabel: 'Create Room',
-                    onAction:
-                        () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            fullscreenDialog: true,
-                            builder: (context) => const CreateRoomScreen(),
-                          ),
-                        ),
+                    onAction: () => context.push('/rooms/create'),
                   );
                 }
                 return _RoomProgressList(rooms: rooms);
               },
               loading: () => const _LoadingCard(),
-              error: (_, __) => const SizedBox.shrink(),
+              error:
+                  (_, __) =>
+                      const ErrorCard(message: 'Could not load your rooms.'),
             ),
             const SizedBox(height: 20),
 
@@ -163,7 +167,16 @@ class HomeScreen extends ConsumerWidget {
                           coherenceReport: report,
                         ),
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error:
+                        (_, __) => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'Could not load coherence report.',
+                            style: TextStyle(
+                              color: PaletteColours.textTertiary,
+                            ),
+                          ),
+                        ),
                   ),
                   const SizedBox(height: 16),
                 ];
@@ -640,13 +653,7 @@ class _AddRoomButton extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap:
-              () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  fullscreenDialog: true,
-                  builder: (context) => const CreateRoomScreen(),
-                ),
-              ),
+          onTap: () => context.push('/rooms/create'),
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1283,6 +1290,47 @@ class _ProductChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mini Palette Strip (spec 1B.1) — small row of DNA swatches
+// ---------------------------------------------------------------------------
+
+class _MiniPaletteStrip extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dnaAsync = ref.watch(latestColourDnaProvider);
+
+    return dnaAsync.when(
+      data: (dna) {
+        if (dna == null || dna.colourHexes.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final hexes = dna.colourHexes.take(8).toList();
+        return GestureDetector(
+          onTap: () => context.push('/palette'),
+          child: Row(
+            children: [
+              for (int i = 0; i < hexes.length; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                Expanded(
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: hexToColor(hexes[i]),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

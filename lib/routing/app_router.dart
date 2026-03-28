@@ -15,6 +15,7 @@ import 'package:palette/features/onboarding/screens/onboarding_screen.dart';
 import 'package:palette/features/palette/screens/palette_screen.dart';
 import 'package:palette/features/profile/screens/profile_screen.dart';
 import 'package:palette/features/red_thread/screens/red_thread_screen.dart';
+import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/features/rooms/screens/room_detail_screen.dart';
 import 'package:palette/features/rooms/screens/room_list_screen.dart';
 import 'package:palette/features/shopping_list/screens/shopping_list_screen.dart';
@@ -77,6 +78,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/red-thread',
         builder: (context, state) => const RedThreadScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/rooms/create',
+        pageBuilder:
+            (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: CreateRoomScreen(),
+            ),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

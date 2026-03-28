@@ -37,7 +37,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
     });
     _revealController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 400),
     );
     _blurAnimation = Tween<double>(begin: 0, end: 12).animate(
       CurvedAnimation(
@@ -529,6 +529,15 @@ class _PlusTierCard extends StatelessWidget {
                   'Start 14-day free trial',
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                 ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'After your free trial, Plus renews at £3.99/month '
+              '(billed annually at £47.88). Cancel any time.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: PaletteColours.textTertiary,
               ),
             ),
           ],

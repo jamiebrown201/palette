@@ -133,7 +133,14 @@ class ExploreScreen extends ConsumerWidget {
               );
             },
             loading: () => const SizedBox(height: 64),
-            error: (_, __) => const SizedBox.shrink(),
+            error:
+                (_, __) => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'Could not load palette data.',
+                    style: TextStyle(color: PaletteColours.textTertiary),
+                  ),
+                ),
           ),
         ],
       ),

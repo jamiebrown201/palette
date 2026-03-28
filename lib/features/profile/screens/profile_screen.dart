@@ -109,7 +109,13 @@ class ProfileScreen extends ConsumerWidget {
                     );
                   },
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error:
+                      (_, __) => const _ProfileRow(
+                        icon: Icons.warning_amber_rounded,
+                        iconColor: PaletteColours.textTertiary,
+                        title: BrandedTerms.colourDna,
+                        subtitle: 'Could not load — tap to retry',
+                      ),
                 ),
                 const Divider(height: 1, indent: 56),
                 _ProfileRow(
@@ -162,13 +168,35 @@ class ProfileScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+                const Divider(height: 1, indent: 56),
+                SwitchListTile(
+                  secondary: const Icon(
+                    Icons.home_outlined,
+                    color: PaletteColours.sageGreen,
+                  ),
+                  title: const Text('Renter Mode'),
+                  subtitle: Text(
+                    constraints.isRenter
+                        ? 'Recommendations adapted for renters'
+                        : "Switch on if you're renting",
+                  ),
+                  value: constraints.isRenter,
+                  onChanged: (v) {
+                    ref
+                        .read(renterConstraintsProvider.notifier)
+                        .state = constraints.copyWith(isRenter: v);
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 if (constraints.isRenter) ...[
                   const Divider(height: 1, indent: 56),
                   _ProfileRow(
-                    icon: Icons.home_outlined,
+                    icon: Icons.tune,
                     iconColor: PaletteColours.sageGreen,
-                    title: 'Renter Settings',
-                    subtitle: 'Update what you can change in your rental',
+                    title: 'Renter Constraints',
+                    subtitle: 'What can you change in your rental?',
                     trailing: const Icon(
                       Icons.chevron_right,
                       color: PaletteColours.textTertiary,
