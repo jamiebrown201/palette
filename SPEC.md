@@ -992,14 +992,14 @@ As more filters, badges, room matches, and recommendation contexts appear (espec
 
 | Feature                               | Status      | Priority |
 | ------------------------------------- | ----------- | -------- |
-| 1E.1 Analytics Instrumentation        | Not started | P0       |
+| 1E.1 Analytics Instrumentation        | Done        | P0       |
 | 1E.2 A/B Testing Infrastructure       | Not started | P1       |
 | 1E.3 Blurred Premium Previews         | Done        | P0       |
-| 1E.4 Paywall Visual Redesign          | Partial     | P0       |
+| 1E.4 Paywall Visual Redesign          | Done        | P0       |
 | 1E.5 Visual Polish Pass               | Partial     | P1       |
-| 1E.6 Branded Term Consistency         | Not started | P1       |
-| 1E.7 Capture Tab Resolution           | Not started | P1       |
-| 1E.8 Red Thread Flow Visualisation    | Partial     | P0       |
+| 1E.6 Branded Term Consistency         | Done        | P1       |
+| 1E.7 Capture Tab Resolution           | Done        | P1       |
+| 1E.8 Red Thread Flow Visualisation    | Done        | P0       |
 | 1E.9 Room Preview Colour-Block Mockup | Done        | P1       |
 | 1E.10 Applied State System            | Not started | P2       |
 
@@ -1726,14 +1726,14 @@ _Updated March 2026._
 
 | Feature                               | Status      | Priority | Notes                                                              |
 | ------------------------------------- | ----------- | -------- | ------------------------------------------------------------------ |
-| 1E.1 Analytics Instrumentation        | Not started | P0       | Must ship before anything else                                     |
+| 1E.1 Analytics Instrumentation        | Done        | P0       | AnalyticsService + events + screen tracking                        |
 | 1E.2 A/B Testing Infrastructure       | Not started | P1       | PostHog feature flags                                              |
 | 1E.3 Blurred Premium Previews         | Done        | P0       | PremiumGate widget with blur + CTA. Used on Light Dir, 70/20/10, Red Thread |
-| 1E.4 Paywall Visual Redesign          | Partial     | P0       | Outcome-led headline + price anchoring done. Missing: hero animation with user's room data, social proof |
+| 1E.4 Paywall Visual Redesign          | Done        | P0       | Visual hero with user room data + blur animation, warm accent CTA, outcome-focused tiers, free trial CTA |
 | 1E.5 Visual Polish Pass               | Partial     | P1       | Typography + theme defined. Missing: WCAG contrast audit, three-level depth system |
-| 1E.6 Branded Term Consistency         | Not started | P1       | Systematic pass — plain-English subtitles under branded terms      |
-| 1E.7 Capture Tab Resolution           | Not started | P1       | Ship minimal camera MVP (Option B). Do NOT remove Capture tab.     |
-| 1E.8 Red Thread Flow Visualisation    | Partial     | P0       | Floor plan painter exists but NOT the node-and-edge flow diagram described in spec |
+| 1E.6 Branded Term Consistency         | Done        | P1       | Systematic pass — plain-English subtitles under branded terms      |
+| 1E.7 Capture Tab Resolution           | Done        | P1       | Camera-to-paint matching MVP shipped                               |
+| 1E.8 Red Thread Flow Visualisation    | Done        | P0       | Floor plan painter exists but NOT the node-and-edge flow diagram described in spec |
 | 1E.9 Room Preview Colour-Block Mockup | Done        | P1       | Zero-cost visualisation                                            |
 | 1E.10 Applied State System            | Not started | P2       | Prerequisite for Phase 2 density                                   |
 
