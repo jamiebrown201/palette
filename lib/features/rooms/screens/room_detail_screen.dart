@@ -29,6 +29,7 @@ import 'package:palette/features/red_thread/providers/red_thread_providers.dart'
 import 'package:palette/features/rooms/data/room_colour_psychology.dart';
 import 'package:palette/features/rooms/logic/colour_plan_harmony.dart';
 import 'package:palette/features/rooms/logic/light_recommendations.dart';
+import 'package:palette/features/rooms/logic/paint_finish_recommender.dart';
 import 'package:palette/features/rooms/logic/product_scoring.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
@@ -251,6 +252,12 @@ class _RoomDetailContent extends ConsumerWidget {
             if (room.heroColourHex != null) ...[
               const SizedBox(height: 24),
               _PaintRecommendationsSection(room: room),
+            ],
+
+            // Paint & Finish Recommender (Phase 2B.3)
+            if (room.heroColourHex != null && !room.isRenterMode) ...[
+              const SizedBox(height: 24),
+              _PaintFinishSection(room: room),
             ],
 
             // Room gap analysis — "What this room still needs"
@@ -3016,6 +3023,353 @@ class _PaintRecommendationCard extends ConsumerWidget {
             brand: paint.brand,
             colourCode: paint.code,
             colourName: paint.name,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Paint & Finish Recommender (Phase 2B.3)
+// ---------------------------------------------------------------------------
+
+class _PaintFinishSection extends ConsumerWidget {
+  const _PaintFinishSection({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final recsAsync = ref.watch(roomPaintRecommendationsProvider(room));
+
+    // Get the best matching paint for finish + quantity calculations.
+    final heroPaint = recsAsync.whenOrNull<PaintColour?>(
+      data: (recs) => recs.isNotEmpty ? recs.first.paint : null,
+    );
+
+    final plan = generatePaintPlan(room: room, heroPaint: heroPaint);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeader(
+          title: 'Paint finishes & quantities',
+          subtitle: 'What finish for each surface, and how much to buy',
+        ),
+        const SizedBox(height: 8),
+
+        // Light direction note
+        if (plan.lightDirectionNote != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: PaletteColours.statusInfo.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: PaletteColours.statusInfo.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.wb_sunny_outlined,
+                  size: 16,
+                  color: PaletteColours.sageGreenDark,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    plan.lightDirectionNote!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.sageGreenDark,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // Colour interaction note
+        if (plan.colourNote != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: PaletteColours.statusWarning.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: PaletteColours.statusWarning.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline,
+                  size: 16,
+                  color: PaletteColours.softGoldDark,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    plan.colourNote!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: PaletteColours.softGoldDark,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // Finish recommendations per surface
+        ...plan.finishRecommendations.map(
+          (rec) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _FinishCard(
+              recommendation: rec,
+              quantity: plan.quantities[rec.surface],
+              paintName: heroPaint?.name,
+              roomName: room.name,
+            ),
+          ),
+        ),
+
+        // Total estimated paint cost
+        if (heroPaint?.approximatePricePerLitre != null) ...[
+          const SizedBox(height: 4),
+          _PaintCostSummary(
+            quantities: plan.quantities,
+            paintName: heroPaint!.name,
+          ),
+        ],
+
+        // Disclaimer
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'Quantities are estimates for two coats. Always buy a little '
+            'extra for touch-ups.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: PaletteColours.textTertiary,
+              fontSize: 11,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FinishCard extends StatelessWidget {
+  const _FinishCard({
+    required this.recommendation,
+    required this.roomName,
+    this.quantity,
+    this.paintName,
+  });
+
+  final FinishRecommendation recommendation;
+  final PaintQuantity? quantity;
+  final String? paintName;
+  final String roomName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final rec = recommendation;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: PaletteColours.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Surface + finish header
+          Row(
+            children: [
+              Icon(
+                _surfaceIcon(rec.surface),
+                size: 18,
+                color: PaletteColours.sageGreen,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  rec.surface.displayName,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: PaletteColours.sageGreenLight.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  rec.finish.displayName,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: PaletteColours.sageGreenDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // Reason
+          Text(
+            rec.reason,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: PaletteColours.textSecondary,
+            ),
+          ),
+
+          // Alternative finish
+          if (rec.alternativeFinish != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Alternative: ${rec.alternativeFinish!.displayName}'
+              '${rec.alternativeReason != null ? ' — ${rec.alternativeReason}' : ''}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: PaletteColours.textTertiary,
+                fontSize: 11,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+
+          // Quantity
+          if (quantity != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: PaletteColours.softCream,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.shopping_basket_outlined,
+                    size: 14,
+                    color: PaletteColours.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      paintName != null
+                          ? '${quantity!.tinsNeeded}× ${quantity!.tinLabel} '
+                              '$paintName in ${rec.finish.emulsionLabel}'
+                          : '${quantity!.tinsNeeded}× ${quantity!.tinLabel} '
+                              'in ${rec.finish.emulsionLabel}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (quantity!.estimatedCost != null)
+                    Text(
+                      '~£${quantity!.estimatedCost!.toStringAsFixed(0)}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: PaletteColours.sageGreenDark,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  IconData _surfaceIcon(PaintSurface surface) {
+    switch (surface) {
+      case PaintSurface.walls:
+        return Icons.crop_square;
+      case PaintSurface.woodwork:
+        return Icons.vertical_split_outlined;
+      case PaintSurface.ceiling:
+        return Icons.roofing_outlined;
+    }
+  }
+}
+
+class _PaintCostSummary extends StatelessWidget {
+  const _PaintCostSummary({required this.quantities, required this.paintName});
+
+  final Map<PaintSurface, PaintQuantity> quantities;
+  final String paintName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    double total = 0;
+    for (final q in quantities.values) {
+      if (q.estimatedCost != null) total += q.estimatedCost!;
+    }
+    if (total <= 0) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: PaletteColours.softCream,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(0, 1),
+            blurRadius: 4,
+            color: Color(0x0A000000),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Estimated paint cost',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textSecondary,
+                  ),
+                ),
+                Text(
+                  paintName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: PaletteColours.textTertiary,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '~£${total.toStringAsFixed(0)}',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: PaletteColours.sageGreenDark,
+            ),
           ),
         ],
       ),
