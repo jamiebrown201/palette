@@ -20,6 +20,7 @@ import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/logic/coherence_checker.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
+import 'package:palette/features/rooms/logic/whole_home_bundles.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/shopping_list/providers/shopping_list_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
@@ -151,6 +152,10 @@ class HomeScreen extends ConsumerWidget {
 
             // Seasonal Refresh Suggestions
             const _SeasonalRefreshSection(),
+            const SizedBox(height: 20),
+
+            // Whole-Home Bundles (cross-room recommendations)
+            const _WholeHomeBundlesSection(),
             const SizedBox(height: 20),
 
             // Whole-Home Coherence
@@ -1286,6 +1291,223 @@ class _ProductChip extends StatelessWidget {
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Whole-Home Bundles (spec 2C.2) — cross-room product recommendations
+// ---------------------------------------------------------------------------
+
+class _WholeHomeBundlesSection extends ConsumerStatefulWidget {
+  const _WholeHomeBundlesSection();
+
+  @override
+  ConsumerState<_WholeHomeBundlesSection> createState() =>
+      _WholeHomeBundlesSectionState();
+}
+
+class _WholeHomeBundlesSectionState
+    extends ConsumerState<_WholeHomeBundlesSection> {
+  bool _tracked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bundlesAsync = ref.watch(wholeHomeBundlesProvider);
+
+    return bundlesAsync.when(
+      data: (bundles) {
+        if (bundles.isEmpty) return const SizedBox.shrink();
+
+        if (!_tracked) {
+          _tracked = true;
+          ref.read(analyticsProvider).track(
+            AnalyticsEvents.wholeHomeBundleViewed,
+            {'bundle_count': bundles.length},
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionHeader(
+              title: 'Whole-Home Bundles',
+              subtitle: 'Products that connect your rooms',
+            ),
+            const SizedBox(height: 4),
+            ...bundles.map(
+              (b) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _BundleCard(bundle: b),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _BundleCard extends ConsumerWidget {
+  const _BundleCard({required this.bundle});
+
+  final WholeHomeBundle bundle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analytics = ref.read(analyticsProvider);
+    final threadColor = hexToColor(bundle.sharedThreadHex);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: PaletteColours.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with thread colour accent
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: threadColor.withValues(alpha: 0.08),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: threadColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: PaletteColours.divider,
+                      width: 0.5,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.link_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        bundle.headline,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        bundle.description,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: PaletteColours.textSecondary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Product recommendations
+          ...bundle.recommendations.map(
+            (rec) => Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  analytics
+                      .track(AnalyticsEvents.wholeHomeBundleProductTapped, {
+                        'room_a_id': bundle.roomA.id,
+                        'room_b_id': bundle.roomB.id,
+                        'product_id': rec.product.id,
+                        'product_category': rec.product.category.name,
+                        'room_id': rec.room.id,
+                      });
+                  context.push('/rooms/${rec.room.id}');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      // Product colour swatch
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: hexToColor(rec.product.primaryColourHex),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: PaletteColours.divider,
+                            width: 0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${rec.product.name} for ${rec.room.name}',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w500),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              rec.reason,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color: PaletteColours.textSecondary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '\u00A3${rec.product.priceGbp.toStringAsFixed(0)}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: PaletteColours.sageGreen,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: PaletteColours.textTertiary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],

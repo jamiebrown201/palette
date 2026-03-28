@@ -110,11 +110,12 @@ class ProfileScreen extends ConsumerWidget {
                   },
                   loading: () => const SizedBox.shrink(),
                   error:
-                      (_, __) => const _ProfileRow(
+                      (_, __) => _ProfileRow(
                         icon: Icons.warning_amber_rounded,
                         iconColor: PaletteColours.textTertiary,
                         title: BrandedTerms.colourDna,
                         subtitle: 'Could not load — tap to retry',
+                        onTap: () => ref.invalidate(latestColourDnaProvider),
                       ),
                 ),
                 const Divider(height: 1, indent: 56),

@@ -7,6 +7,7 @@ import 'package:palette/features/rooms/logic/product_scoring.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
+import 'package:palette/features/rooms/logic/whole_home_bundles.dart';
 import 'package:palette/features/rooms/providers/feedback_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 
@@ -121,5 +122,45 @@ final seasonalSuggestionsProvider = FutureProvider<List<SeasonalSuggestion>>((
     catalogue: catalogue,
     season: season,
     threadColourHexes: threadColours.map((t) => t.hex).toList(),
+  );
+});
+
+/// Whole-home bundles: cross-room product recommendations that
+/// strengthen the Red Thread between adjacent rooms.
+final wholeHomeBundlesProvider = FutureProvider<List<WholeHomeBundle>>((
+  ref,
+) async {
+  final rooms = await ref.watch(allRoomsProvider.future);
+  if (rooms.length < 2) return [];
+
+  final threadRepo = ref.watch(redThreadRepositoryProvider);
+  final threadColours = await threadRepo.getThreadColours();
+  if (threadColours.isEmpty) return [];
+
+  final adjacencies = await threadRepo.getAdjacencies();
+  if (adjacencies.isEmpty) return [];
+
+  final productRepo = ref.watch(productRepositoryProvider);
+  final catalogue = await productRepo.getAllProducts();
+
+  final dna = await ref.watch(latestColourDnaProvider.future);
+
+  // Build furniture map for all rooms
+  final roomRepo = ref.watch(roomRepositoryProvider);
+  final furnitureByRoom = <String, List<LockedFurniture>>{};
+  for (final room in rooms) {
+    furnitureByRoom[room.id] = await roomRepo.getFurnitureForRoom(room.id);
+  }
+
+  final weightsConfig = await ref.watch(scoringWeightsConfigProvider.future);
+
+  return generateWholeHomeBundles(
+    rooms: rooms,
+    adjacencies: adjacencies,
+    threadHexes: threadColours.map((t) => t.hex).toList(),
+    catalogue: catalogue,
+    furnitureByRoom: furnitureByRoom,
+    archetype: dna?.archetype,
+    weights: weightsConfig.forCategory('bundle'),
   );
 });

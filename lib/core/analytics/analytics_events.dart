@@ -59,6 +59,11 @@ abstract final class AnalyticsEvents {
   static const seasonalRefreshViewed = 'seasonal_refresh_viewed';
   static const seasonalRefreshProductTapped = 'seasonal_refresh_product_tapped';
 
+  // ── Whole-Home Bundles ───────────────────────────────────────
+  static const wholeHomeBundleViewed = 'whole_home_bundle_viewed';
+  static const wholeHomeBundleProductTapped =
+      'whole_home_bundle_product_tapped';
+
   // ── Retention ───────────────────────────────────────────────
   static const sessionStarted = 'session_started';
   static const sessionDuration = 'session_duration';
