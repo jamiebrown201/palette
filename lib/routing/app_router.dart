@@ -6,6 +6,7 @@ import 'package:palette/core/analytics/analytics_observer.dart';
 import 'package:palette/features/capture/screens/capture_screen.dart';
 import 'package:palette/features/colour_wheel/screens/colour_wheel_screen.dart';
 import 'package:palette/features/colour_wheel/screens/white_finder_screen.dart';
+import 'package:palette/features/dev/screens/feedback_stats_screen.dart';
 import 'package:palette/features/dev/screens/qa_mode_screen.dart';
 import 'package:palette/features/explore/screens/explore_screen.dart';
 import 'package:palette/features/explore/screens/paint_library_screen.dart';
@@ -82,12 +83,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/shopping-list',
         builder: (context, state) => const ShoppingListScreen(),
       ),
-      if (kDebugMode)
+      if (kDebugMode) ...[
         GoRoute(
           parentNavigatorKey: _rootNavigatorKey,
           path: '/dev',
           builder: (context, state) => const QaModeScreen(),
         ),
+        GoRoute(
+          parentNavigatorKey: _rootNavigatorKey,
+          path: '/dev/feedback-stats',
+          builder: (context, state) => const FeedbackStatsScreen(),
+        ),
+      ],
 
       // Tab-based navigation
       StatefulShellRoute.indexedStack(

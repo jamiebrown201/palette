@@ -371,6 +371,11 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
         icon: Icons.workspace_premium,
         onTap: () => context.push('/paywall'),
       ),
+      _ScreenEntry(
+        label: 'Feedback Stats',
+        icon: Icons.analytics_outlined,
+        onTap: () => context.push('/dev/feedback-stats'),
+      ),
     ];
 
     return GridView.builder(

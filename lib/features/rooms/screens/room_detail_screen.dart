@@ -4046,9 +4046,9 @@ class _ProductCard extends ConsumerWidget {
             ),
           ),
 
-          // Buy + Save buttons
+          // Buy + Save + Dismiss buttons
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Row(
               children: [
                 // Save to list
@@ -4077,6 +4077,12 @@ class _ProductCard extends ConsumerWidget {
               ],
             ),
           ),
+
+          // Not for me
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: _DismissButton(product: product, roomId: roomId),
+          ),
         ],
       ),
     );
@@ -4098,6 +4104,9 @@ class _ProductCard extends ConsumerWidget {
           slot: slot.name,
         );
 
+    // Persist buy feedback for the feedback loop.
+    _recordFeedback(ref, product, 'buy');
+
     final uri = Uri.tryParse(product.affiliateUrl);
     if (uri == null) return;
     try {
@@ -4109,6 +4118,26 @@ class _ProductCard extends ConsumerWidget {
         ).showSnackBar(const SnackBar(content: Text('Could not open link')));
       }
     }
+  }
+
+  void _recordFeedback(
+    WidgetRef ref,
+    Product product,
+    String action, [
+    String? dismissReason,
+  ]) {
+    final repo = ref.read(feedbackRepositoryProvider);
+    repo.record(
+      RecommendationFeedbacksCompanion.insert(
+        id: _uuid.v4(),
+        productId: product.id,
+        roomId: roomId,
+        productCategory: product.category.name,
+        action: action,
+        dismissReason: Value(dismissReason),
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 }
 
@@ -4226,6 +4255,21 @@ class _SaveToListButton extends ConsumerWidget {
       'room_id': roomId,
     });
 
+    // Persist save feedback for the feedback loop.
+    ref
+        .read(feedbackRepositoryProvider)
+        .record(
+          RecommendationFeedbacksCompanion.insert(
+            id: _uuid.v4(),
+            productId: product.id,
+            roomId: roomId,
+            productCategory: product.category.name,
+            action: 'save',
+            dismissReason: const Value.absent(),
+            createdAt: DateTime.now(),
+          ),
+        );
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -4238,6 +4282,111 @@ class _SaveToListButton extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+/// "Not for me" button with dismiss reason capture.
+class _DismissButton extends ConsumerWidget {
+  const _DismissButton({required this.product, required this.roomId});
+
+  final Product product;
+  final String roomId;
+
+  static const _reasons = [
+    ('style', 'Wrong style'),
+    ('price', 'Too expensive'),
+    ('colour', 'Wrong colour'),
+    ('scale', 'Wrong size'),
+    ('material', 'Wrong material'),
+    ('other', 'Other'),
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return TextButton.icon(
+      onPressed: () => _showDismissSheet(context, ref),
+      icon: const Icon(Icons.close, size: 14),
+      label: const Text('Not for me'),
+      style: TextButton.styleFrom(
+        foregroundColor: PaletteColours.textTertiary,
+        textStyle: const TextStyle(fontSize: 12),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+      ),
+    );
+  }
+
+  void _showDismissSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<String>(
+      context: context,
+      builder:
+          (ctx) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      "Why isn't this right?",
+                      style: Theme.of(ctx).textTheme.titleMedium,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                    child: Text(
+                      'This helps us improve your recommendations.',
+                      style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: PaletteColours.textTertiary,
+                      ),
+                    ),
+                  ),
+                  for (final (code, label) in _reasons)
+                    ListTile(
+                      title: Text(label),
+                      onTap: () => Navigator.pop(ctx, code),
+                    ),
+                ],
+              ),
+            ),
+          ),
+    ).then((reason) {
+      if (reason == null) return;
+
+      // Analytics event
+      ref
+          .read(analyticsProvider)
+          .trackRecommendationDismissed(
+            productId: product.id,
+            reason: reason,
+            roomId: roomId,
+          );
+
+      // Persist feedback for the loop.
+      ref
+          .read(feedbackRepositoryProvider)
+          .record(
+            RecommendationFeedbacksCompanion.insert(
+              id: _uuid.v4(),
+              productId: product.id,
+              roomId: roomId,
+              productCategory: product.category.name,
+              action: 'dismiss',
+              dismissReason: Value(reason),
+              createdAt: DateTime.now(),
+            ),
+          );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Noted — we'll improve your suggestions."),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    });
   }
 }
 

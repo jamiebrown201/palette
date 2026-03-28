@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/colour/delta_e.dart';
 import 'package:palette/core/constants/enums.dart';
@@ -7,8 +10,10 @@ import 'package:palette/data/models/room.dart';
 
 /// Configurable scoring weights for the recommendation engine.
 ///
-/// Weights are stored here as named constants so they can be easily moved
-/// to a JSON config file when the backend ships. Total = 1.0.
+/// Loaded from `assets/data/scoring_weights.json` at runtime. Supports
+/// per-category overrides so that, e.g., rug recommendations can weight
+/// `budgetFit` more heavily if feedback data shows price is the dominant
+/// dismiss reason for rugs.
 class ScoringWeights {
   const ScoringWeights({
     this.colourCompatibility = 0.22,
@@ -21,6 +26,21 @@ class ScoringWeights {
     this.renterSuitability = 0.05,
   });
 
+  /// Create from a JSON map (e.g. from scoring_weights.json).
+  factory ScoringWeights.fromJson(Map<String, dynamic> json) => ScoringWeights(
+    colourCompatibility:
+        (json['colourCompatibility'] as num?)?.toDouble() ?? 0.22,
+    undertoneCompatibility:
+        (json['undertoneCompatibility'] as num?)?.toDouble() ?? 0.15,
+    finishMaterialHarmony:
+        (json['finishMaterialHarmony'] as num?)?.toDouble() ?? 0.13,
+    budgetFit: (json['budgetFit'] as num?)?.toDouble() ?? 0.13,
+    styleFit: (json['styleFit'] as num?)?.toDouble() ?? 0.12,
+    materialBalance: (json['materialBalance'] as num?)?.toDouble() ?? 0.10,
+    scaleFit: (json['scaleFit'] as num?)?.toDouble() ?? 0.10,
+    renterSuitability: (json['renterSuitability'] as num?)?.toDouble() ?? 0.05,
+  );
+
   final double colourCompatibility;
   final double undertoneCompatibility;
   final double finishMaterialHarmony;
@@ -29,10 +49,84 @@ class ScoringWeights {
   final double materialBalance;
   final double scaleFit;
   final double renterSuitability;
+
+  Map<String, double> toJson() => {
+    'colourCompatibility': colourCompatibility,
+    'undertoneCompatibility': undertoneCompatibility,
+    'finishMaterialHarmony': finishMaterialHarmony,
+    'budgetFit': budgetFit,
+    'styleFit': styleFit,
+    'materialBalance': materialBalance,
+    'scaleFit': scaleFit,
+    'renterSuitability': renterSuitability,
+  };
 }
 
 /// Default weights from the spec.
 const kDefaultWeights = ScoringWeights();
+
+/// Versioned scoring weights configuration loaded from JSON asset.
+///
+/// Supports global weights and per-category overrides.
+class ScoringWeightsConfig {
+  const ScoringWeightsConfig({
+    required this.version,
+    required this.global,
+    required this.categoryOverrides,
+  });
+
+  factory ScoringWeightsConfig.fromJson(Map<String, dynamic> json) {
+    final global =
+        json['global'] is Map<String, dynamic>
+            ? ScoringWeights.fromJson(json['global'] as Map<String, dynamic>)
+            : kDefaultWeights;
+
+    final overrides = <String, ScoringWeights>{};
+    final overridesJson = json['categoryOverrides'];
+    if (overridesJson is Map<String, dynamic>) {
+      for (final entry in overridesJson.entries) {
+        if (entry.value is Map<String, dynamic>) {
+          overrides[entry.key] = ScoringWeights.fromJson(
+            entry.value as Map<String, dynamic>,
+          );
+        }
+      }
+    }
+
+    return ScoringWeightsConfig(
+      version: (json['version'] as num?)?.toInt() ?? 0,
+      global: global,
+      categoryOverrides: overrides,
+    );
+  }
+
+  final int version;
+  final ScoringWeights global;
+
+  /// Category name -> override weights for that category.
+  final Map<String, ScoringWeights> categoryOverrides;
+
+  /// Get the weights for a specific product category, falling back to global.
+  ScoringWeights forCategory(String category) =>
+      categoryOverrides[category] ?? global;
+
+  /// Load from the bundled JSON asset.
+  static Future<ScoringWeightsConfig> load() async {
+    try {
+      final raw = await rootBundle.loadString(
+        'assets/data/scoring_weights.json',
+      );
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      return ScoringWeightsConfig.fromJson(json);
+    } catch (_) {
+      return const ScoringWeightsConfig(
+        version: 0,
+        global: kDefaultWeights,
+        categoryOverrides: {},
+      );
+    }
+  }
+}
 
 /// A scored product recommendation with explanation.
 class ScoredProduct {

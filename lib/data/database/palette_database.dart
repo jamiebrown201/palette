@@ -8,6 +8,7 @@ import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
 import 'package:palette/data/models/product.dart';
+import 'package:palette/data/models/recommendation_feedback.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
@@ -29,13 +30,14 @@ part 'palette_database.g.dart';
     ColourInteractions,
     Products,
     ShoppingListItems,
+    RecommendationFeedbacks,
   ],
 )
 class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -112,6 +114,10 @@ class PaletteDatabase extends _$PaletteDatabase {
       if (from < 10) {
         // Shopping List (Phase 2B.2)
         await m.createTable(shoppingListItems);
+      }
+      if (from < 11) {
+        // Recommendation Feedback (Phase 2C.1)
+        await m.createTable(recommendationFeedbacks);
       }
     },
   );

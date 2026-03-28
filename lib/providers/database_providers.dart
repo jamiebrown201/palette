@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/repositories/colour_dna_repository.dart';
 import 'package:palette/data/repositories/colour_interaction_repository.dart';
+import 'package:palette/data/repositories/feedback_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/repositories/palette_repository.dart';
 import 'package:palette/data/repositories/product_repository.dart';
@@ -56,3 +57,7 @@ ProductRepository productRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 ShoppingListRepository shoppingListRepository(Ref ref) =>
     ShoppingListRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+FeedbackRepository feedbackRepository(Ref ref) =>
+    FeedbackRepository(ref.watch(paletteDatabaseProvider));

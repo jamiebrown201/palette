@@ -7,6 +7,7 @@ import 'package:palette/features/rooms/logic/product_scoring.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
 import 'package:palette/features/rooms/logic/seasonal_refresh.dart';
+import 'package:palette/features/rooms/providers/feedback_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 
 /// Stream of all rooms, ordered by sort order.
@@ -77,6 +78,8 @@ final roomProductRecsProvider = FutureProvider.family<
   final productRepo = ref.watch(productRepositoryProvider);
   final dna = await ref.watch(latestColourDnaProvider.future);
 
+  final weightsConfig = await ref.watch(scoringWeightsConfigProvider.future);
+
   final candidates = await productRepo.getForGapType(
     report.primaryGap!.gapType,
     renterSafeOnly: room.isRenterMode,
@@ -84,11 +87,14 @@ final roomProductRecsProvider = FutureProvider.family<
 
   if (candidates.isEmpty) return [];
 
+  final weights = weightsConfig.forCategory(report.primaryGap!.gapType.name);
+
   final scored = scoreProducts(
     candidates: candidates,
     room: room,
     lockedFurniture: furniture,
     archetype: dna?.archetype,
+    weights: weights,
     limit: 10,
   );
 

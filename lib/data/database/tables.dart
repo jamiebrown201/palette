@@ -7,6 +7,7 @@ import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/paint_colour.dart';
 import 'package:palette/data/models/palette_colour.dart';
 import 'package:palette/data/models/product.dart';
+import 'package:palette/data/models/recommendation_feedback.dart';
 import 'package:palette/data/models/red_thread_colour.dart';
 import 'package:palette/data/models/room.dart';
 import 'package:palette/data/models/room_adjacency.dart';
@@ -368,6 +369,29 @@ class ShoppingListItems extends Table {
   TextColumn get primaryColourHex => text()();
   TextColumn get categoryName => text()();
   DateTimeColumn get addedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Recommendation feedback (Phase 2C.1)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(RecommendationFeedback)
+class RecommendationFeedbacks extends Table {
+  TextColumn get id => text()();
+  TextColumn get productId => text()();
+  TextColumn get roomId => text()();
+  TextColumn get productCategory => text()();
+
+  /// 'dismiss', 'save', or 'buy'.
+  TextColumn get action => text()();
+
+  /// Dismiss reason: 'style', 'price', 'colour', 'scale', 'material', 'other'.
+  TextColumn get dismissReason => text().nullable()();
+
+  DateTimeColumn get createdAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};

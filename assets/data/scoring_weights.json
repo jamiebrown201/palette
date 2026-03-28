@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "description": "Recommendation engine scoring weights. Adjust based on aggregate feedback patterns.",
+  "global": {
+    "colourCompatibility": 0.22,
+    "undertoneCompatibility": 0.15,
+    "finishMaterialHarmony": 0.13,
+    "budgetFit": 0.13,
+    "styleFit": 0.12,
+    "materialBalance": 0.10,
+    "scaleFit": 0.10,
+    "renterSuitability": 0.05
+  },
+  "categoryOverrides": {}
+}

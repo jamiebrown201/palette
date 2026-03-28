@@ -1085,11 +1085,20 @@ class _ShoppingListSummary extends ConsumerWidget {
 // Seasonal Refresh Suggestions (2B.5)
 // ---------------------------------------------------------------------------
 
-class _SeasonalRefreshSection extends ConsumerWidget {
+class _SeasonalRefreshSection extends ConsumerStatefulWidget {
   const _SeasonalRefreshSection();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_SeasonalRefreshSection> createState() =>
+      _SeasonalRefreshSectionState();
+}
+
+class _SeasonalRefreshSectionState
+    extends ConsumerState<_SeasonalRefreshSection> {
+  bool _tracked = false;
+
+  @override
+  Widget build(BuildContext context) {
     final suggestionsAsync = ref.watch(seasonalSuggestionsProvider);
 
     return suggestionsAsync.when(
@@ -1097,6 +1106,15 @@ class _SeasonalRefreshSection extends ConsumerWidget {
         if (suggestions.isEmpty) return const SizedBox.shrink();
 
         final season = seasonFromDate(DateTime.now());
+
+        // Track viewed once per widget lifecycle
+        if (!_tracked) {
+          _tracked = true;
+          ref.read(analyticsProvider).track(
+            AnalyticsEvents.seasonalRefreshViewed,
+            {'season': season.name, 'suggestion_count': suggestions.length},
+          );
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
