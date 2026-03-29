@@ -268,7 +268,7 @@ class _HeaderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0D000000),
+            color: PaletteColours.shadowLevel1,
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -355,7 +355,7 @@ class _ComparisonCard extends StatelessWidget {
         ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0D000000),
+            color: PaletteColours.shadowLevel1,
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -592,7 +592,7 @@ class _DiaryEntryCard extends ConsumerWidget {
         border: Border.all(color: PaletteColours.warmGrey),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x08000000),
+            color: PaletteColours.shadowLevel1,
             blurRadius: 4,
             offset: Offset(0, 1),
           ),
@@ -868,6 +868,8 @@ class _PhotoImage extends StatelessWidget {
 
 Color _hexToColor(String hex) {
   final cleaned = hex.replaceFirst('#', '');
+  final validHex = RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(cleaned);
+  if (!validHex) return const Color(0xFF888888);
   return Color(int.parse('FF$cleaned', radix: 16));
 }
 

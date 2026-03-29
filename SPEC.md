@@ -993,7 +993,7 @@ As more filters, badges, room matches, and recommendation contexts appear (espec
 | Feature                               | Status      | Priority |
 | ------------------------------------- | ----------- | -------- |
 | 1E.1 Analytics Instrumentation        | Done        | P0       |
-| 1E.2 A/B Testing Infrastructure       | Not started | P1       |
+| 1E.2 A/B Testing Infrastructure       | Done        | P1       |
 | 1E.3 Blurred Premium Previews         | Done        | P0       |
 | 1E.4 Paywall Visual Redesign          | Done        | P0       |
 | 1E.5 Visual Polish Pass               | Done        | P1       |
@@ -1001,7 +1001,7 @@ As more filters, badges, room matches, and recommendation contexts appear (espec
 | 1E.7 Capture Tab Resolution           | Done        | P1       |
 | 1E.8 Red Thread Flow Visualisation    | Done        | P0       |
 | 1E.9 Room Preview Colour-Block Mockup | Done        | P1       |
-| 1E.10 Applied State System            | Not started | P2       |
+| 1E.10 Applied State System            | Done        | P2       |
 
 ---
 
@@ -1722,12 +1722,12 @@ _Updated March 2026._
 | 1D.3 Sample Ordering               | Not started      |                                                 |
 | 1D.4 Re-engagement & Notifications | Not started      |                                                 |
 
-### Phase 1E: In progress (NEXT PRIORITY)
+### Phase 1E: Complete
 
 | Feature                               | Status      | Priority | Notes                                                              |
 | ------------------------------------- | ----------- | -------- | ------------------------------------------------------------------ |
 | 1E.1 Analytics Instrumentation        | Done        | P0       | AnalyticsService + events + screen tracking                        |
-| 1E.2 A/B Testing Infrastructure       | Not started | P1       | PostHog feature flags                                              |
+| 1E.2 A/B Testing Infrastructure       | Done        | P1       | Local feature flag service, cohort assignment, 6 experiments, QA overrides |
 | 1E.3 Blurred Premium Previews         | Done        | P0       | PremiumGate widget with blur + CTA. Used on Light Dir, 70/20/10, Red Thread |
 | 1E.4 Paywall Visual Redesign          | Done        | P0       | Visual hero with user room data + blur animation, warm accent CTA, outcome-focused tiers, free trial CTA |
 | 1E.5 Visual Polish Pass               | Done        | P1       | Card depth system, WCAG contrast fixes, hero colour progress bars implemented |
@@ -1735,7 +1735,7 @@ _Updated March 2026._
 | 1E.7 Capture Tab Resolution           | Done        | P1       | Camera-to-paint matching MVP shipped                               |
 | 1E.8 Red Thread Flow Visualisation    | Done        | P0       | Floor plan painter exists but NOT the node-and-edge flow diagram described in spec |
 | 1E.9 Room Preview Colour-Block Mockup | Done        | P1       | Zero-cost visualisation                                            |
-| 1E.10 Applied State System            | Not started | P2       | Prerequisite for Phase 2 density                                   |
+| 1E.10 Applied State System            | Done        | P2       | Per-room filter persistence, room context badge, reset filters     |
 
 ### Phase 2A: Not started
 
