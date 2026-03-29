@@ -73,8 +73,8 @@ const learnArticles = <LearnArticle>[
   ),
   LearnArticle(
     icon: Icons.linear_scale,
-    iconColor: Color(0xFF8B3A3A),
-    iconBg: Color(0xFFF0E0E0),
+    iconColor: PaletteColours.redThread,
+    iconBg: PaletteColours.redThreadLight,
     title: 'What is a Red Thread?',
     subtitle: 'The colour that ties your whole home together',
     body:

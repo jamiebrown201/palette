@@ -30,6 +30,46 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   void initState() {
     super.initState();
     ref.read(analyticsProvider).screenView('assistant');
+    // Listen for context becoming available to show welcome message.
+    // Using addPostFrameCallback to avoid modifying providers during build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.listenManual(assistantContextProvider, (_, next) {
+        next.whenData((_) => _showWelcomeMessage());
+      },
+        fireImmediately: true,
+      );
+    });
+  }
+
+  void _showWelcomeMessage() {
+    if (_hasShownStarters) return;
+    final messages = ref.read(assistantMessagesProvider);
+    if (messages.isNotEmpty) return;
+
+    final ctxAsync = ref.read(assistantContextProvider);
+    ctxAsync.whenData((ctx) {
+      if (_hasShownStarters) return;
+      _hasShownStarters = true;
+      final engine = AssistantEngine(ctx);
+      final starters = engine.starterSuggestions();
+
+      ref
+          .read(assistantMessagesProvider.notifier)
+          .addMessage(
+            AssistantMessage(
+              text:
+                  "I'm your pocket interior designer. I know your "
+                  'rooms, your palette, and your style. Ask me anything '
+                  'about your home.',
+              isUser: false,
+              suggestedFollowUps: starters,
+            ),
+          );
+
+      if (widget.initialPrompt != null) {
+        Future.microtask(() => _send(widget.initialPrompt!));
+      }
+    });
   }
 
   @override
@@ -89,34 +129,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     final messages = ref.watch(assistantMessagesProvider);
     final ctxAsync = ref.watch(assistantContextProvider);
 
-    // Show welcome + starters on first load
-    if (!_hasShownStarters && messages.isEmpty) {
-      ctxAsync.whenData((ctx) {
-        if (!_hasShownStarters) {
-          _hasShownStarters = true;
-          final engine = AssistantEngine(ctx);
-          final starters = engine.starterSuggestions();
-
-          ref
-              .read(assistantMessagesProvider.notifier)
-              .addMessage(
-                AssistantMessage(
-                  text:
-                      "I'm your pocket interior designer. I know your "
-                      'rooms, your palette, and your style. Ask me anything '
-                      'about your home.',
-                  isUser: false,
-                  suggestedFollowUps: starters,
-                ),
-              );
-
-          // Auto-send initial prompt if provided
-          if (widget.initialPrompt != null) {
-            Future.microtask(() => _send(widget.initialPrompt!));
-          }
-        }
-      });
-    }
+    // Welcome message is now shown via initState + addPostFrameCallback
+    // to avoid modifying provider state during build.
 
     return Scaffold(
       backgroundColor: PaletteColours.warmWhite,
@@ -290,8 +304,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
               borderRadius: BorderRadius.circular(24),
               onTap: () => _send(_controller.text),
               child: const SizedBox(
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 child: Icon(
                   Icons.arrow_upward_rounded,
                   color: PaletteColours.textOnAccent,

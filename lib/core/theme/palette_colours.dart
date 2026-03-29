@@ -37,6 +37,7 @@ abstract final class PaletteColours {
   // Status (accessible: no red/green pairings)
   static const statusPositive = Color(0xFF5B8DB8);
   static const statusWarning = Color(0xFFC9A96E);
+  static const statusNeedsWork = Color(0xFFCC7755);
   static const statusInfo = Color(0xFF8FAE8B);
   static const statusNeutral = Color(0xFFE8E4DE);
 

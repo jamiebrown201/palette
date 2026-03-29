@@ -233,8 +233,9 @@ String _oldNewBlackGoldSuggestion({
   final missing = <String>[];
   if (!hasOld) missing.add('a vintage or traditional piece');
   if (!hasNew) missing.add('a contemporary item');
-  if (!hasBlack)
+  if (!hasBlack) {
     missing.add('a dark accent (matte black frame or dark cushion)');
+  }
   if (!hasGold) missing.add('a warm metallic touch (brass, gold, or copper)');
   return 'Consider adding ${missing.join(' and ')}.';
 }

@@ -275,7 +275,7 @@ class _InvitePartnerView extends ConsumerWidget {
 
   String _generateInviteCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    final random = Random();
+    final random = Random.secure();
     return List.generate(6, (_) => chars[random.nextInt(chars.length)]).join();
   }
 }

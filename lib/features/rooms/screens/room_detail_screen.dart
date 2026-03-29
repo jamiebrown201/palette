@@ -221,8 +221,7 @@ class _RoomDetailContent extends ConsumerWidget {
 
             // Room Audit CTA (Phase 4)
             OutlinedButton.icon(
-              onPressed:
-                  () => context.push('/room-audit?roomId=${room.id}'),
+              onPressed: () => context.push('/room-audit?roomId=${room.id}'),
               icon: const Icon(Icons.checklist_outlined, size: 16),
               label: const Text('Room Audit'),
               style: OutlinedButton.styleFrom(
@@ -2627,13 +2626,13 @@ class _FurnitureItemTile extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.15),
+                    color: PaletteColours.softGold.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     'Replacing',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.amber.shade800,
+                      color: PaletteColours.softGoldDark,
                     ),
                   ),
                 ),

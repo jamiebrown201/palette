@@ -538,10 +538,13 @@ class _PlusTierCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                'or \u00A329.99/year (save 37%)',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textTertiary,
+              Flexible(
+                child: Text(
+                  'or \u00A329.99/year (save 37%)',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: PaletteColours.textTertiary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -669,10 +672,13 @@ class _ProTierCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                'or \u00A359.99/year (save 37%)',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.textTertiary,
+              Flexible(
+                child: Text(
+                  'or \u00A359.99/year (save 37%)',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: PaletteColours.textTertiary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

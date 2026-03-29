@@ -64,8 +64,8 @@ class MoodboardItemTile extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: onDelete,
                   child: SizedBox(
-                    width: 44,
-                    height: 44,
+                    width: 48,
+                    height: 48,
                     child: Center(
                       child: Container(
                         padding: const EdgeInsets.all(4),

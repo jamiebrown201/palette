@@ -89,6 +89,10 @@ class HomeScreen extends ConsumerWidget {
                   ),
             ),
 
+            // Mini Palette Strip — spec 1B.1: top, below greeting/DNA
+            _MiniPaletteStrip(),
+            const SizedBox(height: 12),
+
             // Drift prompt
             _DriftPromptCard(),
 
@@ -120,10 +124,6 @@ class HomeScreen extends ConsumerWidget {
 
             // AI Design Assistant CTA (Phase 3.2)
             _DesignAssistantCard(),
-            const SizedBox(height: 12),
-
-            // Mini Palette Strip (spec 1B.1)
-            _MiniPaletteStrip(),
             const SizedBox(height: 12),
 
             // My Rooms with progress

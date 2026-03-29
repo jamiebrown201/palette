@@ -282,7 +282,7 @@ class _ScoreCard extends StatelessWidget {
               _StatusChip(
                 icon: Icons.error_outline,
                 label: '${report.needsWorkCount} to fix',
-                colour: const Color(0xFFCC7755),
+                colour: PaletteColours.statusNeedsWork,
               ),
             ],
           ),
@@ -294,7 +294,7 @@ class _ScoreCard extends StatelessWidget {
   Color _scoreColour(double pct) {
     if (pct >= 0.75) return PaletteColours.sageGreen;
     if (pct >= 0.5) return PaletteColours.softGold;
-    return const Color(0xFFCC7755);
+    return PaletteColours.statusNeedsWork;
   }
 }
 
@@ -454,7 +454,7 @@ class _RuleCard extends StatelessWidget {
       AuditStatus.needsWork => const Icon(
         Icons.error,
         size: 20,
-        color: Color(0xFFCC7755),
+        color: PaletteColours.statusNeedsWork,
       ),
       AuditStatus.unknown => const Icon(
         Icons.help_outline,
@@ -468,7 +468,9 @@ class _RuleCard extends StatelessWidget {
     return switch (status) {
       AuditStatus.pass => PaletteColours.sageGreen.withValues(alpha: 0.3),
       AuditStatus.partial => PaletteColours.softGold.withValues(alpha: 0.3),
-      AuditStatus.needsWork => const Color(0xFFCC7755).withValues(alpha: 0.3),
+      AuditStatus.needsWork => PaletteColours.statusNeedsWork.withValues(
+        alpha: 0.3,
+      ),
       AuditStatus.unknown => PaletteColours.warmGrey,
     };
   }
@@ -477,7 +479,7 @@ class _RuleCard extends StatelessWidget {
     return switch (status) {
       AuditStatus.pass => PaletteColours.sageGreen,
       AuditStatus.partial => PaletteColours.softGoldDark,
-      AuditStatus.needsWork => const Color(0xFFCC7755),
+      AuditStatus.needsWork => PaletteColours.statusNeedsWork,
       AuditStatus.unknown => PaletteColours.textSecondary,
     };
   }
