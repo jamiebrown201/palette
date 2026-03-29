@@ -242,6 +242,18 @@ class _RoomDetailContent extends ConsumerWidget {
                 side: const BorderSide(color: PaletteColours.softGold),
               ),
             ),
+            const SizedBox(height: 8),
+
+            // Design Diary CTA (Phase 4)
+            OutlinedButton.icon(
+              onPressed: () => context.push('/design-diary?roomId=${room.id}'),
+              icon: const Icon(Icons.auto_stories_outlined, size: 16),
+              label: const Text('Design Diary'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: PaletteColours.softGoldDark,
+                side: const BorderSide(color: PaletteColours.softGold),
+              ),
+            ),
             const SizedBox(height: 20),
 
             // Furniture Lock

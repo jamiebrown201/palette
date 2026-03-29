@@ -3,6 +3,7 @@ import 'package:palette/core/constants/enums.dart';
 import 'package:palette/data/database/converters.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/colour_interaction.dart';
+import 'package:palette/data/models/diary_entry.dart';
 import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/moodboard.dart';
 import 'package:palette/data/models/moodboard_item.dart';
@@ -516,6 +517,28 @@ class PartnerProfiles extends Table {
   BoolColumn get hasCompletedQuiz => boolean()();
   DateTimeColumn get invitedAt => dateTime()();
   DateTimeColumn get completedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// ---------------------------------------------------------------------------
+// Design Diary entries (Phase 4 — Before & After Sharing)
+// ---------------------------------------------------------------------------
+
+@UseRowClass(DiaryEntry)
+class DiaryEntries extends Table {
+  TextColumn get id => text()();
+  TextColumn get roomId => text().references(Rooms, #id)();
+  TextColumn get roomName => text()();
+  TextColumn get photoPath => text()();
+
+  /// 'before' or 'after'.
+  TextColumn get phase => text()();
+
+  TextColumn get caption => text().nullable()();
+  TextColumn get heroColourHex => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};

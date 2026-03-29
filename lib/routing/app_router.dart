@@ -20,6 +20,7 @@ import 'package:palette/features/partner/screens/partner_screen.dart';
 import 'package:palette/features/profile/screens/profile_screen.dart';
 import 'package:palette/features/red_thread/screens/red_thread_screen.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
+import 'package:palette/features/rooms/screens/design_diary_screen.dart';
 import 'package:palette/features/rooms/screens/lighting_planner_screen.dart';
 import 'package:palette/features/rooms/screens/renovation_guide_screen.dart';
 import 'package:palette/features/rooms/screens/room_audit_screen.dart';
@@ -141,6 +142,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/renovation-guide',
         builder:
             (context, state) => RenovationGuideScreen(
+              roomId: state.uri.queryParameters['roomId'] ?? '',
+            ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/design-diary',
+        builder:
+            (context, state) => DesignDiaryScreen(
               roomId: state.uri.queryParameters['roomId'] ?? '',
             ),
       ),

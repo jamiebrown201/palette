@@ -4,6 +4,7 @@ import 'package:palette/data/database/converters.dart';
 import 'package:palette/data/database/tables.dart';
 import 'package:palette/data/models/colour_dna_result.dart';
 import 'package:palette/data/models/colour_interaction.dart';
+import 'package:palette/data/models/diary_entry.dart';
 import 'package:palette/data/models/locked_furniture.dart';
 import 'package:palette/data/models/moodboard.dart';
 import 'package:palette/data/models/moodboard_item.dart';
@@ -38,13 +39,14 @@ part 'palette_database.g.dart';
     MoodboardItems,
     SampleListItems,
     PartnerProfiles,
+    DiaryEntries,
   ],
 )
 class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -149,6 +151,10 @@ class PaletteDatabase extends _$PaletteDatabase {
       if (from < 15) {
         // Partner Mode (Phase 3.3)
         await m.createTable(partnerProfiles);
+      }
+      if (from < 16) {
+        // Design Diary (Phase 4)
+        await m.createTable(diaryEntries);
       }
     },
   );

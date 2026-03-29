@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/data/database/palette_database.dart';
 import 'package:palette/data/repositories/colour_dna_repository.dart';
 import 'package:palette/data/repositories/colour_interaction_repository.dart';
+import 'package:palette/data/repositories/diary_repository.dart';
 import 'package:palette/data/repositories/feedback_repository.dart';
 import 'package:palette/data/repositories/moodboard_repository.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
@@ -76,3 +77,7 @@ SampleListRepository sampleListRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 PartnerRepository partnerRepository(Ref ref) =>
     PartnerRepository(ref.watch(paletteDatabaseProvider));
+
+@Riverpod(keepAlive: true)
+DiaryRepository diaryRepository(Ref ref) =>
+    DiaryRepository(ref.watch(paletteDatabaseProvider));

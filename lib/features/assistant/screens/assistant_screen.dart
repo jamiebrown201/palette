@@ -33,9 +33,13 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     // Listen for context becoming available to show welcome message.
     // Using addPostFrameCallback to avoid modifying providers during build.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.listenManual(assistantContextProvider, (_, next) {
-        next.whenData((_) => _showWelcomeMessage());
-      }, fireImmediately: true);
+      ref.listenManual(
+        assistantContextProvider, // provider
+        (_, next) {
+          next.whenData((_) => _showWelcomeMessage());
+        },
+        fireImmediately: true,
+      );
     });
   }
 

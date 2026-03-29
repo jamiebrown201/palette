@@ -122,4 +122,10 @@ abstract final class AnalyticsEvents {
   static const visualiserPhotoSelected = 'visualiser_photo_selected';
   static const visualiserGenerated = 'visualiser_generated';
   static const visualiserCreditsPurchased = 'visualiser_credits_purchased';
+
+  // ── Design Diary (Phase 4) ──────────────────────────────
+  static const diaryEntryAdded = 'diary_entry_added';
+  static const diaryEntryDeleted = 'diary_entry_deleted';
+  static const diaryShared = 'diary_shared';
+  static const diaryViewed = 'diary_viewed';
 }
