@@ -5,6 +5,7 @@ import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/rooms/logic/lighting_planner.dart';
 import 'package:palette/features/rooms/logic/product_scoring.dart';
+import 'package:palette/features/rooms/logic/renovation_sequencing.dart';
 import 'package:palette/features/rooms/logic/room_audit.dart';
 import 'package:palette/features/rooms/logic/room_gap_engine.dart';
 import 'package:palette/features/rooms/logic/room_paint_recommendations.dart';
@@ -176,6 +177,37 @@ final lightingPlanProvider = FutureProvider.family<LightingPlan, String>((
     room: room,
     furniture: furniture,
     catalogue: catalogue,
+  );
+});
+
+/// Renovation guide for a specific room.
+///
+/// Generates a step-by-step sequence adapted to the room's property
+/// type, era, tenure, and existing furniture. Follows the professional
+/// decorator's rule: top-down, big-to-small, structural-to-decorative.
+final renovationGuideProvider = FutureProvider.family<RenovationGuide, String>((
+  ref,
+  roomId,
+) async {
+  final room = await ref.watch(roomByIdProvider(roomId).future);
+  if (room == null) {
+    return const RenovationGuide(
+      roomName: '',
+      steps: [],
+      summary: 'Room not found',
+      completedCount: 0,
+      totalCount: 0,
+    );
+  }
+  final furniture = await ref.watch(furnitureForRoomProvider(roomId).future);
+  final dna = await ref.watch(latestColourDnaProvider.future);
+
+  return generateRenovationGuide(
+    room: room,
+    furniture: furniture,
+    propertyType: dna?.propertyType,
+    propertyEra: dna?.propertyEra,
+    tenure: dna?.tenure,
   );
 });
 

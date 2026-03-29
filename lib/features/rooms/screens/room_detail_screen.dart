@@ -229,6 +229,19 @@ class _RoomDetailContent extends ConsumerWidget {
                 side: const BorderSide(color: PaletteColours.softGold),
               ),
             ),
+            const SizedBox(height: 8),
+
+            // Renovation Guide CTA (Phase 4)
+            OutlinedButton.icon(
+              onPressed:
+                  () => context.push('/renovation-guide?roomId=${room.id}'),
+              icon: const Icon(Icons.format_list_numbered, size: 16),
+              label: const Text('Renovation Guide'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: PaletteColours.softGoldDark,
+                side: const BorderSide(color: PaletteColours.softGold),
+              ),
+            ),
             const SizedBox(height: 20),
 
             // Furniture Lock

@@ -35,9 +35,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.listenManual(assistantContextProvider, (_, next) {
         next.whenData((_) => _showWelcomeMessage());
-      },
-        fireImmediately: true,
-      );
+      }, fireImmediately: true);
     });
   }
 
