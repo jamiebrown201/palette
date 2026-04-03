@@ -83,7 +83,15 @@ class VisualPreferencePage extends ConsumerWidget {
                     : notifier.advanceToPropertyContext,
             child: const Text('Continue'),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: notifier.advanceToPropertyContext,
+            style: TextButton.styleFrom(
+              foregroundColor: PaletteColours.textTertiary,
+            ),
+            child: const Text('Skip this step'),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );

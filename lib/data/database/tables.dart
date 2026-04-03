@@ -131,7 +131,7 @@ class PaletteColours extends Table {
 @UseRowClass(Room)
 class Rooms extends Table {
   TextColumn get id => text()();
-  TextColumn get name => text()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
   TextColumn get direction =>
       text().nullable().map(
         const EnumNameConverter<CompassDirection>(CompassDirection.values),
@@ -170,7 +170,7 @@ class Rooms extends Table {
 class LockedFurnitureItems extends Table {
   TextColumn get id => text()();
   TextColumn get roomId => text().references(Rooms, #id)();
-  TextColumn get name => text()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
   TextColumn get colourHex => text()();
   TextColumn get role =>
       text().map(
@@ -402,7 +402,7 @@ class ShoppingListItems extends Table {
 @UseRowClass(Moodboard)
 class Moodboards extends Table {
   TextColumn get id => text()();
-  TextColumn get name => text()();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
   TextColumn get roomId => text().nullable().references(Rooms, #id)();
   TextColumn get roomName => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
@@ -428,7 +428,7 @@ class MoodboardItems extends Table {
   TextColumn get colourName => text().nullable()();
   TextColumn get imageUrl => text().nullable()();
   TextColumn get productId => text().nullable()();
-  TextColumn get label => text().nullable()();
+  TextColumn get label => text().nullable().withLength(min: 0, max: 200)();
   IntColumn get sortOrder => integer()();
   DateTimeColumn get addedAt => dateTime()();
 
@@ -536,7 +536,7 @@ class DiaryEntries extends Table {
   /// 'before' or 'after'.
   TextColumn get phase => text()();
 
-  TextColumn get caption => text().nullable()();
+  TextColumn get caption => text().nullable().withLength(min: 0, max: 200)();
   TextColumn get heroColourHex => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 

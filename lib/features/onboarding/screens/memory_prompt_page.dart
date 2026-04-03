@@ -43,7 +43,7 @@ class MemoryPromptPage extends ConsumerWidget {
           const SizedBox(height: 32),
           Expanded(
             child: GridView.builder(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.only(bottom: 8),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 0.95,
@@ -83,6 +83,14 @@ class MemoryPromptPage extends ConsumerWidget {
               },
             ),
           ),
+          TextButton(
+            onPressed: notifier.skipToVisualPreference,
+            style: TextButton.styleFrom(
+              foregroundColor: PaletteColours.textTertiary,
+            ),
+            child: const Text('Skip this step'),
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );

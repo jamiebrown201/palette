@@ -166,6 +166,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
   void setReversibleOnly(bool value) =>
       state = state.copyWith(reversibleOnly: value);
 
+  /// Skip memory prompts and advance directly to visual preference.
+  void skipToVisualPreference() {
+    state = state.copyWith(stage: QuizStage.visualPreference);
+  }
+
   /// Navigate back to a previous stage.
   void goBackToMemoryPrompts() {
     state = state.copyWith(

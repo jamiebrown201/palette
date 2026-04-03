@@ -777,7 +777,9 @@ class _ProjectPassCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Perfect for a single decorating project',
+                  "Looks like you're decorating your whole home. "
+                  'Get 6 months of everything for less than one '
+                  'hour with an interior designer.',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: PaletteColours.textTertiary,
                   ),

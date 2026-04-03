@@ -263,6 +263,7 @@ class MoodboardDetailScreen extends ConsumerWidget {
               content: TextField(
                 controller: controller,
                 autofocus: true,
+                maxLength: 200,
                 decoration: const InputDecoration(
                   hintText: 'Add a note...',
                   border: OutlineInputBorder(),
@@ -307,6 +308,7 @@ class MoodboardDetailScreen extends ConsumerWidget {
                 controller: controller,
                 autofocus: true,
                 textCapitalization: TextCapitalization.words,
+                maxLength: 100,
                 decoration: const InputDecoration(border: OutlineInputBorder()),
                 onSubmitted: (value) => Navigator.pop(ctx, value),
               ),

@@ -397,7 +397,10 @@ class _RoomDetailContent extends ConsumerWidget {
 
             // Light simulation
             if (room.heroColourHex != null && room.direction != null) ...[
-              const SectionHeader(title: 'Light Simulation'),
+              const SectionHeader(
+                title: 'Light Simulation',
+                subtitle: 'A helpful preview — not a photorealistic simulation',
+              ),
               const SizedBox(height: 8),
               _LightSimulation(
                 hex: room.heroColourHex!,

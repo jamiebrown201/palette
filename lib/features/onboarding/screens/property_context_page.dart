@@ -158,7 +158,25 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
                     )
                     : const Text('See My ${BrandedTerms.colourDna}'),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed:
+                _isGenerating
+                    ? null
+                    : () async {
+                      setState(() => _isGenerating = true);
+                      try {
+                        await notifier.generateAndSaveResult();
+                      } finally {
+                        if (mounted) setState(() => _isGenerating = false);
+                      }
+                    },
+            style: TextButton.styleFrom(
+              foregroundColor: PaletteColours.textTertiary,
+            ),
+            child: const Text('Skip this step'),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -183,7 +201,7 @@ class _RenterConstraintSection extends StatelessWidget {
         const _SectionLabel(label: 'Help us tailor your experience'),
         const SizedBox(height: 4),
         Text(
-          "We'll adapt recommendations to what you can actually change",
+          "We'll help you create a home you love, deposit intact.",
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(color: PaletteColours.textTertiary),

@@ -231,6 +231,7 @@ class _CreateMoodboardDialogState extends State<_CreateMoodboardDialog> {
         controller: _controller,
         autofocus: true,
         textCapitalization: TextCapitalization.words,
+        maxLength: 100,
         decoration: const InputDecoration(
           hintText: 'e.g. Living Room Ideas',
           border: OutlineInputBorder(),

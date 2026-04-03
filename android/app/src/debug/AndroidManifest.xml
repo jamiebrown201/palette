@@ -4,4 +4,17 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <application>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <!-- Deep links for QA navigation (debug only) -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="palette"/>
+            </intent-filter>
+        </activity>
+    </application>
 </manifest>

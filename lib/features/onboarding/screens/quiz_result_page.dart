@@ -7,6 +7,7 @@ import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/branded_terms.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/features/onboarding/data/archetype_definitions.dart';
 import 'package:palette/features/onboarding/data/era_affinities.dart';
 import 'package:palette/features/onboarding/logic/undertone_temperature.dart';
@@ -481,7 +482,9 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
                   ),
                   child: const Text('Explore My Palette'),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 16),
+                const ColourDisclaimer(),
+                const SizedBox(height: 24),
               ],
             ),
           ),

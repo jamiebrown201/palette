@@ -18,8 +18,13 @@ const double _zn = 108.883;
 /// Accepts formats: '#RRGGBB', 'RRGGBB', '#rrggbb'.
 ({int r, int g, int b}) hexToRgb(String hex) {
   final cleaned = hex.replaceAll('#', '').toUpperCase();
-  assert(cleaned.length == 6, 'Hex string must be 6 characters: $hex');
-  final value = int.parse(cleaned, radix: 16);
+  if (cleaned.length != 6) {
+    throw ArgumentError('Hex string must be 6 characters: $hex');
+  }
+  final value = int.tryParse(cleaned, radix: 16);
+  if (value == null) {
+    throw ArgumentError('Invalid hex colour string: $hex');
+  }
   return (r: (value >> 16) & 0xFF, g: (value >> 8) & 0xFF, b: value & 0xFF);
 }
 

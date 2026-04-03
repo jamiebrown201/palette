@@ -78,13 +78,14 @@ class FeatureFlagService {
     return variant(experiment) == name;
   }
 
-  /// Override a variant for testing / QA mode. Not persisted across restarts
-  /// unless [persist] is true.
+  /// Override a variant for testing / QA mode. Only available in debug builds.
+  /// Not persisted across restarts unless [persist] is true.
   Future<void> overrideVariant(
     Experiment experiment,
     String variantName, {
     bool persist = false,
   }) async {
+    if (!kDebugMode) return;
     _assignments[experiment.id] = variantName;
     if (persist) {
       final prefs = await SharedPreferences.getInstance();
@@ -97,8 +98,9 @@ class FeatureFlagService {
     });
   }
 
-  /// Resets all assignments. Useful in QA mode.
+  /// Resets all assignments. Only available in debug builds.
   Future<void> resetAll() async {
+    if (!kDebugMode) return;
     final prefs = await SharedPreferences.getInstance();
     for (final key in _assignments.keys) {
       await prefs.remove('$_prefix$key');
