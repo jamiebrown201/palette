@@ -474,7 +474,7 @@ class _ProductTile extends ConsumerWidget {
             const SizedBox(width: 8),
             // Buy CTA
             IconButton(
-              onPressed: () {
+              onPressed: () async {
                 ref
                     .read(analyticsProvider)
                     .track(AnalyticsEvents.affiliateLinkTapped, {
@@ -482,10 +482,20 @@ class _ProductTile extends ConsumerWidget {
                       'category': product.category.name,
                       'source': 'lighting_planner',
                     });
-                launchUrl(
-                  Uri.parse(product.affiliateUrl),
-                  mode: LaunchMode.externalApplication,
-                );
+                final uri = Uri.tryParse(product.affiliateUrl);
+                if (uri == null ||
+                    (uri.scheme != 'https' && uri.scheme != 'http')) {
+                  return;
+                }
+                try {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } catch (_) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Could not open link')),
+                    );
+                  }
+                }
               },
               icon: const Icon(Icons.open_in_new, size: 18),
               tooltip: 'Buy',

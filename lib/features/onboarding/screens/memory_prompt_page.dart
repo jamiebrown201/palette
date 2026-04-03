@@ -140,7 +140,9 @@ class _ColourMoodCardState extends State<_ColourMoodCard>
   void _handleTap() {
     if (_selected) return;
     setState(() => _selected = true);
-    Future.delayed(const Duration(milliseconds: 350), widget.onTap);
+    Future.delayed(const Duration(milliseconds: 350), () {
+      if (mounted) widget.onTap();
+    });
   }
 
   @override

@@ -663,10 +663,10 @@ class _DiaryEntryCard extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 18),
                   onPressed: () => _confirmDelete(context, ref),
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.all(8),
                   constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
+                    minWidth: 48,
+                    minHeight: 48,
                   ),
                   color: PaletteColours.textSecondary,
                   tooltip: 'Delete photo',

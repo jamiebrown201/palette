@@ -657,13 +657,14 @@ class _DnaPaletteRow extends StatelessWidget {
                     return GestureDetector(
                       onTap:
                           onColourTap != null ? () => onColourTap!(hex) : null,
+                      behavior: HitTestBehavior.opaque,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: Column(
                           children: [
                             Container(
-                              width: 36,
-                              height: 36,
+                              width: 48,
+                              height: 48,
                               decoration: BoxDecoration(
                                 color: hexToColor(hex),
                                 borderRadius: BorderRadius.circular(8),

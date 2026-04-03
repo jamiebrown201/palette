@@ -668,7 +668,7 @@ class _NotificationSettingsCard extends ConsumerWidget {
       helpText: 'When are you moving in?',
     );
 
-    if (picked != null) {
+    if (picked != null && context.mounted) {
       await ref.read(userProfileRepositoryProvider).setMovingDate(picked);
     }
   }

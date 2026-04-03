@@ -393,7 +393,7 @@ class _NextActionSectionState extends ConsumerState<_NextActionSection> {
 
     // A/B test: next-action copy variant (spec 1E.2)
     final copyVariant = ref
-        .read(featureFlagProvider)
+        .watch(featureFlagProvider)
         .variant(Experiments.nextActionCopy);
 
     // Track exposure once per widget lifecycle, not on every rebuild
@@ -1719,21 +1719,25 @@ class _MiniPaletteStrip extends ConsumerWidget {
         final hexes = dna.colourHexes.take(8).toList();
         return GestureDetector(
           onTap: () => context.push('/palette'),
-          child: Row(
-            children: [
-              for (int i = 0; i < hexes.length; i++) ...[
-                if (i > 0) const SizedBox(width: 6),
-                Expanded(
-                  child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: hexToColor(hexes[i]),
-                      borderRadius: BorderRadius.circular(3),
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 21),
+            child: Row(
+              children: [
+                for (int i = 0; i < hexes.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: hexToColor(hexes[i]),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },

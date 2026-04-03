@@ -400,9 +400,10 @@ class _BadgeLegendState extends State<_BadgeLegend> {
           ),
           IconButton(
             icon: const Icon(Icons.close, size: 16),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+            padding: const EdgeInsets.all(8),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             color: PaletteColours.textTertiary,
+            tooltip: 'Dismiss legend',
             onPressed: () => setState(() => _dismissed = true),
           ),
         ],

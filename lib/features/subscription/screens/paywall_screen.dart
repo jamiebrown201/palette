@@ -86,7 +86,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
 
     // A/B test: paywall copy variant (spec 1E.2)
     final copyVariant = ref
-        .read(featureFlagProvider)
+        .watch(featureFlagProvider)
         .variant(Experiments.paywallCopy);
 
     final (headline, subtitle) = _paywallCopyForVariant(copyVariant);
@@ -95,7 +95,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen>
       backgroundColor: PaletteColours.warmWhite,
       appBar: AppBar(
         title: const Text('Upgrade'),
-        leading: IconButton(icon: const Icon(Icons.close), onPressed: _dismiss),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: _dismiss,
+          tooltip: 'Close',
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
@@ -572,7 +576,7 @@ class _PlusTierCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'After your free trial, Plus renews at £3.99/month '
-              '(billed annually at £47.88). Cancel any time.',
+              'or £29.99/year. Cancel any time.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: PaletteColours.textTertiary,
@@ -696,6 +700,15 @@ class _ProTierCard extends StatelessWidget {
                   ),
                 ),
                 child: const Text('Choose Pro'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Pro renews at \u00A37.99/month or \u00A359.99/year. '
+              'Cancel any time.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: PaletteColours.textTertiary,
               ),
             ),
           ],

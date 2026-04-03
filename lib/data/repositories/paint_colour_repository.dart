@@ -38,9 +38,15 @@ class PaintColourRepository {
 
   /// Search paint colours by name (case-insensitive partial match).
   /// SQLite LIKE is case-insensitive for ASCII by default.
-  Future<List<PaintColour>> search(String query) =>
-      (_db.select(_db.paintColours)
-        ..where((t) => t.name.like('%${query.toLowerCase()}%'))).get();
+  Future<List<PaintColour>> search(String query) {
+    final escaped = query
+        .toLowerCase()
+        .replaceAll(r'\', r'\\')
+        .replaceAll('%', r'\%')
+        .replaceAll('_', r'\_');
+    return (_db.select(_db.paintColours)
+      ..where((t) => t.name.like('%$escaped%'))).get();
+  }
 
   /// Find the closest paint colours to a given hex colour using CIEDE2000.
   Future<List<PaintColourMatch>> findClosestMatches(

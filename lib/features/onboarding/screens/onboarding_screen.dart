@@ -114,6 +114,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         IconButton(
                           onPressed: _goBack,
                           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+                          tooltip: 'Go back',
                         )
                       else
                         const SizedBox(width: 48),

@@ -1092,38 +1092,60 @@ class _ThreadSwatch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: onDelete,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: hexToColor(hex),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: PaletteColours.divider, width: 2),
-        ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 2),
+    return SizedBox(
+      width: 56,
+      height: 68,
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.4),
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(6),
-              ),
+              color: hexToColor(hex),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: PaletteColours.divider, width: 2),
             ),
-            child: Text(
-              hex.toUpperCase().replaceAll('#', ''),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(6),
+                  ),
+                ),
+                child: Text(
+                  hex.toUpperCase().replaceAll('#', ''),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+          GestureDetector(
+            onTap: onDelete,
+            behavior: HitTestBehavior.opaque,
+            child: Semantics(
+              label: 'Remove thread colour',
+              button: true,
+              child: const SizedBox(
+                height: 20,
+                width: 56,
+                child: Icon(
+                  Icons.close,
+                  size: 14,
+                  color: PaletteColours.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

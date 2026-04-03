@@ -370,18 +370,18 @@ class _ShoppingListItemCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   SizedBox(
-                    height: 28,
+                    height: 48,
                     child: FilledButton.icon(
                       onPressed: () => _openLink(context, ref),
-                      icon: const Icon(Icons.open_in_new, size: 12),
+                      icon: const Icon(Icons.open_in_new, size: 14),
                       label: const Text('Buy'),
                       style: FilledButton.styleFrom(
                         backgroundColor: PaletteColours.sageGreen,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        textStyle: const TextStyle(fontSize: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        textStyle: const TextStyle(fontSize: 13),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                     ),

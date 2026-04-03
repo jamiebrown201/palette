@@ -33,7 +33,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   late final _picker = ImagePicker();
   bool _isProcessing = false;
   Color? _capturedColour;
-  late String _capturedHex;
+  String _capturedHex = '808080';
   List<PaintColourMatch>? _matches;
 
   /// Temperature adjustment: -1.0 (cooler) to 1.0 (warmer), default 0.

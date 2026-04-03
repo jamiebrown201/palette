@@ -100,11 +100,25 @@ class _QuizResultPageState extends ConsumerState<QuizResultPage>
       final boundary =
           _repaintKey.currentContext?.findRenderObject()
               as RenderRepaintBoundary?;
-      if (boundary == null) return;
+      if (boundary == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not generate share image')),
+          );
+        }
+        return;
+      }
 
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
+      if (byteData == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not generate share image')),
+          );
+        }
+        return;
+      }
 
       final bytes = byteData.buffer.asUint8List();
       await Share.shareXFiles(

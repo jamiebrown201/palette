@@ -565,6 +565,7 @@ class _RoomDetailContent extends ConsumerWidget {
                         const SizedBox(height: 16),
                         FilledButton(
                           onPressed: () async {
+                            if (name.trim().isEmpty) return;
                             final repo = ref.read(roomRepositoryProvider);
                             final width = double.tryParse(widthCtrl.text);
                             final length = double.tryParse(lengthCtrl.text);
@@ -985,11 +986,7 @@ class _RoomPreviewMockup extends ConsumerWidget {
             height: 36,
           ),
           // Optional dash line for Red Thread
-          if (dashHex != null)
-            Container(
-              height: 6,
-              color: Color(int.parse(dashHex.replaceFirst('#', '0xFF'))),
-            ),
+          if (dashHex != null) Container(height: 6, color: hexToColor(dashHex)),
         ],
       ),
     );
@@ -1011,7 +1008,7 @@ class _PreviewBand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colour = Color(int.parse(hex.replaceFirst('#', '0xFF')));
+    final colour = hexToColor(hex);
     // Use white or dark text depending on luminance
     final textColour =
         colour.computeLuminance() > 0.5
@@ -2765,12 +2762,12 @@ class _LandlordPresetChip extends StatelessWidget {
 final _furnitureSectionKey = GlobalKey();
 
 bool _isLightColour(String hex) {
-  final cleaned = hex.replaceAll('#', '');
-  final value = int.parse(cleaned, radix: 16);
-  final r = (value >> 16) & 0xFF;
-  final g = (value >> 8) & 0xFF;
-  final b = value & 0xFF;
-  return (0.299 * r + 0.587 * g + 0.114 * b) > 160;
+  try {
+    final colour = hexToColor(hex);
+    return colour.computeLuminance() > 0.4;
+  } catch (_) {
+    return true;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -2973,11 +2970,15 @@ class _RoomChecklistState extends ConsumerState<_RoomChecklist> {
           if (!item.done && item.actionLabel != null && item.onAction != null)
             GestureDetector(
               onTap: item.onAction,
-              child: Text(
-                item.actionLabel!,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: PaletteColours.sageGreenDark,
-                  fontWeight: FontWeight.w600,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  item.actionLabel!,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: PaletteColours.sageGreenDark,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

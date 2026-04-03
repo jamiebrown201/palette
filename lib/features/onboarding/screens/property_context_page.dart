@@ -133,8 +133,21 @@ class _PropertyContextPageState extends ConsumerState<PropertyContextPage> {
                     ? null
                     : () async {
                       setState(() => _isGenerating = true);
-                      await notifier.generateAndSaveResult();
-                      if (mounted) setState(() => _isGenerating = false);
+                      try {
+                        await notifier.generateAndSaveResult();
+                      } catch (_) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Something went wrong. Please try again.',
+                              ),
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (mounted) setState(() => _isGenerating = false);
+                      }
                     },
             child:
                 _isGenerating

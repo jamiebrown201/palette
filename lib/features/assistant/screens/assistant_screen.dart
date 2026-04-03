@@ -299,19 +299,23 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Material(
-            color: PaletteColours.sageGreen,
-            borderRadius: BorderRadius.circular(24),
-            child: InkWell(
+          Semantics(
+            label: 'Send message',
+            button: true,
+            child: Material(
+              color: PaletteColours.sageGreen,
               borderRadius: BorderRadius.circular(24),
-              onTap: () => _send(_controller.text),
-              child: const SizedBox(
-                width: 48,
-                height: 48,
-                child: Icon(
-                  Icons.arrow_upward_rounded,
-                  color: PaletteColours.textOnAccent,
-                  size: 22,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: () => _send(_controller.text),
+                child: const SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Icon(
+                    Icons.arrow_upward_rounded,
+                    color: PaletteColours.textOnAccent,
+                    size: 22,
+                  ),
                 ),
               ),
             ),

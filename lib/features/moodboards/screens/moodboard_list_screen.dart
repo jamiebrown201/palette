@@ -40,6 +40,7 @@ class MoodboardListScreen extends ConsumerWidget {
         onPressed: () => _createMoodboard(context, ref),
         backgroundColor: PaletteColours.sageGreen,
         foregroundColor: PaletteColours.textOnAccent,
+        tooltip: 'Create moodboard',
         child: const Icon(Icons.add),
       ),
       body: moodboards.when(

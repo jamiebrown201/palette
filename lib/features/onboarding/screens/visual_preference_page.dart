@@ -77,7 +77,10 @@ class VisualPreferencePage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: notifier.advanceToPropertyContext,
+            onPressed:
+                quizState.selectedRoomIds.isEmpty
+                    ? null
+                    : notifier.advanceToPropertyContext,
             child: const Text('Continue'),
           ),
           const SizedBox(height: 24),

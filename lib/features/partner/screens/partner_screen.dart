@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/database/palette_database.dart';
@@ -259,6 +260,7 @@ class _InvitePartnerView extends ConsumerWidget {
             invitedAt: DateTime.now(),
           ),
         );
+    if (!context.mounted) return;
     ref.invalidate(partnerProfileProvider);
 
     ref.read(analyticsProvider).track('partner_invited');
@@ -336,6 +338,7 @@ class _PendingInviteView extends ConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.copy),
+                  tooltip: 'Copy invite code',
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: partner.inviteCode));
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -852,8 +855,7 @@ class _PaletteComparisonRow extends StatelessWidget {
               itemCount: hexes.length,
               separatorBuilder: (_, __) => const SizedBox(width: 4),
               itemBuilder: (_, i) {
-                final hex = hexes[i].replaceAll('#', '');
-                final colour = Color(int.parse('FF$hex', radix: 16));
+                final colour = hexToColor(hexes[i]);
                 return Container(
                   width: 32,
                   height: 32,

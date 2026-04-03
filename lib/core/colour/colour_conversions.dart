@@ -128,9 +128,14 @@ LabColour rgbToLab(int r, int g, int b) {
 }
 
 /// Convert a hex colour string ('#RRGGBB' or 'RRGGBB') to a Flutter [Color].
+/// Returns mid-grey on malformed input instead of throwing.
 Color hexToColor(String hex) {
   final cleaned = hex.replaceAll('#', '');
-  return Color(int.parse('FF$cleaned', radix: 16));
+  try {
+    return Color(int.parse('FF$cleaned', radix: 16));
+  } catch (_) {
+    return const Color(0xFF808080);
+  }
 }
 
 /// Convert a Flutter [Color] to a hex string with '#' prefix.

@@ -116,10 +116,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
         path: '/assistant',
-        builder:
-            (context, state) => AssistantScreen(
-              initialPrompt: state.uri.queryParameters['prompt'],
-            ),
+        builder: (context, state) {
+          final prompt = state.uri.queryParameters['prompt'];
+          final sanitised =
+              prompt != null && prompt.length <= 500
+                  ? prompt.replaceAll(RegExp(r'[\x00-\x1F]'), '')
+                  : null;
+          return AssistantScreen(initialPrompt: sanitised);
+        },
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

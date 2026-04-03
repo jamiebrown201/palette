@@ -289,7 +289,7 @@ class _SampleListBody extends ConsumerWidget {
     final config = configs[brand];
     if (config == null) return;
     final uri = Uri.tryParse(config.homepageUrl);
-    if (uri == null) return;
+    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) return;
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

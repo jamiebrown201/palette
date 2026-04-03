@@ -32,9 +32,13 @@ class MoodboardDetailScreen extends ConsumerWidget {
           () =>
               const Scaffold(body: Center(child: CircularProgressIndicator())),
       error:
-          (e, _) => Scaffold(
+          (_, __) => Scaffold(
             appBar: AppBar(),
-            body: Center(child: Text('Error loading moodboard: $e')),
+            body: const Center(
+              child: Text(
+                'Something went wrong. Please go back and try again.',
+              ),
+            ),
           ),
       data: (moodboard) {
         if (moodboard == null) {
@@ -67,11 +71,15 @@ class MoodboardDetailScreen extends ConsumerWidget {
             onPressed: () => _showAddSheet(context, ref),
             backgroundColor: PaletteColours.sageGreen,
             foregroundColor: PaletteColours.textOnAccent,
+            tooltip: 'Add item',
             child: const Icon(Icons.add),
           ),
           body: items.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error:
+                (_, __) => const Center(
+                  child: Text('Something went wrong. Tap to retry.'),
+                ),
             data: (itemList) {
               if (itemList.isEmpty) {
                 return _EmptyMoodboard(
@@ -246,37 +254,41 @@ class MoodboardDetailScreen extends ConsumerWidget {
     MoodboardItem item,
   ) async {
     final controller = TextEditingController(text: item.label);
-    final newLabel = await showDialog<String>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Edit note'),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Add a note...',
-                border: OutlineInputBorder(),
+    try {
+      final newLabel = await showDialog<String>(
+        context: context,
+        builder:
+            (ctx) => AlertDialog(
+              title: const Text('Edit note'),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Add a note...',
+                  border: OutlineInputBorder(),
+                ),
+                onSubmitted: (value) => Navigator.pop(ctx, value),
               ),
-              onSubmitted: (value) => Navigator.pop(ctx, value),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, controller.text),
+                  child: const Text('Save'),
+                ),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, controller.text),
-                child: const Text('Save'),
-              ),
-            ],
-          ),
-    );
+      );
 
-    if (newLabel == null) return;
-    await ref
-        .read(moodboardRepositoryProvider)
-        .updateItemLabel(item.id, newLabel.isEmpty ? null : newLabel);
+      if (newLabel == null) return;
+      await ref
+          .read(moodboardRepositoryProvider)
+          .updateItemLabel(item.id, newLabel.isEmpty ? null : newLabel);
+    } finally {
+      controller.dispose();
+    }
   }
 
   Future<void> _renameMoodboard(
@@ -285,41 +297,45 @@ class MoodboardDetailScreen extends ConsumerWidget {
     String currentName,
   ) async {
     final controller = TextEditingController(text: currentName);
-    final newName = await showDialog<String>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Rename moodboard'),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-              onSubmitted: (value) => Navigator.pop(ctx, value),
+    try {
+      final newName = await showDialog<String>(
+        context: context,
+        builder:
+            (ctx) => AlertDialog(
+              title: const Text('Rename moodboard'),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                onSubmitted: (value) => Navigator.pop(ctx, value),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, controller.text),
+                  child: const Text('Save'),
+                ),
+              ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, controller.text),
-                child: const Text('Save'),
-              ),
-            ],
-          ),
-    );
+      );
 
-    if (newName == null || newName.trim().isEmpty) return;
-    await ref
-        .read(moodboardRepositoryProvider)
-        .update(
-          moodboardId,
-          MoodboardsCompanion(
-            name: Value(newName.trim()),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+      if (newName == null || newName.trim().isEmpty) return;
+      await ref
+          .read(moodboardRepositoryProvider)
+          .update(
+            moodboardId,
+            MoodboardsCompanion(
+              name: Value(newName.trim()),
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+    } finally {
+      controller.dispose();
+    }
   }
 
   static Color _parseHex(String hex) {

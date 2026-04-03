@@ -365,14 +365,17 @@ class _VisualiserScreenState extends ConsumerState<VisualiserScreen> {
 
     // Load room data if we have a roomId.
     if (widget.roomId != null) {
-      final roomAsync = ref.watch(roomByIdProvider(widget.roomId!));
-      roomAsync.whenData((r) {
-        if (r != null && _room == null) {
-          _room = r;
-          if (_selectedColour == null && r.heroColourHex != null) {
-            _selectedColour = hexToColor(r.heroColourHex!);
+      ref.listen(roomByIdProvider(widget.roomId!), (_, next) {
+        next.whenData((r) {
+          if (r != null && _room == null) {
+            setState(() {
+              _room = r;
+              if (_selectedColour == null && r.heroColourHex != null) {
+                _selectedColour = hexToColor(r.heroColourHex!);
+              }
+            });
           }
-        }
+        });
       });
     }
 
