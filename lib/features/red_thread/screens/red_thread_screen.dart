@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/red_thread/logic/floor_plan_template.dart';
 import 'package:palette/features/red_thread/providers/red_thread_providers.dart';
 import 'package:palette/features/red_thread/widgets/floor_plan_painter.dart';
+import 'package:palette/features/red_thread/widgets/red_thread_graph_painter.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/providers/app_providers.dart';
 import 'package:palette/providers/database_providers.dart';
@@ -458,7 +460,13 @@ class _RedThreadContent extends ConsumerWidget {
           _ThreadColourRow(threadHexes: threadHexes),
           const SizedBox(height: 24),
 
-          // Floor plan template
+          // Flow diagram — free-form node-and-edge graph (spec 1E.8)
+          const SectionHeader(title: 'Flow Diagram'),
+          const SizedBox(height: 8),
+          _RedThreadGraphView(rooms: rooms, threadHexes: threadHexes),
+          const SizedBox(height: 24),
+
+          // Optional: floor plan template overlay
           const SectionHeader(title: 'Floor Plan'),
           const SizedBox(height: 8),
           _TemplatePicker(
@@ -1201,6 +1209,128 @@ class _TemplatePicker extends StatelessWidget {
             );
           }).toList(),
     );
+  }
+}
+
+/// Free-form node-and-edge graph of rooms and their connections (spec 1E.8).
+class _RedThreadGraphView extends ConsumerWidget {
+  const _RedThreadGraphView({required this.rooms, required this.threadHexes});
+
+  final List<Room> rooms;
+  final List<String> threadHexes;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final coherenceAsync = ref.watch(coherenceReportProvider);
+    final pairsAsync = ref.watch(adjacentRoomPairsProvider);
+
+    // Determine disconnected room IDs from coherence report
+    final disconnectedIds = <String>{};
+    coherenceAsync.whenData((report) {
+      for (final r in report.results) {
+        if (!r.isConnected) disconnectedIds.add(r.roomId);
+      }
+    });
+
+    // Build graph nodes from rooms
+    final nodes =
+        rooms
+            .map(
+              (r) => GraphNode(
+                id: r.id,
+                name: r.name,
+                heroHex: r.heroColourHex,
+                isDisconnected: disconnectedIds.contains(r.id),
+              ),
+            )
+            .toList();
+
+    // Build graph edges from adjacencies
+    final graphEdges = <GraphEdge>[];
+    pairsAsync.whenData((pairs) {
+      for (final (a, b) in pairs) {
+        graphEdges.add(GraphEdge(fromId: a.id, toId: b.id));
+      }
+    });
+
+    // Compute canvas height based on room count
+    final canvasHeight = (rooms.length <= 4 ? 280 : 360).toDouble();
+
+    return Container(
+      height: canvasHeight,
+      decoration: BoxDecoration(
+        color: PaletteColours.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PaletteColours.divider),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: InteractiveViewer(
+        minScale: 0.8,
+        maxScale: 3.0,
+        child: GestureDetector(
+          onTapUp:
+              (details) => _handleTap(context, details.localPosition, nodes),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: CustomPaint(
+              painter: RedThreadGraphPainter(
+                nodes: nodes,
+                edges: graphEdges,
+                threadHexes: threadHexes,
+              ),
+              size: Size.infinite,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleTap(
+    BuildContext context,
+    Offset localPosition,
+    List<GraphNode> nodes,
+  ) {
+    // Account for 16px padding
+    final adjusted = localPosition - const Offset(16, 16);
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final canvasSize = Size(
+      renderBox.size.width - 32,
+      renderBox.size.height - 32,
+    );
+
+    // Re-compute positions using same circular layout as the painter
+    final count = nodes.length;
+    if (count == 0) return;
+
+    const nodeW = 120.0;
+    const nodeH = 56.0;
+
+    final centerX = canvasSize.width / 2;
+    final centerY = canvasSize.height / 2;
+    final radiusX = (canvasSize.width / 2) - nodeW / 2 - 16;
+    final radiusY = (canvasSize.height / 2) - nodeH / 2 - 16;
+    final radius =
+        count == 1
+            ? 0.0
+            : math.min(radiusX, radiusY).clamp(60.0, double.infinity);
+
+    for (var i = 0; i < count; i++) {
+      final angle = count == 1 ? 0.0 : -math.pi / 2 + (2 * math.pi * i / count);
+      final pos = Offset(
+        centerX + radius * math.cos(angle),
+        centerY + radius * math.sin(angle),
+      );
+      final rect = Rect.fromCenter(center: pos, width: nodeW, height: nodeH);
+      if (rect.contains(adjusted)) {
+        final roomId = rooms.firstWhere((r) => r.id == nodes[i].id).id;
+        context.push('/rooms/$roomId');
+        return;
+      }
+    }
   }
 }
 

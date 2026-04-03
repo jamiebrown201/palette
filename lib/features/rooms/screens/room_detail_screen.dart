@@ -2865,10 +2865,9 @@ class _RoomChecklistState extends ConsumerState<_RoomChecklist> {
     final isExpanded = _expandedOverride ?? completed < 4;
 
     // Hero colour for progress bar (spec 1E.5)
-    final heroHex = room.heroColourHex?.replaceFirst('#', '');
     final progressColour =
-        heroHex != null && heroHex.length == 6
-            ? Color(int.parse('FF$heroHex', radix: 16))
+        room.heroColourHex != null
+            ? hexToColor(room.heroColourHex!)
             : PaletteColours.sageGreen;
 
     return Container(
@@ -4378,7 +4377,7 @@ class _ProductCard extends ConsumerWidget {
     _recordFeedback(ref, product, 'buy');
 
     final uri = Uri.tryParse(product.affiliateUrl);
-    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) return;
+    if (uri == null || uri.scheme != 'https') return;
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

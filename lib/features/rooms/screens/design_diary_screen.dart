@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:palette/core/analytics/analytics_events.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/error_card.dart';
@@ -867,10 +868,7 @@ class _PhotoImage extends StatelessWidget {
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 Color _hexToColor(String hex) {
-  final cleaned = hex.replaceFirst('#', '');
-  final validHex = RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(cleaned);
-  if (!validHex) return const Color(0xFF888888);
-  return Color(int.parse('FF$cleaned', radix: 16));
+  return hexToColor(hex);
 }
 
 String _formatDate(DateTime date) {

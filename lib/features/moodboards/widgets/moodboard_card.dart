@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/models/moodboard.dart';
 import 'package:palette/features/moodboards/providers/moodboard_providers.dart';
@@ -135,11 +136,7 @@ class MoodboardCard extends ConsumerWidget {
   }
 
   static Color _parseHex(String hex) {
-    final cleaned = hex.replaceFirst('#', '');
-    if (cleaned.length == 6) {
-      return Color(int.parse('FF$cleaned', radix: 16));
-    }
-    return PaletteColours.warmGrey;
+    return hexToColor(hex);
   }
 
   static String _formattedDate(DateTime date) {

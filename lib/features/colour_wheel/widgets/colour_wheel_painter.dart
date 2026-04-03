@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 
 /// Custom painter that renders an HSL colour wheel.
@@ -179,8 +180,7 @@ class ColourWheelPainter extends CustomPainter {
   }
 
   static Color _parseHex(String hex) {
-    final cleaned = hex.replaceAll('#', '');
-    return Color(int.parse('FF$cleaned', radix: 16));
+    return hexToColor(hex);
   }
 
   @override

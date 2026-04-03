@@ -517,9 +517,12 @@ class _PlusTierCard extends StatelessWidget {
           _featureBullet(context, 'Light-matched colour recommendations'),
           _featureBullet(
             context,
-            '${BrandedTerms.seventyTwentyTen} colour planner',
+            '${BrandedTerms.seventyTwentyTen} colour planner — ${BrandedTerms.seventyTwentyTenSubtitle}',
           ),
-          _featureBullet(context, '${BrandedTerms.redThread} whole-home flow'),
+          _featureBullet(
+            context,
+            '${BrandedTerms.redThread} whole-home flow — ${BrandedTerms.redThreadSubtitle}',
+          ),
           _featureBullet(context, 'Edit & customise your palette'),
           _featureBullet(context, 'Export room plans as PDF'),
           _featureBullet(context, 'AI Room Visualiser (5 credits/month)'),

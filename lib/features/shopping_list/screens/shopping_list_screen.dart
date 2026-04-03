@@ -405,7 +405,7 @@ class _ShoppingListItemCard extends ConsumerWidget {
     });
 
     final uri = Uri.tryParse(item.affiliateUrl);
-    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) return;
+    if (uri == null || uri.scheme != 'https') return;
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

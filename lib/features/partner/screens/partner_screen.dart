@@ -1031,6 +1031,7 @@ void _showManualEntrySheet(BuildContext context, WidgetRef ref) {
                               labelText: "Partner's name",
                               border: OutlineInputBorder(),
                             ),
+                            maxLength: 100,
                             onChanged: (v) => name = v,
                           ),
                           const SizedBox(height: 16),

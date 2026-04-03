@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 
@@ -207,7 +208,7 @@ class _AddColourSheetState extends ConsumerState<AddColourSheet> {
                 final hex = _hexController.text.trim();
                 if (hex.isEmpty) return;
                 final normalised = hex.startsWith('#') ? hex.substring(1) : hex;
-                if (normalised.length != 6) return;
+                if (!RegExp(r'^[0-9A-Fa-f]{6}$').hasMatch(normalised)) return;
                 _addColour(normalised, _labelController.text.trim());
               },
               child: const Text('Add colour'),
@@ -264,9 +265,9 @@ class _AddColourSheetState extends ConsumerState<AddColourSheet> {
 
   void _addImage(String url) {
     final uri = Uri.tryParse(url);
-    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) {
+    if (uri == null || uri.scheme != 'https') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid http/https URL')),
+        const SnackBar(content: Text('Please enter a valid HTTPS URL')),
       );
       return;
     }
@@ -282,11 +283,7 @@ class _ColourSwatch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cleaned = hex.replaceFirst('#', '');
-    final colour =
-        cleaned.length == 6
-            ? Color(int.parse('FF$cleaned', radix: 16))
-            : PaletteColours.warmGrey;
+    final colour = hexToColor(hex);
 
     return GestureDetector(
       onTap: onTap,

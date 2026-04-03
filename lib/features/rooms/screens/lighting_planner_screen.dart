@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palette/core/analytics/analytics_events.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/core/widgets/error_card.dart';
@@ -483,8 +484,7 @@ class _ProductTile extends ConsumerWidget {
                       'source': 'lighting_planner',
                     });
                 final uri = Uri.tryParse(product.affiliateUrl);
-                if (uri == null ||
-                    (uri.scheme != 'https' && uri.scheme != 'http')) {
+                if (uri == null || uri.scheme != 'https') {
                   return;
                 }
                 try {
@@ -510,9 +510,7 @@ class _ProductTile extends ConsumerWidget {
   }
 
   Color _parseHex(String hex) {
-    final cleaned = hex.replaceAll('#', '');
-    if (cleaned.length != 6) return PaletteColours.warmGrey;
-    return Color(int.parse('FF$cleaned', radix: 16));
+    return hexToColor(hex);
   }
 }
 

@@ -10,6 +10,7 @@ import 'package:palette/core/colour/palette_family.dart';
 import 'package:palette/core/colour/undertone.dart';
 import 'package:palette/core/constants/enums.dart';
 import 'package:palette/core/theme/palette_colours.dart';
+import 'package:palette/core/widgets/colour_disclaimer.dart';
 import 'package:palette/data/repositories/paint_colour_repository.dart';
 import 'package:palette/data/services/seed_data_service.dart';
 import 'package:palette/features/samples/widgets/order_sample_button.dart';
@@ -94,11 +95,21 @@ class ColourDetailSheet extends StatelessWidget {
                     if (matches.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
-                        matches.first.colour.brand,
+                        '${matches.first.colour.brand}'
+                        '${matches.first.colour.code.isNotEmpty ? ' · ${matches.first.colour.code}' : ''}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: PaletteColours.textSecondary,
                         ),
                       ),
+                      if (matches.first.colour.approximatePricePerLitre !=
+                          null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          '≈ £${matches.first.colour.approximatePricePerLitre!.toStringAsFixed(2)}/litre',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: PaletteColours.textTertiary),
+                        ),
+                      ],
                     ],
                   ],
                 ),
@@ -174,6 +185,10 @@ class ColourDetailSheet extends StatelessWidget {
                   paintColourRepo: paintColourRepo,
                 ),
               ],
+
+              // Colour accuracy disclaimer (spec Design Principle 10)
+              const SizedBox(height: 16),
+              const ColourDisclaimer(),
             ],
           ),
         );
@@ -323,7 +338,8 @@ class _PaintMatchTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      colour.brand,
+                      '${colour.brand}'
+                      '${colour.code.isNotEmpty ? ' · ${colour.code}' : ''}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: PaletteColours.textSecondary,
                       ),
@@ -446,7 +462,7 @@ class _BuyThisPaintButtonState extends ConsumerState<BuyThisPaintButton> {
       colourName: widget.colourName,
     );
     final uri = Uri.tryParse(url);
-    if (uri == null || (uri.scheme != 'https' && uri.scheme != 'http')) return;
+    if (uri == null || uri.scheme != 'https') return;
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }

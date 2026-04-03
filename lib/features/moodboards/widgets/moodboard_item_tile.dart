@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:palette/core/colour/colour_conversions.dart';
 import 'package:palette/core/theme/palette_colours.dart';
 import 'package:palette/data/models/moodboard_item.dart';
 
@@ -107,11 +108,7 @@ class MoodboardItemTile extends StatelessWidget {
 
   Widget _buildColour(BuildContext context) {
     final hex = item.colourHex ?? 'E8E4DE';
-    final cleaned = hex.replaceFirst('#', '');
-    final colour =
-        cleaned.length == 6
-            ? Color(int.parse('FF$cleaned', radix: 16))
-            : PaletteColours.warmGrey;
+    final colour = hexToColor(hex);
 
     return ColoredBox(
       color: colour,
@@ -146,7 +143,7 @@ class MoodboardItemTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        '#$cleaned'.toUpperCase(),
+                        '#${hex.replaceFirst('#', '')}'.toUpperCase(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: PaletteColours.textOnAccent.withValues(
                             alpha: 0.7,
