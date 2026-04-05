@@ -1,3 +1,4 @@
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Wraps Supabase auth operations for use throughout the app.
@@ -19,6 +20,9 @@ class AuthService {
   Stream<AuthState> get onAuthStateChange => _client.auth.onAuthStateChange;
 
   Future<void> signInWithGoogle() async {
+    Sentry.addBreadcrumb(
+      Breadcrumb(message: 'Google Sign-In starting', category: 'auth'),
+    );
     await _client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: redirectUrl,
@@ -29,6 +33,9 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    Sentry.addBreadcrumb(
+      Breadcrumb(message: 'Email sign-in starting', category: 'auth'),
+    );
     return _client.auth.signInWithPassword(email: email, password: password);
   }
 
@@ -36,6 +43,9 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    Sentry.addBreadcrumb(
+      Breadcrumb(message: 'Email sign-up starting', category: 'auth'),
+    );
     return _client.auth.signUp(
       email: email,
       password: password,
@@ -44,10 +54,16 @@ class AuthService {
   }
 
   Future<void> resetPassword(String email) async {
+    Sentry.addBreadcrumb(
+      Breadcrumb(message: 'Password reset requested', category: 'auth'),
+    );
     await _client.auth.resetPasswordForEmail(email, redirectTo: redirectUrl);
   }
 
   Future<void> signOut() async {
+    Sentry.addBreadcrumb(
+      Breadcrumb(message: 'Sign-out starting', category: 'auth'),
+    );
     await _client.auth.signOut();
   }
 }

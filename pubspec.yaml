@@ -43,8 +43,11 @@ dependencies:
   path_provider: ^2.1.5
   uuid: ^4.5.1
 
-  # Backend (scaffold)
+  # Backend
   supabase_flutter: ^2.9.0
+
+  # Error monitoring
+  sentry_flutter: ^9.16.0
 
   cupertino_icons: ^1.0.8
   image_picker: ^1.2.1
