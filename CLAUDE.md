@@ -8,6 +8,7 @@ Palette is a Flutter colour companion app for home decorators. It helps users di
 - **State management:** Riverpod
 - **Database:** Drift (SQLite) — local-first, schema v17
 - **Auth:** Supabase (Google OAuth + email/password)
+- **Error monitoring:** Sentry (5-layer error boundaries, provider observer, auth breadcrumbs)
 - **Routing:** GoRouter (auth-aware redirects)
 - **Target:** Android (emulator-5554)
 

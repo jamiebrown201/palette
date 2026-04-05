@@ -1695,6 +1695,16 @@ _Updated April 2026._
 | DB schema                | Done   | `supabaseUserId` on UserProfiles (schema v17)                         |
 | Profile sign-out         | Done   | Account section on profile screen with sign-out                       |
 
+### Infrastructure: Error Monitoring (Complete)
+
+| Feature                  | Status | Notes                                                                 |
+| ------------------------ | ------ | --------------------------------------------------------------------- |
+| Sentry project           | Done   | `palette` in `odyssey-entertainment-labs` org, EU region              |
+| SentryFlutter init       | Done   | Conditional on `SENTRY_DSN` dart define, 20% trace sampling           |
+| Error boundaries         | Done   | 5 layers: appRunner, runZonedGuarded, FlutterError, PlatformDispatcher, ProviderObserver |
+| Auth breadcrumbs         | Done   | All auth service methods emit Sentry breadcrumbs                      |
+| Provider observer        | Done   | `SentryProviderObserver` catches all Riverpod errors with provider name context |
+
 ### Phase 1A: Complete (native app)
 
 | Feature                         | Status | Notes                                                                             |
