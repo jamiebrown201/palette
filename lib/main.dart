@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,87 +25,123 @@ import 'package:palette/providers/feature_flag_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+const _sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+bool get _sentryEnabled => _sentryDsn.isNotEmpty;
+
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
-  );
-
-  final db = await openDatabase();
-
-  // Seed paint colour data on first launch.
-  final paintRepo = PaintColourRepository(db);
-  final seedService = SeedDataService(db, paintRepo);
-  await seedService.seedIfNeeded();
-
-  // Seed product catalogue on first launch.
-  final productRepo = ProductRepository(db);
-  await seedProducts(productRepo);
-
-  // Load persisted user profile to restore state across restarts.
-  final profileRepo = UserProfileRepository(db);
-  final profile = await profileRepo.getOrCreate();
-
-  // Load DNA result for tenure (renter vs owner).
-  final dnaRepo = ColourDnaRepository(db);
-  final dna =
-      profile.colourDnaResultId != null
-          ? await dnaRepo.getById(profile.colourDnaResultId!)
-          : null;
-
-  final constraints = RenterConstraints(
-    isRenter: dna?.tenure == Tenure.renter,
-    canPaint: profile.canPaint,
-    canDrill: profile.canDrill,
-    keepingFlooring: profile.keepingFlooring,
-    isTemporaryHome: profile.isTemporaryHome,
-    reversibleOnly: profile.reversibleOnly,
-  );
-
-  final analytics = AnalyticsService();
-  final sessionTracker = SessionTracker(analytics);
-  await sessionTracker.start();
-
-  // Initialise A/B testing feature flags (spec 1E.2).
-  final featureFlags = FeatureFlagService(analytics);
-  await featureFlags.initialise(Experiments.all);
-
-  const sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
-
-  void appRunner() => runApp(
-    ProviderScope(
-      observers: [SentryProviderObserver()],
-      overrides: [
-        paletteDatabaseProvider.overrideWithValue(db),
-        analyticsProvider.overrideWithValue(analytics),
-        featureFlagProvider.overrideWithValue(featureFlags),
-        hasCompletedOnboardingProvider.overrideWith(
-          (_) => profile.hasCompletedOnboarding,
-        ),
-        subscriptionTierProvider.overrideWith((_) => profile.subscriptionTier),
-        colourBlindModeProvider.overrideWith((_) => profile.colourBlindMode),
-        renterConstraintsProvider.overrideWith((_) => constraints),
-      ],
-      child: const PaletteApp(),
-    ),
-  );
-
-  if (sentryDsn.isNotEmpty) {
+  if (_sentryEnabled) {
     await SentryFlutter.init(
       (options) {
-        options.dsn = sentryDsn;
+        options.dsn = _sentryDsn;
         options.tracesSampleRate = 0.2;
         options.environment = kReleaseMode ? 'production' : 'development';
         options.sendDefaultPii = false;
       },
-      appRunner: appRunner,
+      appRunner: _guardedMain,
     );
   } else {
-    if (kDebugMode) {
-      debugPrint('SENTRY_DSN is empty — Sentry disabled');
-    }
-    appRunner();
+    if (kDebugMode) debugPrint('SENTRY_DSN is empty — Sentry disabled');
+    await _guardedMain();
   }
+}
+
+Future<void> _guardedMain() async {
+  // Catch errors that escape the Flutter framework (async gaps, isolates).
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      // Flutter framework errors (build, layout, painting).
+      FlutterError.onError = (details) {
+        FlutterError.presentError(details);
+        if (_sentryEnabled) {
+          Sentry.captureException(
+            details.exception,
+            stackTrace: details.stack,
+          );
+        }
+      };
+
+      // Platform dispatcher errors (platform channel failures).
+      PlatformDispatcher.instance.onError = (error, stack) {
+        if (_sentryEnabled) {
+          Sentry.captureException(error, stackTrace: stack);
+        }
+        return true;
+      };
+
+      await Supabase.initialize(
+        url: const String.fromEnvironment('SUPABASE_URL'),
+        anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+      );
+
+      final db = await openDatabase();
+
+      // Seed paint colour data on first launch.
+      final paintRepo = PaintColourRepository(db);
+      final seedService = SeedDataService(db, paintRepo);
+      await seedService.seedIfNeeded();
+
+      // Seed product catalogue on first launch.
+      final productRepo = ProductRepository(db);
+      await seedProducts(productRepo);
+
+      // Load persisted user profile to restore state across restarts.
+      final profileRepo = UserProfileRepository(db);
+      final profile = await profileRepo.getOrCreate();
+
+      // Load DNA result for tenure (renter vs owner).
+      final dnaRepo = ColourDnaRepository(db);
+      final dna =
+          profile.colourDnaResultId != null
+              ? await dnaRepo.getById(profile.colourDnaResultId!)
+              : null;
+
+      final constraints = RenterConstraints(
+        isRenter: dna?.tenure == Tenure.renter,
+        canPaint: profile.canPaint,
+        canDrill: profile.canDrill,
+        keepingFlooring: profile.keepingFlooring,
+        isTemporaryHome: profile.isTemporaryHome,
+        reversibleOnly: profile.reversibleOnly,
+      );
+
+      final analytics = AnalyticsService();
+      final sessionTracker = SessionTracker(analytics);
+      await sessionTracker.start();
+
+      // Initialise A/B testing feature flags (spec 1E.2).
+      final featureFlags = FeatureFlagService(analytics);
+      await featureFlags.initialise(Experiments.all);
+
+      runApp(
+        ProviderScope(
+          observers: [SentryProviderObserver()],
+          overrides: [
+            paletteDatabaseProvider.overrideWithValue(db),
+            analyticsProvider.overrideWithValue(analytics),
+            featureFlagProvider.overrideWithValue(featureFlags),
+            hasCompletedOnboardingProvider.overrideWith(
+              (_) => profile.hasCompletedOnboarding,
+            ),
+            subscriptionTierProvider.overrideWith(
+              (_) => profile.subscriptionTier,
+            ),
+            colourBlindModeProvider.overrideWith((_) => profile.colourBlindMode),
+            renterConstraintsProvider.overrideWith((_) => constraints),
+          ],
+          child: const PaletteApp(),
+        ),
+      );
+    },
+    (error, stack) {
+      // Zone-level catch-all for async errors that escape everything above.
+      if (_sentryEnabled) {
+        Sentry.captureException(error, stackTrace: stack);
+      }
+      if (kDebugMode) {
+        debugPrint('Uncaught error: $error\n$stack');
+      }
+    },
+  );
 }
