@@ -46,7 +46,7 @@ class PaletteDatabase extends _$PaletteDatabase {
   PaletteDatabase(super.e);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -155,6 +155,10 @@ class PaletteDatabase extends _$PaletteDatabase {
       if (from < 16) {
         // Design Diary (Phase 4)
         await m.createTable(diaryEntries);
+      }
+      if (from < 17) {
+        // Supabase auth (link local profile to cloud identity)
+        await m.addColumn(userProfiles, userProfiles.supabaseUserId);
       }
     },
   );

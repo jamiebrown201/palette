@@ -6,12 +6,13 @@ Palette is a Flutter colour companion app for home decorators. It helps users di
 ## Tech Stack
 - **Framework:** Flutter (Dart)
 - **State management:** Riverpod
-- **Database:** Drift (SQLite)
-- **Routing:** GoRouter
+- **Database:** Drift (SQLite) — local-first, schema v17
+- **Auth:** Supabase (Google OAuth + email/password)
+- **Routing:** GoRouter (auth-aware redirects)
 - **Target:** Android (emulator-5554)
 
 ## Key Commands
-- **Run app:** `flutter run -d emulator-5554` (keep running in background)
+- **Run app:** `flutter run --dart-define-from-file=dart_defines.env -d emulator-5554` (keep running in background)
 - **Quick refresh:** `flutter analyze` + `flutter test` (run both to verify changes)
 - **Hot restart:** Send `R` to the flutter run terminal, or kill and re-run
 - **Take screenshot:** `./scripts/qa_screenshot.sh <descriptive-name>`
@@ -40,13 +41,20 @@ See [QA Process Guide](docs/qa-process.md) for the full workflow.
 - Ask user to take screenshots of all remaining screens at once
 - Skip the verify step before moving on
 
+## Auth Flow
+- Onboarding quiz requires no account
+- After quiz, router redirects to `/auth` gate (Google Sign-In or email)
+- Supabase user ID linked to local profile on sign-in
+- Returning users skip straight to `/home` (session persisted)
+- QA mode (`/dev`) bypasses auth
+
 ## Project Structure
 ```
 lib/
   core/           # Shared widgets, theme, constants, colour science
   data/           # Database, models, repositories, seed data
-  features/       # Feature modules (onboarding, rooms, palette, explore, etc.)
-  providers/      # App-level Riverpod providers
+  features/       # Feature modules (auth, onboarding, rooms, palette, explore, etc.)
+  providers/      # App-level Riverpod providers (auth, analytics, database, feature flags)
   routing/        # GoRouter configuration and app shell
 ```
 

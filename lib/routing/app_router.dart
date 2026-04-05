@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palette/core/analytics/analytics_observer.dart';
 import 'package:palette/features/assistant/screens/assistant_screen.dart';
+import 'package:palette/features/auth/screens/auth_screen.dart';
+import 'package:palette/features/auth/screens/email_auth_screen.dart';
 import 'package:palette/features/capture/screens/capture_screen.dart';
 import 'package:palette/features/colour_wheel/screens/colour_wheel_screen.dart';
 import 'package:palette/features/colour_wheel/screens/white_finder_screen.dart';
@@ -32,6 +34,7 @@ import 'package:palette/features/subscription/screens/paywall_screen.dart';
 import 'package:palette/features/visualiser/screens/visualiser_screen.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
+import 'package:palette/providers/auth_providers.dart';
 import 'package:palette/routing/app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -43,6 +46,7 @@ final _profileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'profile');
 
 final routerProvider = Provider<GoRouter>((ref) {
   final hasCompletedOnboarding = ref.watch(hasCompletedOnboardingProvider);
+  final isAuthenticated = ref.watch(isAuthenticatedProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -58,16 +62,47 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       final isOnboarding = loc == '/onboarding';
-      final isDev = loc == '/dev';
-      if (!hasCompletedOnboarding && !isOnboarding && !isDev) {
+      final isAuth = loc == '/auth' || loc.startsWith('/auth/');
+      final isDev = loc == '/dev' || loc.startsWith('/dev/');
+
+      // QA mode bypasses auth
+      if (isDev) return null;
+
+      // Not onboarded → force to onboarding (regardless of auth)
+      if (!hasCompletedOnboarding && !isOnboarding) {
         return '/onboarding';
       }
-      if (hasCompletedOnboarding && isOnboarding) {
+
+      // Onboarded but not authenticated → force to auth gate
+      if (hasCompletedOnboarding && !isAuthenticated && !isAuth) {
+        return '/auth';
+      }
+
+      // Authenticated trying to access auth screen → go home
+      if (isAuthenticated && isAuth) {
         return '/home';
       }
+
+      // Authenticated + onboarded on onboarding page → go home
+      if (hasCompletedOnboarding && isAuthenticated && isOnboarding) {
+        return '/home';
+      }
+
       return null;
     },
     routes: [
+      // Auth routes (outside tab shell)
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/auth',
+        builder: (context, state) => const AuthScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/auth/email',
+        builder: (context, state) => const EmailAuthScreen(),
+      ),
+
       // Full-screen routes (outside tab shell)
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

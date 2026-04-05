@@ -55,6 +55,17 @@ class UserProfileRepository {
     );
   }
 
+  Future<void> linkSupabaseUser(String supabaseUserId) async {
+    final stmt = _db.update(_db.userProfiles)
+      ..where((t) => t.id.equals(_defaultId));
+    await stmt.write(
+      UserProfilesCompanion(
+        supabaseUserId: Value(supabaseUserId),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> setSubscriptionTier(SubscriptionTier tier) async {
     final stmt = _db.update(_db.userProfiles)
       ..where((t) => t.id.equals(_defaultId));

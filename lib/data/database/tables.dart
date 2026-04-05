@@ -264,6 +264,7 @@ class RoomAdjacencies extends Table {
 @UseRowClass(UserProfile)
 class UserProfiles extends Table {
   TextColumn get id => text()();
+  TextColumn get supabaseUserId => text().nullable()();
   BoolColumn get hasCompletedOnboarding => boolean()();
   TextColumn get subscriptionTier =>
       text().map(

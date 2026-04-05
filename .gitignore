@@ -55,9 +55,11 @@ screenshots/
 # Environment
 .env
 .env.*
+dart_defines.env
 
 # Credentials
 *.jks
 *.keystore
+key.properties
 google-services.json
 GoogleService-Info.plist

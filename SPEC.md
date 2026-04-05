@@ -1682,7 +1682,18 @@ Online: AI Visualiser, product recommendations (requires catalogue sync), web im
 
 ## Implementation Status
 
-_Updated March 2026._
+_Updated April 2026._
+
+### Infrastructure: Auth (Complete)
+
+| Feature                  | Status | Notes                                                                 |
+| ------------------------ | ------ | --------------------------------------------------------------------- |
+| Supabase project         | Done   | Project `ygjywymrbfwgglbzvyly`, London region, free plan              |
+| Google OAuth             | Done   | Google Cloud project `palette-colour-app`, Web + Android OAuth clients |
+| Auth screens             | Done   | Auth gate (`/auth`) with Google Sign-In + email, email form (`/auth/email`) |
+| Router auth gating       | Done   | Onboarding → auth → home redirect flow, QA mode bypasses auth        |
+| DB schema                | Done   | `supabaseUserId` on UserProfiles (schema v17)                         |
+| Profile sign-out         | Done   | Account section on profile screen with sign-out                       |
 
 ### Phase 1A: Complete (native app)
 

@@ -10,6 +10,7 @@ import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/features/rooms/providers/room_providers.dart';
 import 'package:palette/features/rooms/screens/create_room_screen.dart';
 import 'package:palette/providers/app_providers.dart';
+import 'package:palette/providers/auth_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 import 'package:palette/providers/feature_flag_provider.dart';
 
@@ -44,6 +45,46 @@ class _QaModeScreenState extends ConsumerState<QaModeScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // === AUTH DEBUG ===
+          Text(
+            'Auth',
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Authenticated: ${ref.watch(isAuthenticatedProvider)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'User: ${ref.watch(currentUserProvider)?.email ?? 'none'}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'ID: ${ref.watch(currentUserProvider)?.id ?? 'none'}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  if (ref.watch(isAuthenticatedProvider))
+                    OutlinedButton(
+                      onPressed: () => ref.read(authServiceProvider).signOut(),
+                      child: const Text('Sign Out'),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // === STATE CONTROLS ===
           Text(
             'State Controls',

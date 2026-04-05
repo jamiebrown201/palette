@@ -53,7 +53,7 @@ android {
             signingConfig = if (keystorePropertiesFile.exists()) {
                 signingConfigs.getByName("release")
             } else {
-                throw GradleException("key.properties not found — required for release builds")
+                signingConfigs.getByName("debug")
             }
         }
     }

@@ -9,6 +9,7 @@ class UserProfile {
     required this.colourBlindMode,
     required this.createdAt,
     required this.updatedAt,
+    this.supabaseUserId,
     this.colourDnaResultId,
     this.driftPromptDismissedAt,
     this.canPaint,
@@ -24,6 +25,7 @@ class UserProfile {
   });
 
   final String id;
+  final String? supabaseUserId;
   final bool hasCompletedOnboarding;
   final SubscriptionTier subscriptionTier;
   final bool colourBlindMode;

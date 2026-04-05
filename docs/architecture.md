@@ -7,14 +7,16 @@
 
 ## 1. System Overview
 
-Palette is a **pure Flutter application** targeting Android, built with a **local-first architecture**. All user data is stored on-device in a SQLite database via the Drift ORM. There is no backend server in active use -- `supabase_flutter` is listed as a dependency (scaffolded) but is not wired into any application logic.
+Palette is a **Flutter application** targeting Android, built with a **local-first architecture** and **Supabase authentication**. All user data is stored on-device in a SQLite database via the Drift ORM. Supabase provides authentication (Google OAuth + email/password) and user identity; local data is linked to the Supabase user via `supabaseUserId` on the `UserProfiles` table.
 
 **Key characteristics:**
 
-- **Offline-capable:** All colour science, palette generation, and room planning run on-device with zero network dependency.
+- **Offline-capable:** All colour science, palette generation, and room planning run on-device with zero network dependency. Auth requires connectivity for sign-in but sessions persist offline.
+- **Auth-gated:** Users complete the onboarding quiz without an account, then must sign in (Google or email) to access the main app. Auth state drives GoRouter redirects.
 - **Seed data model:** A bundled JSON file (`assets/data/paint_colours.json`, ~131 KB) containing 200+ UK paint colours from Farrow & Ball, Little Greene, Dulux Heritage, and Crown is loaded into SQLite on first launch.
 - **No code generation for models:** Data models are plain Dart classes with manual `copyWith` methods, not Freezed-generated (despite `freezed` being a dev dependency). Drift tables use `@UseRowClass` to map directly to these model classes.
 - **Target:** Android (emulator-5554), Dart SDK ^3.10.4.
+- **Env config:** App requires `--dart-define-from-file=dart_defines.env` with `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `GOOGLE_WEB_CLIENT_ID`.
 
 ---
 
@@ -37,6 +39,7 @@ lib/
     repositories/            # Data access layer (one per entity)
     services/                # Seed data loading, retailer config
   features/
+    auth/                    # Authentication gate (Google OAuth + email sign-in)
     capture/                 # Colour capture from camera (placeholder)
     colour_wheel/            # Interactive colour wheel + white finder tool
     dev/                     # QA mode screen (debug builds only)
@@ -81,7 +84,7 @@ The app uses **Riverpod v2** (`flutter_riverpod: ^2.6.1`) with a mix of:
 - **Code-generated providers** (`@riverpod`, `@Riverpod(keepAlive: true)`) via `riverpod_annotation` + `riverpod_generator` for the database layer and some feature providers (red thread, database repositories).
 
 **Entry point (`main.dart`):**
-The `ProviderScope` wraps the entire app with four critical overrides initialised before `runApp`:
+Supabase is initialised before the database in `main.dart` via `Supabase.initialize()` with URL and anon key from dart defines. The `ProviderScope` wraps the entire app with critical overrides initialised before `runApp`:
 
 ```
 ProviderScope(
@@ -95,6 +98,8 @@ ProviderScope(
   child: PaletteApp(),
 )
 ```
+
+Auth providers (`supabaseClientProvider`, `authStateProvider`, `isAuthenticatedProvider`, `currentUserProvider`) read from `Supabase.instance.client` directly and do not need overrides.
 
 ### 3.2 Provider Organisation
 
@@ -116,6 +121,11 @@ ProviderScope(
 | `colourBlindModeProvider` | `StateProvider<bool>` | Accessibility |
 | `renterConstraintsProvider` | `StateProvider<RenterConstraints>` | Renter permissions |
 | `roomModeConfigProvider` | `Provider.family<RoomModeConfig, bool>` | Per-room mode config |
+| `supabaseClientProvider` | `Provider<SupabaseClient>` | Supabase client instance |
+| `authServiceProvider` | `Provider<AuthService>` | Auth operations (sign in/out) |
+| `authStateProvider` | `StreamProvider<AuthState>` | Streams auth state changes |
+| `isAuthenticatedProvider` | `Provider<bool>` | Whether user has active session |
+| `currentUserProvider` | `Provider<User?>` | Current Supabase user |
 
 **Feature-level providers** (in each feature's `providers/` folder):
 
@@ -149,6 +159,8 @@ The app uses **GoRouter v14** with `StatefulShellRoute.indexedStack` for tab-bas
 
 | Route | Screen | Notes |
 |---|---|---|
+| `/auth` | `AuthScreen` | Auth gate (Google + email options) |
+| `/auth/email` | `EmailAuthScreen` | Email sign-in/sign-up form |
 | `/onboarding` | `OnboardingScreen` | Colour DNA quiz flow |
 | `/palette` | `PaletteScreen` | Personal palette viewer |
 | `/paywall` | `PaywallScreen` | Subscription upgrade |
@@ -167,8 +179,16 @@ The app uses **GoRouter v14** with `StatefulShellRoute.indexedStack` for tab-bas
 
 ### 4.3 Navigation Guards
 
-- **Onboarding redirect:** Users who have not completed onboarding are redirected to `/onboarding` from any route except `/dev`.
-- **Post-onboarding redirect:** Users who have completed onboarding are redirected away from `/onboarding` to `/home`.
+The router watches both `hasCompletedOnboardingProvider` and `isAuthenticatedProvider`, rebuilding on state changes:
+
+| Onboarded | Authenticated | Redirect |
+|---|---|---|
+| No | No | `/onboarding` |
+| Yes | No | `/auth` |
+| No | Yes | `/onboarding` |
+| Yes | Yes | Allow through |
+
+- **QA bypass:** `/dev` and `/dev/*` routes skip all auth checks.
 - **Trailing slash normalisation:** Deep links with trailing slashes are normalised.
 - **Error fallback:** Unknown routes render `HomeScreen`.
 
@@ -182,7 +202,7 @@ The `AppShell` widget provides the `NavigationBar` with 5 destinations: Home, Ro
 
 ### 5.1 Drift Database
 
-**Database class:** `PaletteDatabase` (schema version 6)
+**Database class:** `PaletteDatabase` (schema version 17)
 
 **Connection:** `NativeDatabase.createInBackground(file)` using `sqlite3_flutter_libs`. Database file lives at `${applicationDocumentsDirectory}/palette.sqlite`.
 
@@ -197,7 +217,7 @@ The `AppShell` widget provides the `NavigationBar` with 5 destinations: Home, Ro
 | `LockedFurnitureItems` | `LockedFurniture` | Existing furniture items locked into room planning |
 | `RedThreadColours` | `RedThreadColour` | Whole-home unifying colours (2-4 colours) |
 | `RoomAdjacencies` | `RoomAdjacency` | Room connectivity graph for coherence checking |
-| `UserProfiles` | `UserProfile` | Single-row table for user preferences and state |
+| `UserProfiles` | `UserProfile` | Single-row table for user preferences, state, and `supabaseUserId` |
 | `ColourInteractions` | `ColourInteraction` | Colour selection tracking for DNA drift detection |
 
 ### 5.3 Type Converters
@@ -216,6 +236,8 @@ The `AppShell` widget provides the `NavigationBar` with 5 destinations: Home, Ro
 | 4 | Added `saturationPreference` to `ColourDnaResults` |
 | 5 | Created `ColourInteractions` table; added `driftPromptDismissedAt` to `UserProfiles` |
 | 6 | Added renter constraint columns to `UserProfiles` (`canPaint`, `canDrill`, `keepingFlooring`, `isTemporaryHome`, `reversibleOnly`) |
+| 7-16 | Products, shopping list, moodboards, samples, notifications, partner profiles, diary entries |
+| 17 | Added `supabaseUserId` to `UserProfiles` for auth identity linking |
 
 ### 5.5 Repositories
 
@@ -228,7 +250,7 @@ Each repository wraps direct Drift queries with a clean API. Repositories are in
 | `ColourDnaRepository` | `getById`, `watchLatest` (stream) |
 | `PaletteRepository` | `watchForResult` (stream by DNA result ID) |
 | `RedThreadRepository` | `watchThreadColours` (stream), `getThreadColours`, `getAdjacencies` |
-| `UserProfileRepository` | `getOrCreate` (single-row pattern) |
+| `UserProfileRepository` | `getOrCreate` (single-row pattern), `linkSupabaseUser` |
 | `ColourInteractionRepository` | Colour interaction tracking for drift detection |
 
 ### 5.6 Seed Data

@@ -14,6 +14,7 @@ import 'package:palette/features/onboarding/providers/quiz_providers.dart';
 import 'package:palette/features/palette/providers/palette_providers.dart';
 import 'package:palette/providers/analytics_provider.dart';
 import 'package:palette/providers/app_providers.dart';
+import 'package:palette/providers/auth_providers.dart';
 import 'package:palette/providers/database_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -257,6 +258,46 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           const _NotificationSettingsCard(),
+          const SizedBox(height: 24),
+
+          // Account section
+          Text(
+            'Account',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: PaletteColours.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: PaletteColours.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: PaletteColours.divider),
+            ),
+            child: Column(
+              children: [
+                _ProfileRow(
+                  icon: Icons.person_outline,
+                  iconColor: PaletteColours.sageGreen,
+                  title: ref.watch(currentUserProvider)?.email ?? 'Signed in',
+                  subtitle:
+                      ref.watch(currentUserProvider)?.appMetadata['provider']
+                          as String? ??
+                      'Email',
+                ),
+                const Divider(height: 1, indent: 56),
+                _ProfileRow(
+                  icon: Icons.logout,
+                  iconColor: PaletteColours.destructive,
+                  title: 'Sign out',
+                  onTap: () async {
+                    await ref.read(authServiceProvider).signOut();
+                  },
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
 
           // About section
